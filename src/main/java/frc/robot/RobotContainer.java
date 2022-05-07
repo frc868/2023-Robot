@@ -38,6 +38,7 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Hopper;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Misc;
 import frc.robot.subsystems.Shooter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -55,6 +56,8 @@ public class RobotContainer {
     private final Shooter shooter = new Shooter();
     private final Limelight limelight = new Limelight();
     private final Astra astra = new Astra();
+    @SuppressWarnings("unused")
+    private final Misc misc = new Misc();
 
     XboxController driverController = new XboxController(OI.DRIVER_PORT);
     XboxController operatorController = new XboxController(OI.OPERATOR_PORT);
