@@ -8,6 +8,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * anything Sendable like a Field2d, PIDController, or a motor controller.
  * 
  * @author dr
+ * @apiNote do not put this or a LogGroup of this in a {@code periodic} method,
+ *          since Sendables are sent to SmartDashboard declaratively. put these
+ *          in an {@code init} method.
  */
 public class SendableLogger extends Logger<Sendable> {
     private String key;
@@ -19,9 +22,19 @@ public class SendableLogger extends Logger<Sendable> {
         this.sendable = sendable;
     }
 
+    public SendableLogger(String key, Sendable sendable) {
+        super(sendable, "Not set");
+        this.key = key;
+        this.sendable = sendable;
+    }
+
     @Override
-    public void run() {
+    public void init() {
         SmartDashboard.putData(subsystem + "/" + key, sendable);
     }
 
+    @Override
+    public void run() {
+
+    }
 }

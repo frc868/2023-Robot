@@ -20,6 +20,12 @@ public class LogGroup {
         }
     }
 
+    public void init() {
+        for (Logger<?> logger : loggers) {
+            logger.init();
+        }
+    }
+
     public void run() {
         for (Logger<?> logger : loggers) {
             logger.run();

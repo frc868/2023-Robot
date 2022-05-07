@@ -1,6 +1,5 @@
 package frc.robot.logging;
 
-import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -18,15 +17,18 @@ public class Logger<T> {
      * The object we are logging.
      */
     public T obj;
+
     /**
      * The name of the subsystem to log under (the naming convention in SD is
      * SmartDashboard/{subsystem}/{device_name}/{value_name}).
      */
     protected String subsystem;
+
     /**
      * The name of the device to log.
      */
     private String deviceName;
+
     /**
      * An array of values to log. Using the unspecified generic form since this list
      * contains several types of {@code LogItem}.
@@ -85,6 +87,12 @@ public class Logger<T> {
     }
 
     /**
+     * Inits the logger. Used for SendableLoggers. Intended to be overridden.
+     */
+    public void init() {
+    }
+
+    /**
      * Runs the logger. This will call the functions listed to log and convert them
      * to the correct type.
      */
@@ -103,10 +111,6 @@ public class Logger<T> {
                     case BOOLEAN:
                         SmartDashboard.putBoolean(subsystem + "/" + deviceName + "/" + v.getKey(),
                                 (boolean) v.getFunc().call());
-                        break;
-                    case DATA:
-                        SmartDashboard.putData(subsystem + "/" + deviceName + "/" + v.getKey(),
-                                (Sendable) v.getFunc().call());
                         break;
                     case STRING_ARRAY:
                         SmartDashboard.putStringArray(subsystem + "/" + deviceName + "/" + v.getKey(),

@@ -16,6 +16,7 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.OI;
@@ -88,20 +89,19 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
+        LiveWindow.disableAllTelemetry();
         // Configure the button bindings
         drivetrain.setDefaultCommand(
                 new DefaultDrive(drivetrain, driverController::getLeftX, driverController::getRightX));
         climber.setDefaultCommand(
                 new FunctionalCommand(() -> {
                 }, () -> climber.setSpeed(operatorController.getLeftY()), (interrupted) -> {
-                }, () -> {
-                    return false;
-                }, climber));
+                }, () -> false, climber));
         configureButtonBindings();
         configureAutonChooser();
-        commandViewer.run(); // this only needs to be run once since Sendables are put on SmartDashboard
-                             // declaratively (that is, they only need to be added once and don't need to be
-                             // updated to work).
+        commandViewer.init(); // this only needs to be run once since Sendables are put on SmartDashboard
+                              // declaratively (that is, they only need to be added once and don't need to be
+                              // updated to work).
 
         // Ignore everything here, this is just a test to put on SmartDashboard
         Trajectory testTrajectory = TrajectoryGenerator.generateTrajectory(
