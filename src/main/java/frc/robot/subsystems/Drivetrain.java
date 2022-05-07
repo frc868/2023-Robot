@@ -13,7 +13,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
-import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
@@ -21,10 +20,9 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.logging.LogGroup;
-import frc.robot.logging.LogItem;
 import frc.robot.logging.LogProfileBuilder;
-import frc.robot.logging.LogType;
 import frc.robot.logging.Logger;
+import frc.robot.logging.SendableLogger;
 
 /**
  * Drivetrain subsystem, includes all of the motors and the methods with which
@@ -60,10 +58,7 @@ public class Drivetrain extends SubsystemBase {
                             LogProfileBuilder.buildCANSparkMaxLogItems(rightSecondaryMotor)),
                     new Logger<AHRS>(navx, "NavX",
                             LogProfileBuilder.buildNavXLogItems(navx)),
-                    new Logger<Field2d>(field, "Field",
-                            new LogItem<?>[] {
-                                    new LogItem<Sendable>(LogType.DATA, "Field", () -> field)
-                            })
+                    new SendableLogger("field", field),
             });
 
     /**
@@ -76,6 +71,7 @@ public class Drivetrain extends SubsystemBase {
         rightMotors.setInverted(Constants.Drivetrain.IS_RIGHT_INVERTED);
         drive.setMaxOutput(0.8);
         odometry = new DifferentialDriveOdometry(navx.getRotation2d());
+        logger.init();
     }
 
     /**
