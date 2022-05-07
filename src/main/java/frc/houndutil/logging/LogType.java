@@ -1,4 +1,4 @@
-package frc.robot.logging;
+package frc.houndutil.logging;
 
 /**
  * The type of Logger to create. These are values defined by NetworkTables.

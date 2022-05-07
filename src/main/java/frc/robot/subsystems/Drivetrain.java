@@ -18,11 +18,11 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.houndutil.logging.LogGroup;
+import frc.houndutil.logging.LogProfileBuilder;
+import frc.houndutil.logging.Logger;
+import frc.houndutil.logging.SendableLogger;
 import frc.robot.Constants;
-import frc.robot.logging.LogGroup;
-import frc.robot.logging.LogProfileBuilder;
-import frc.robot.logging.Logger;
-import frc.robot.logging.SendableLogger;
 
 /**
  * Drivetrain subsystem, includes all of the motors and the methods with which

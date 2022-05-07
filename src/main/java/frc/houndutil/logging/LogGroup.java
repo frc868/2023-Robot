@@ -1,4 +1,4 @@
-package frc.robot.logging;
+package frc.houndutil.logging;
 
 /**
  * Defines a group of {@link Logger}s to log. This is useful when used in a

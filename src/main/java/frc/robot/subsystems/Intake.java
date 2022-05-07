@@ -6,10 +6,10 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.houndutil.logging.LogGroup;
+import frc.houndutil.logging.LogProfileBuilder;
+import frc.houndutil.logging.Logger;
 import frc.robot.Constants;
-import frc.robot.logging.LogGroup;
-import frc.robot.logging.LogProfileBuilder;
-import frc.robot.logging.Logger;
 
 public class Intake extends SubsystemBase {
     private CANSparkMax motor = new CANSparkMax(Constants.Intake.CANIDs.MOTOR,

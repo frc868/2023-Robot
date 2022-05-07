@@ -1,4 +1,4 @@
-package frc.robot.logging;
+package frc.houndutil.logging;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 

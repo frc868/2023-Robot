@@ -8,10 +8,10 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import frc.houndutil.logging.LogGroup;
+import frc.houndutil.logging.LogProfileBuilder;
+import frc.houndutil.logging.Logger;
 import frc.robot.Constants;
-import frc.robot.logging.LogGroup;
-import frc.robot.logging.LogProfileBuilder;
-import frc.robot.logging.Logger;
 
 /**
  * Climber subsystem, includes the climber arms, locks, and 2nd stage arms.

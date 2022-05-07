@@ -7,12 +7,12 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
+import frc.houndutil.logging.LogGroup;
+import frc.houndutil.logging.LogProfileBuilder;
+import frc.houndutil.logging.LogType;
+import frc.houndutil.logging.Logger;
+import frc.houndutil.logging.SingleItemLogger;
 import frc.robot.Constants;
-import frc.robot.logging.LogGroup;
-import frc.robot.logging.LogProfileBuilder;
-import frc.robot.logging.LogType;
-import frc.robot.logging.Logger;
-import frc.robot.logging.SingleItemLogger;
 
 public class Shooter extends PIDSubsystem {
     private CANSparkMax primaryMotor = new CANSparkMax(Constants.Shooter.CANIDs.PRIMARY,

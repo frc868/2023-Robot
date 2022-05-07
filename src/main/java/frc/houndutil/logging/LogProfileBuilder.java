@@ -1,4 +1,4 @@
-package frc.robot.logging;
+package frc.houndutil.logging;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;

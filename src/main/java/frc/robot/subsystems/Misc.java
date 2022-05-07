@@ -3,9 +3,9 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.logging.LogGroup;
-import frc.robot.logging.LogProfileBuilder;
-import frc.robot.logging.Logger;
+import frc.houndutil.logging.LogGroup;
+import frc.houndutil.logging.LogProfileBuilder;
+import frc.houndutil.logging.Logger;
 
 public class Misc extends SubsystemBase {
     private PowerDistribution pdh = new PowerDistribution();

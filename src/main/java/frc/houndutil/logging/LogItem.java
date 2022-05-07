@@ -1,4 +1,4 @@
-package frc.robot.logging;
+package frc.houndutil.logging;
 
 import java.util.concurrent.Callable;
 
