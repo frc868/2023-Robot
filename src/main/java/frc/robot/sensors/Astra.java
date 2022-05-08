@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * @author dr
  */
 public class Astra extends SubsystemBase {
-    private static NetworkTable table = NetworkTableInstance.getDefault().getTable("FRCVision");;
+    private static NetworkTable table = NetworkTableInstance.getDefault().getTable("HoundEye");;
 
     public Astra() {
     }
