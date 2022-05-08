@@ -1,6 +1,10 @@
 package frc.houndutil.houndlog;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableRegistry;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -28,9 +32,27 @@ public class SendableLogger extends Logger<Sendable> {
         this.sendable = sendable;
     }
 
+    /**
+     * This is required because I'm stubborn and don't want to use SmartDashboard
+     * for this, so I had to copy the code to send a Sendable over NetworkTables
+     * from {@link SmartDashboard}.
+     * 
+     * @param s        the sendable to send
+     * @param logTable the table through which to send it
+     */
+    private void publishSendable(NetworkTable logTable) {
+        NetworkTable dataTable = logTable.getSubTable(subsystem).getSubTable(key);
+        SendableBuilderImpl builder = new SendableBuilderImpl();
+        builder.setTable(dataTable);
+        SendableRegistry.publish(sendable, builder);
+        builder.startListeners();
+        dataTable.getEntry(".name").setString(key);
+    }
+
     @Override
     public void init() {
-        SmartDashboard.putData(subsystem + "/" + key, sendable);
+        NetworkTable logTable = NetworkTableInstance.getDefault().getTable("HoundLog");
+        publishSendable(logTable);
     }
 
     @Override

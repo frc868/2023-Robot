@@ -103,31 +103,31 @@ public class Logger<T> {
             try {
                 switch (v.getType()) {
                     case STRING:
-                        logTable.getEntry(subsystem + "/" + deviceName + "/" + v.getKey()).setString(
-                                (String) v.getFunc().call());
+                        logTable.getSubTable(subsystem).getSubTable(deviceName).getEntry(v.getKey())
+                                .setString((String) v.getFunc().call());
                         break;
                     case NUMBER:
-                        logTable.getEntry(subsystem + "/" + deviceName + "/" + v.getKey()).setDouble(
-                                (double) v.getFunc().call());
+                        logTable.getSubTable(subsystem).getSubTable(deviceName).getEntry(v.getKey())
+                                .setDouble((double) v.getFunc().call());
                         break;
                     case BOOLEAN:
-                        logTable.getEntry(subsystem + "/" + deviceName + "/" + v.getKey()).setBoolean(
-                                (boolean) v.getFunc().call());
+                        logTable.getSubTable(subsystem).getSubTable(deviceName).getEntry(v.getKey())
+                                .setBoolean((boolean) v.getFunc().call());
                         break;
                     case STRING_ARRAY:
-                        logTable.getEntry(subsystem + "/" + deviceName + "/" + v.getKey()).setStringArray(
-                                (String[]) v.getFunc().call());
+                        logTable.getSubTable(subsystem).getSubTable(deviceName).getEntry(v.getKey())
+                                .setStringArray((String[]) v.getFunc().call());
                         break;
                     case NUMBER_ARRAY:
-                        logTable.getEntry(subsystem + "/" + deviceName + "/" + v.getKey()).setDoubleArray(
-                                (double[]) v.getFunc().call());
+                        logTable.getSubTable(subsystem).getSubTable(deviceName).getEntry(v.getKey())
+                                .setDoubleArray((double[]) v.getFunc().call());
                         break;
                     case BOOLEAN_ARRAY:
-                        logTable.getEntry(subsystem + "/" + deviceName + "/" + v.getKey()).setBooleanArray(
-                                (boolean[]) v.getFunc().call());
+                        logTable.getSubTable(subsystem).getSubTable(deviceName).getEntry(v.getKey())
+                                .setBooleanArray((boolean[]) v.getFunc().call());
                         break;
                     default:
-                        logTable.getEntry(subsystem + "/" + deviceName + "/" + v.getKey())
+                        logTable.getSubTable(subsystem).getSubTable(deviceName).getEntry(v.getKey())
                                 .setString("Unspecified type.");
                         break;
                 }

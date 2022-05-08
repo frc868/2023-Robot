@@ -1,7 +1,7 @@
 package frc.robot.commands.auton;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.RunShooterLockedSpeed;
@@ -21,7 +21,7 @@ public class ShootSequence extends SequentialCommandGroup {
     public ShootSequence(Drivetrain drivetrain, Shooter shooter, Limelight limelight, Hopper hopper) {
         addCommands(
                 new InstantCommand(limelight::setShootingMode),
-                new ParallelCommandGroup(
+                new ParallelRaceGroup(
                         new RunShooterLockedSpeed(shooter, limelight),
                         new SequentialCommandGroup(
                                 new TurnToGoal(drivetrain, limelight),
