@@ -1,4 +1,4 @@
-package frc.houndutil.logging;
+package frc.houndutil.houndlog;
 
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;

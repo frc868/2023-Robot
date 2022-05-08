@@ -1,4 +1,4 @@
-package frc.houndutil.logging;
+package frc.houndutil.houndlog;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;

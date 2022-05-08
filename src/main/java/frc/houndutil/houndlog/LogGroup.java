@@ -1,4 +1,4 @@
-package frc.houndutil.logging;
+package frc.houndutil.houndlog;
 
 /**
  * Defines a group of {@link Logger}s to log. This is useful when used in a

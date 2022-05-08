@@ -18,10 +18,10 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.houndutil.logging.LogGroup;
-import frc.houndutil.logging.LogProfileBuilder;
-import frc.houndutil.logging.Logger;
-import frc.houndutil.logging.SendableLogger;
+import frc.houndutil.houndlog.LogGroup;
+import frc.houndutil.houndlog.LogProfileBuilder;
+import frc.houndutil.houndlog.Logger;
+import frc.houndutil.houndlog.SendableLogger;
 import frc.robot.Constants;
 
 /**

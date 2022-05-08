@@ -1,4 +1,4 @@
-package frc.houndutil.logging;
+package frc.houndutil.houndlog;
 
 /**
  * The type of Logger to create. These are values defined by NetworkTables.

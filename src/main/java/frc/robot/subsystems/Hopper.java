@@ -6,9 +6,9 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.houndutil.logging.LogGroup;
-import frc.houndutil.logging.LogProfileBuilder;
-import frc.houndutil.logging.Logger;
+import frc.houndutil.houndlog.LogGroup;
+import frc.houndutil.houndlog.LogProfileBuilder;
+import frc.houndutil.houndlog.Logger;
 import frc.robot.Constants;
 
 /**

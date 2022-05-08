@@ -1,4 +1,4 @@
-package frc.houndutil.logging;
+package frc.houndutil.houndlog;
 
 import java.util.concurrent.Callable;
 

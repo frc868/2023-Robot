@@ -1,6 +1,7 @@
-package frc.houndutil.logging;
+package frc.houndutil.houndlog;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 /**
  * A logger for a specified object T. This logger will post all values contained
@@ -97,35 +98,37 @@ public class Logger<T> {
      * to the correct type.
      */
     public void run() {
+        NetworkTable logTable = NetworkTableInstance.getDefault().getTable("HoundLog");
         for (LogItem<?> v : values) {
             try {
                 switch (v.getType()) {
                     case STRING:
-                        SmartDashboard.putString(subsystem + "/" + deviceName + "/" + v.getKey(),
+                        logTable.getEntry(subsystem + "/" + deviceName + "/" + v.getKey()).setString(
                                 (String) v.getFunc().call());
                         break;
                     case NUMBER:
-                        SmartDashboard.putNumber(subsystem + "/" + deviceName + "/" + v.getKey(),
+                        logTable.getEntry(subsystem + "/" + deviceName + "/" + v.getKey()).setDouble(
                                 (double) v.getFunc().call());
                         break;
                     case BOOLEAN:
-                        SmartDashboard.putBoolean(subsystem + "/" + deviceName + "/" + v.getKey(),
+                        logTable.getEntry(subsystem + "/" + deviceName + "/" + v.getKey()).setBoolean(
                                 (boolean) v.getFunc().call());
                         break;
                     case STRING_ARRAY:
-                        SmartDashboard.putStringArray(subsystem + "/" + deviceName + "/" + v.getKey(),
+                        logTable.getEntry(subsystem + "/" + deviceName + "/" + v.getKey()).setStringArray(
                                 (String[]) v.getFunc().call());
                         break;
                     case NUMBER_ARRAY:
-                        SmartDashboard.putNumberArray(subsystem + "/" + deviceName + "/" + v.getKey(),
+                        logTable.getEntry(subsystem + "/" + deviceName + "/" + v.getKey()).setDoubleArray(
                                 (double[]) v.getFunc().call());
                         break;
                     case BOOLEAN_ARRAY:
-                        SmartDashboard.putBooleanArray(subsystem + "/" + deviceName + "/" + v.getKey(),
+                        logTable.getEntry(subsystem + "/" + deviceName + "/" + v.getKey()).setBooleanArray(
                                 (boolean[]) v.getFunc().call());
                         break;
                     default:
-                        SmartDashboard.putString(subsystem + "/" + deviceName + "/" + v.getKey(), "Unspecified type.");
+                        logTable.getEntry(subsystem + "/" + deviceName + "/" + v.getKey())
+                                .setString("Unspecified type.");
                         break;
                 }
             } catch (Exception e) {
