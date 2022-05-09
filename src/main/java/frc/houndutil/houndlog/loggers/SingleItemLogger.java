@@ -1,8 +1,10 @@
-package frc.houndutil.houndlog;
+package frc.houndutil.houndlog.loggers;
 
 import java.util.concurrent.Callable;
 
 import edu.wpi.first.networktables.NetworkTable;
+import frc.houndutil.houndlog.LogItem;
+import frc.houndutil.houndlog.enums.LogType;
 
 /**
  * A logger with a single LogItem. Useful for subsystems that need to catalogue

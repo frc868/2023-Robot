@@ -1,6 +1,8 @@
-package frc.houndutil.houndlog;
+package frc.houndutil.houndlog.loggers;
 
 import edu.wpi.first.networktables.NetworkTable;
+import frc.houndutil.houndlog.LogItem;
+import frc.houndutil.houndlog.LogProfileBuilder;
 
 /**
  * A logger for a specified object T. This logger will post all items contained

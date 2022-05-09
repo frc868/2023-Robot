@@ -8,8 +8,9 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.houndutil.houndlog.LogGroup;
 import frc.houndutil.houndlog.LogProfileBuilder;
-import frc.houndutil.houndlog.Logger;
-import frc.houndutil.houndlog.DeviceLogger;
+import frc.houndutil.houndlog.LoggingManager;
+import frc.houndutil.houndlog.loggers.DeviceLogger;
+import frc.houndutil.houndlog.loggers.Logger;
 import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
@@ -19,21 +20,16 @@ public class Intake extends SubsystemBase {
             PneumaticsModuleType.REVPH,
             Constants.Intake.Solenoids.INTAKE_CHANNEL_1,
             Constants.Intake.Solenoids.INTAKE_CHANNEL_2);
-    private LogGroup logger = new LogGroup("Intake",
-            new Logger[] {
-                    new DeviceLogger<CANSparkMax>(motor, "Motor",
-                            LogProfileBuilder.buildCANSparkMaxLogItems(motor)),
-                    new DeviceLogger<DoubleSolenoid>(solenoid, "Gatekeepers",
-                            LogProfileBuilder.buildDoubleSolenoidLogItems(solenoid)),
-            });
 
     public Intake() {
         motor.setInverted(Constants.Intake.IS_INVERTED);
-    }
-
-    @Override
-    public void periodic() {
-        logger.run();
+        LoggingManager.getInstance().addGroup("Intake", new LogGroup(
+                new Logger[] {
+                        new DeviceLogger<CANSparkMax>(motor, "Motor",
+                                LogProfileBuilder.buildCANSparkMaxLogItems(motor)),
+                        new DeviceLogger<DoubleSolenoid>(solenoid, "Gatekeepers",
+                                LogProfileBuilder.buildDoubleSolenoidLogItems(solenoid)),
+                }));
     }
 
     /**

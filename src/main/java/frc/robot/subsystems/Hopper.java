@@ -8,8 +8,9 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.houndutil.houndlog.LogGroup;
 import frc.houndutil.houndlog.LogProfileBuilder;
-import frc.houndutil.houndlog.Logger;
-import frc.houndutil.houndlog.DeviceLogger;
+import frc.houndutil.houndlog.LoggingManager;
+import frc.houndutil.houndlog.loggers.DeviceLogger;
+import frc.houndutil.houndlog.loggers.Logger;
 import frc.robot.Constants;
 
 /**
@@ -23,24 +24,19 @@ public class Hopper extends SubsystemBase {
             Constants.Hopper.Solenoids.GATEKEEPER_CHANNEL_2,
             Constants.Hopper.Solenoids.GATEKEEPER_CHANNEL_1);
 
-    private LogGroup logger = new LogGroup("Hopper",
-            new Logger[] {
-                    new DeviceLogger<CANSparkMax>(motor, "Motor",
-                            LogProfileBuilder.buildCANSparkMaxLogItems(motor)),
-                    new DeviceLogger<DoubleSolenoid>(gatekeepers, "Gatekeepers",
-                            LogProfileBuilder.buildDoubleSolenoidLogItems(gatekeepers))
-            });
-
     /**
      * Constructs the hopper object.
      */
     public Hopper() {
         motor.setInverted(Constants.Hopper.IS_INVERTED);
-    }
 
-    @Override
-    public void periodic() {
-        logger.run();
+        LoggingManager.getInstance().addGroup("Hopper", new LogGroup(
+                new Logger[] {
+                        new DeviceLogger<CANSparkMax>(motor, "Motor",
+                                LogProfileBuilder.buildCANSparkMaxLogItems(motor)),
+                        new DeviceLogger<DoubleSolenoid>(gatekeepers, "Gatekeepers",
+                                LogProfileBuilder.buildDoubleSolenoidLogItems(gatekeepers))
+                }));
     }
 
     /**

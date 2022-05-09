@@ -20,9 +20,10 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.houndutil.houndlog.LogGroup;
 import frc.houndutil.houndlog.LogProfileBuilder;
-import frc.houndutil.houndlog.Logger;
-import frc.houndutil.houndlog.DeviceLogger;
-import frc.houndutil.houndlog.SendableLogger;
+import frc.houndutil.houndlog.LoggingManager;
+import frc.houndutil.houndlog.loggers.DeviceLogger;
+import frc.houndutil.houndlog.loggers.Logger;
+import frc.houndutil.houndlog.loggers.SendableLogger;
 import frc.robot.Constants;
 
 /**
@@ -42,25 +43,9 @@ public class Drivetrain extends SubsystemBase {
     private MotorControllerGroup rightMotors = new MotorControllerGroup(rightPrimaryMotor, rightSecondaryMotor);
     private DifferentialDrive drive = new DifferentialDrive(leftMotors, rightMotors);
     private AHRS navx = new AHRS(SerialPort.Port.kMXP);
-
     private DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(Constants.Drivetrain.TRACK_WIDTH);
     private DifferentialDriveOdometry odometry;
     private Field2d field = new Field2d();
-
-    private LogGroup logger = new LogGroup("Drivetrain",
-            new Logger[] {
-                    new DeviceLogger<CANSparkMax>(leftPrimaryMotor, "Left Primary Motor",
-                            LogProfileBuilder.buildCANSparkMaxLogItems(leftPrimaryMotor)),
-                    new DeviceLogger<CANSparkMax>(leftSecondaryMotor, "Left Secondary Motor",
-                            LogProfileBuilder.buildCANSparkMaxLogItems(leftSecondaryMotor)),
-                    new DeviceLogger<CANSparkMax>(rightPrimaryMotor, "Right Primary Motor",
-                            LogProfileBuilder.buildCANSparkMaxLogItems(rightPrimaryMotor)),
-                    new DeviceLogger<CANSparkMax>(rightSecondaryMotor, "Right Secondary Motor",
-                            LogProfileBuilder.buildCANSparkMaxLogItems(rightSecondaryMotor)),
-                    new DeviceLogger<AHRS>(navx, "NavX",
-                            LogProfileBuilder.buildNavXLogItems(navx)),
-                    new SendableLogger("field", field),
-            });
 
     /**
      * Initializes the drivetrain.
@@ -72,16 +57,30 @@ public class Drivetrain extends SubsystemBase {
         rightMotors.setInverted(Constants.Drivetrain.IS_RIGHT_INVERTED);
         drive.setMaxOutput(0.8);
         odometry = new DifferentialDriveOdometry(navx.getRotation2d());
-        logger.init();
+
+        LoggingManager.getInstance().addGroup("Drivetrain", new LogGroup(
+                new Logger[] {
+                        new DeviceLogger<CANSparkMax>(leftPrimaryMotor, "Left Primary Motor",
+                                LogProfileBuilder.buildCANSparkMaxLogItems(leftPrimaryMotor)),
+                        new DeviceLogger<CANSparkMax>(leftSecondaryMotor, "Left Secondary Motor",
+                                LogProfileBuilder.buildCANSparkMaxLogItems(leftSecondaryMotor)),
+                        new DeviceLogger<CANSparkMax>(rightPrimaryMotor, "Right Primary Motor",
+                                LogProfileBuilder.buildCANSparkMaxLogItems(rightPrimaryMotor)),
+                        new DeviceLogger<CANSparkMax>(rightSecondaryMotor, "Right Secondary Motor",
+                                LogProfileBuilder.buildCANSparkMaxLogItems(rightSecondaryMotor)),
+                        new DeviceLogger<AHRS>(navx, "NavX",
+                                LogProfileBuilder.buildNavXLogItems(navx)),
+                        new SendableLogger("field", field),
+                }));
     }
 
     /**
-     * Runs every 20ms. In this method, all we do is run SmartDashboard/logging
-     * related functions (do NOT run any code that should belong in a command here!)
+     * Runs every 20ms. In this method, all we do is run SmartDashboard, logging, or
+     * odometry-related functions (do NOT run any code that should belong in a
+     * command here!)
      */
     @Override
     public void periodic() {
-        logger.run();
         odometry.update(Rotation2d.fromDegrees(-getGyroAngle()), getLeftPosition(), getRightPosition());
         field.setRobotPose(odometry.getPoseMeters());
     }

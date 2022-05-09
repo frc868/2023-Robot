@@ -10,8 +10,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import frc.houndutil.houndlog.LogGroup;
 import frc.houndutil.houndlog.LogProfileBuilder;
-import frc.houndutil.houndlog.Logger;
-import frc.houndutil.houndlog.DeviceLogger;
+import frc.houndutil.houndlog.LoggingManager;
+import frc.houndutil.houndlog.loggers.DeviceLogger;
+import frc.houndutil.houndlog.loggers.Logger;
 import frc.robot.Constants;
 
 /**
@@ -49,33 +50,28 @@ public class Climber extends SubsystemBase {
      */
     private MotorControllerGroup climberMotors = new MotorControllerGroup(primaryMotor, secondaryMotor);
 
-    private LogGroup logger = new LogGroup("Climber",
-            new Logger[] {
-                    new DeviceLogger<CANSparkMax>(primaryMotor, "Primary Motor",
-                            LogProfileBuilder.buildCANSparkMaxLogItems(primaryMotor)),
-                    new DeviceLogger<CANSparkMax>(secondaryMotor, "Secondary Motor",
-                            LogProfileBuilder.buildCANSparkMaxLogItems(secondaryMotor)),
-                    new DeviceLogger<DoubleSolenoid>(climberSecondStage, "Second Stage",
-                            LogProfileBuilder.buildDoubleSolenoidLogItems(climberSecondStage)),
-                    new DeviceLogger<DoubleSolenoid>(climberLocks, "Locks",
-                            LogProfileBuilder.buildDoubleSolenoidLogItems(climberLocks))
-            });
-
     /**
      * The constructor for the class. Sets the climber motors to the inverted status
      * described in Constants.java.
      */
     public Climber() {
         climberMotors.setInverted(Constants.Climber.IS_INVERTED);
-    }
 
-    @Override
-    public void periodic() {
-        logger.run();
+        LoggingManager.getInstance().addGroup("Climber", new LogGroup(
+                new Logger[] {
+                        new DeviceLogger<CANSparkMax>(primaryMotor, "Primary Motor",
+                                LogProfileBuilder.buildCANSparkMaxLogItems(primaryMotor)),
+                        new DeviceLogger<CANSparkMax>(secondaryMotor, "Secondary Motor",
+                                LogProfileBuilder.buildCANSparkMaxLogItems(secondaryMotor)),
+                        new DeviceLogger<DoubleSolenoid>(climberSecondStage, "Second Stage",
+                                LogProfileBuilder.buildDoubleSolenoidLogItems(climberSecondStage)),
+                        new DeviceLogger<DoubleSolenoid>(climberLocks, "Locks",
+                                LogProfileBuilder.buildDoubleSolenoidLogItems(climberLocks))
+                }));
     }
 
     /**
-     * Gets the current encoder value of the climber
+     * Gets the current encoder value of the climber.
      * 
      * @return current distance traveled since last reset
      */
@@ -84,7 +80,7 @@ public class Climber extends SubsystemBase {
     }
 
     /**
-     * Sets the speed of the climber
+     * Sets the speed of the climber.
      * 
      * @param speed speed from -1 to 1 at which to run the motors.
      */

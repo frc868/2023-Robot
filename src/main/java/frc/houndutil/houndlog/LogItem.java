@@ -2,6 +2,9 @@ package frc.houndutil.houndlog;
 
 import java.util.concurrent.Callable;
 
+import frc.houndutil.houndlog.enums.LogLevel;
+import frc.houndutil.houndlog.enums.LogType;
+
 /**
  * Defines a log item. This is using generics because the type of the log item
  * can change ({@code String}, {@code double}, {@code bool}, {@code Sendable},
@@ -26,6 +29,11 @@ public class LogItem<T> {
     private Callable<T> func;
 
     /**
+     * 
+     */
+    private LogLevel level;
+
+    /**
      * Constructs a {@code LogItem}.
      * 
      * @param type the type of log to create
@@ -36,6 +44,22 @@ public class LogItem<T> {
         this.type = type;
         this.key = key;
         this.func = func;
+        this.level = LogLevel.INFO;
+    }
+
+    /**
+     * Constructs a {@code LogItem}.
+     * 
+     * @param type  the type of log to create
+     * @param key   the key of the value to log
+     * @param func  the function to call to get the value
+     * @param level the level at which to place the LogItem
+     */
+    public LogItem(LogType type, String key, Callable<T> func, LogLevel level) {
+        this.type = type;
+        this.key = key;
+        this.func = func;
+        this.level = level;
     }
 
     /**
@@ -63,5 +87,15 @@ public class LogItem<T> {
      */
     public Callable<T> getFunc() {
         return func;
+    }
+
+    /**
+     * Gets the log level. This determines when the value is logged and when it's
+     * set aside for performance reasons.
+     * 
+     * @return the log level.
+     */
+    public LogLevel getLevel() {
+        return level;
     }
 }

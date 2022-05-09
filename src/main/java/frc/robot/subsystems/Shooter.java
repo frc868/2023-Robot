@@ -9,10 +9,11 @@ import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.PIDSubsystem;
 import frc.houndutil.houndlog.LogGroup;
 import frc.houndutil.houndlog.LogProfileBuilder;
-import frc.houndutil.houndlog.LogType;
-import frc.houndutil.houndlog.Logger;
-import frc.houndutil.houndlog.DeviceLogger;
-import frc.houndutil.houndlog.SingleItemLogger;
+import frc.houndutil.houndlog.LoggingManager;
+import frc.houndutil.houndlog.enums.LogType;
+import frc.houndutil.houndlog.loggers.DeviceLogger;
+import frc.houndutil.houndlog.loggers.Logger;
+import frc.houndutil.houndlog.loggers.SingleItemLogger;
 import frc.robot.Constants;
 
 public class Shooter extends PIDSubsystem {
@@ -24,25 +25,20 @@ public class Shooter extends PIDSubsystem {
 
     private SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Constants.Shooter.kS, Constants.Shooter.kV);
 
-    private LogGroup logger = new LogGroup("Shooter",
-            new Logger[] {
-                    new DeviceLogger<CANSparkMax>(primaryMotor, "Primary Motor",
-                            LogProfileBuilder.buildCANSparkMaxLogItems(primaryMotor)),
-                    new DeviceLogger<CANSparkMax>(secondaryMotor, "Secondary Motor",
-                            LogProfileBuilder.buildCANSparkMaxLogItems(secondaryMotor)),
-                    new SingleItemLogger<Double>(LogType.NUMBER, "PID Setpoint", this::getSetpoint),
-                    new SingleItemLogger<Double>(LogType.NUMBER, "PID Measurement", this::getMeasurement),
-                    new SingleItemLogger<Double>(LogType.NUMBER, "Velocity", this::getVelocity)
-            });
-
     public Shooter() {
         super(new PIDController(Constants.Shooter.kP, Constants.Shooter.kI, Constants.Shooter.kD));
         shooterMotors.setInverted(Constants.Shooter.IS_INVERTED);
-    }
 
-    @Override
-    public void periodic() {
-        logger.run();
+        LoggingManager.getInstance().addGroup("Shooter", new LogGroup(
+                new Logger[] {
+                        new DeviceLogger<CANSparkMax>(primaryMotor, "Primary Motor",
+                                LogProfileBuilder.buildCANSparkMaxLogItems(primaryMotor)),
+                        new DeviceLogger<CANSparkMax>(secondaryMotor, "Secondary Motor",
+                                LogProfileBuilder.buildCANSparkMaxLogItems(secondaryMotor)),
+                        new SingleItemLogger<Double>(LogType.NUMBER, "PID Setpoint", this::getSetpoint),
+                        new SingleItemLogger<Double>(LogType.NUMBER, "PID Measurement", this::getMeasurement),
+                        new SingleItemLogger<Double>(LogType.NUMBER, "Velocity", this::getVelocity)
+                }));
     }
 
     @Override

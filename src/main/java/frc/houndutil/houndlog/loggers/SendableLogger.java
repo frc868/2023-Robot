@@ -1,4 +1,4 @@
-package frc.houndutil.houndlog;
+package frc.houndutil.houndlog.loggers;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;

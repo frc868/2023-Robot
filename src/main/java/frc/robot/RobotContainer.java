@@ -20,8 +20,9 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.houndutil.houndlog.LogGroup;
-import frc.houndutil.houndlog.Logger;
-import frc.houndutil.houndlog.SendableLogger;
+import frc.houndutil.houndlog.LoggingManager;
+import frc.houndutil.houndlog.loggers.Logger;
+import frc.houndutil.houndlog.loggers.SendableLogger;
 import frc.robot.Constants.OI;
 import frc.robot.commands.DefaultDrive;
 import frc.robot.commands.DrivetrainRamsete;
@@ -63,31 +64,6 @@ public class RobotContainer {
     XboxController driverController = new XboxController(OI.DRIVER_PORT);
     XboxController operatorController = new XboxController(OI.OPERATOR_PORT);
     SendableChooser<Command> chooser = new SendableChooser<>();
-    LogGroup commandViewer = new LogGroup(
-            new Logger[] {
-                    new SendableLogger("Commands", "Intake Up", new InstantCommand(intake::setUp, intake)),
-                    new SendableLogger("Commands", "Intake Down", new InstantCommand(intake::setDown, intake)),
-                    new SendableLogger("Commands", "Extend Climber Locks",
-                            new InstantCommand(climber::extendLock, climber)),
-                    new SendableLogger("Commands", "Retract Climber Locks",
-                            new InstantCommand(climber::retractLock, climber)),
-                    new SendableLogger("Commands", "Extend Climber Stage 2",
-                            new InstantCommand(climber::extendSecondStage, climber)),
-                    new SendableLogger("Commands", "Retract Climber Stage 2",
-                            new InstantCommand(climber::retractSecondStage, climber)),
-                    new SendableLogger("Commands", "Run Hopper",
-                            new StartEndCommand(hopper::runMotor, hopper::stopMotor, hopper)),
-                    new SendableLogger("Commands", "Run Intake",
-                            new StartEndCommand(intake::runMotors, intake::stop, intake)),
-                    new SendableLogger("Commands", "Gatekeepers In",
-                            new InstantCommand(hopper::gatekeepersIn, hopper)),
-                    new SendableLogger("Commands", "Gatekeepers Out",
-                            new InstantCommand(hopper::gatekeepersOut, hopper)),
-                    new SendableLogger("Commands", "Run Shooter", new RunShooter(shooter, limelight)),
-                    new SendableLogger("Commands", "Run Shooter Locked Speed", new RunShooter(shooter, limelight)),
-                    new SendableLogger("Commands", "Turn To Goal", new TurnToGoal(drivetrain, limelight)),
-                    new SendableLogger("Commands", "Turn To Ball", new TurnToBall(drivetrain, astra)),
-            });
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -103,9 +79,32 @@ public class RobotContainer {
                 }, () -> false, climber));
         configureButtonBindings();
         configureAutonChooser();
-        commandViewer.init(); // this only needs to be run once since Sendables are put on SmartDashboard
-                              // declaratively (that is, they only need to be added once and don't need to be
-                              // updated to work).
+
+        LoggingManager.getInstance().addGroup("Commands", new LogGroup(
+                new Logger[] {
+                        new SendableLogger("Intake Up", new InstantCommand(intake::setUp, intake)),
+                        new SendableLogger("Intake Down", new InstantCommand(intake::setDown, intake)),
+                        new SendableLogger("Extend Climber Locks",
+                                new InstantCommand(climber::extendLock, climber)),
+                        new SendableLogger("Retract Climber Locks",
+                                new InstantCommand(climber::retractLock, climber)),
+                        new SendableLogger("Extend Climber Stage 2",
+                                new InstantCommand(climber::extendSecondStage, climber)),
+                        new SendableLogger("Retract Climber Stage 2",
+                                new InstantCommand(climber::retractSecondStage, climber)),
+                        new SendableLogger("Run Hopper",
+                                new StartEndCommand(hopper::runMotor, hopper::stopMotor, hopper)),
+                        new SendableLogger("Run Intake",
+                                new StartEndCommand(intake::runMotors, intake::stop, intake)),
+                        new SendableLogger("Gatekeepers In",
+                                new InstantCommand(hopper::gatekeepersIn, hopper)),
+                        new SendableLogger("Gatekeepers Out",
+                                new InstantCommand(hopper::gatekeepersOut, hopper)),
+                        new SendableLogger("Run Shooter", new RunShooter(shooter, limelight)),
+                        new SendableLogger("Run Shooter Locked Speed", new RunShooter(shooter, limelight)),
+                        new SendableLogger("Turn To Goal", new TurnToGoal(drivetrain, limelight)),
+                        new SendableLogger("Turn To Ball", new TurnToBall(drivetrain, astra)),
+                }));
 
         // Ignore everything here, this is just a test to put on SmartDashboard
         Trajectory testTrajectory = TrajectoryGenerator.generateTrajectory(

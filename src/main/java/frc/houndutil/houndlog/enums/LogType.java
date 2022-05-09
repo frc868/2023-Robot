@@ -1,4 +1,4 @@
-package frc.houndutil.houndlog;
+package frc.houndutil.houndlog.enums;
 
 /**
  * The type of Logger to create. These are values defined by NetworkTables.
