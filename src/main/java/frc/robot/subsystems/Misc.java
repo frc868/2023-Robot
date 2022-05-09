@@ -6,15 +6,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.houndutil.houndlog.LogGroup;
 import frc.houndutil.houndlog.LogProfileBuilder;
 import frc.houndutil.houndlog.Logger;
+import frc.houndutil.houndlog.DeviceLogger;
 
 public class Misc extends SubsystemBase {
     private PowerDistribution pdh = new PowerDistribution();
     private PneumaticHub ph = new PneumaticHub();
 
-    private LogGroup logger = new LogGroup("Miscellaneous", new Logger<?>[] {
-            new Logger<PowerDistribution>(pdh, "Power Distribution Hub",
+    private LogGroup logger = new LogGroup("Miscellaneous", new Logger[] {
+            new DeviceLogger<PowerDistribution>(pdh, "Power Distribution Hub",
                     LogProfileBuilder.buildPDHLogItems(pdh)),
-            new Logger<PneumaticHub>(ph, "Pneumatic Hub",
+            new DeviceLogger<PneumaticHub>(ph, "Pneumatic Hub",
                     LogProfileBuilder.buildPneumaticHubLogItems(ph)),
     });
 

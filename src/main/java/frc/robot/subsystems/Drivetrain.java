@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.houndutil.houndlog.LogGroup;
 import frc.houndutil.houndlog.LogProfileBuilder;
 import frc.houndutil.houndlog.Logger;
+import frc.houndutil.houndlog.DeviceLogger;
 import frc.houndutil.houndlog.SendableLogger;
 import frc.robot.Constants;
 
@@ -47,16 +48,16 @@ public class Drivetrain extends SubsystemBase {
     private Field2d field = new Field2d();
 
     private LogGroup logger = new LogGroup("Drivetrain",
-            new Logger<?>[] {
-                    new Logger<CANSparkMax>(leftPrimaryMotor, "Left Primary Motor",
+            new Logger[] {
+                    new DeviceLogger<CANSparkMax>(leftPrimaryMotor, "Left Primary Motor",
                             LogProfileBuilder.buildCANSparkMaxLogItems(leftPrimaryMotor)),
-                    new Logger<CANSparkMax>(leftSecondaryMotor, "Left Secondary Motor",
+                    new DeviceLogger<CANSparkMax>(leftSecondaryMotor, "Left Secondary Motor",
                             LogProfileBuilder.buildCANSparkMaxLogItems(leftSecondaryMotor)),
-                    new Logger<CANSparkMax>(rightPrimaryMotor, "Right Primary Motor",
+                    new DeviceLogger<CANSparkMax>(rightPrimaryMotor, "Right Primary Motor",
                             LogProfileBuilder.buildCANSparkMaxLogItems(rightPrimaryMotor)),
-                    new Logger<CANSparkMax>(rightSecondaryMotor, "Right Secondary Motor",
+                    new DeviceLogger<CANSparkMax>(rightSecondaryMotor, "Right Secondary Motor",
                             LogProfileBuilder.buildCANSparkMaxLogItems(rightSecondaryMotor)),
-                    new Logger<AHRS>(navx, "NavX",
+                    new DeviceLogger<AHRS>(navx, "NavX",
                             LogProfileBuilder.buildNavXLogItems(navx)),
                     new SendableLogger("field", field),
             });

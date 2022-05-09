@@ -4,8 +4,8 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 /**
- * A logger for a specified object T. This logger will post all values contained
- * in {@code values} to SmartDashboard.
+ * The base representation of a logger. Since this is abstract, it will not be
+ * able to be instantiated and you must use a subclass.
  * 
  * The group of logging classes under {@code frc.robot.logging} is designed to
  * be dropped straight into any
@@ -13,12 +13,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
  * 
  * @author dr
  */
-public class Logger<T> {
-    /**
-     * The object we are logging.
-     */
-    public T obj;
-
+public abstract class Logger {
     /**
      * The name of the subsystem to log under (the naming convention in SD is
      * SmartDashboard/{subsystem}/{device_name}/{value_name}).
@@ -26,114 +21,92 @@ public class Logger<T> {
     protected String subsystem;
 
     /**
-     * The name of the device to log.
-     */
-    private String deviceName;
-
-    /**
-     * An array of values to log. Using the unspecified generic form since this list
-     * contains several types of {@code LogItem}.
-     */
-    private LogItem<?>[] values;
-
-    /**
-     * Constructs a Logger object.
+     * Instantiate a Logger.
      * 
-     * @param obj        the object to log values for
-     * @param subsystem  the name of the subsystem
-     * @param deviceName the name of the device
-     * @param values     the list of values to log (can be created manually or
-     *                   through {@link LogProfileBuilder})
-     */
-    public Logger(T obj, String subsystem, String deviceName, LogItem<?>[] values) {
-        this.obj = obj;
-        this.subsystem = subsystem;
-        this.deviceName = deviceName;
-        this.values = values;
-    }
-
-    /**
-     * Constructs a Logger object (without a subsystem, only use if setting the
-     * subsystem through LogGroup).
-     * 
-     * @param obj        the object to log values for
-     * @param deviceName the name of the device
-     * @param values     the list of values to log (can be created manually or
-     *                   through {@link LogProfileBuilder})
-     */
-    public Logger(T obj, String deviceName, LogItem<?>[] values) {
-        this.obj = obj;
-        this.subsystem = "Not set";
-        this.deviceName = deviceName;
-        this.values = values;
-    }
-
-    /**
-     * A more minimal constructor so {@link SendableLogger} can work better. This is
-     * protected so that it can only be used by subclasses (like
-     * {@link SendableLogger})
-     * 
-     * @param obj       the (Sendable) object to log values for
      * @param subsystem the name of the subsystem
      */
-    protected Logger(T obj, String subsystem) {
-        this.obj = obj;
+    protected Logger(String subsystem) {
         this.subsystem = subsystem;
-        this.deviceName = "";
-        this.values = new LogItem<?>[] {}; // an empty array so that run() doesn't fail if this is used incorrectly
     }
 
+    /**
+     * Instantiate a logger (without a subsystem, only use if setting
+     * the subsystem through LogGroup).
+     */
+    protected Logger() {
+        this.subsystem = "Not set";
+    }
+
+    /**
+     * Set the name of the subsystem.
+     * 
+     * @param subsystem the name of the subsystem to set
+     */
     public void setSubsystem(String subsystem) {
         this.subsystem = subsystem;
     }
 
     /**
-     * Inits the logger. Used for SendableLoggers. Intended to be overridden.
+     * Gets the base log table used by all {@link Logger} objects.
      */
-    public void init() {
+    public NetworkTable getLogTable() {
+        return NetworkTableInstance.getDefault().getTable("HoundLog");
     }
 
     /**
-     * Runs the logger. This will call the functions listed to log and convert them
-     * to the correct type.
+     * Logs a specific item by calling the functions listed to log and convert the
+     * results to the correct type.
+     * 
+     * @param item the {@link LogItem} to log
      */
-    public void run() {
-        NetworkTable logTable = NetworkTableInstance.getDefault().getTable("HoundLog");
-        for (LogItem<?> v : values) {
-            try {
-                switch (v.getType()) {
-                    case STRING:
-                        logTable.getSubTable(subsystem).getSubTable(deviceName).getEntry(v.getKey())
-                                .setString((String) v.getFunc().call());
-                        break;
-                    case NUMBER:
-                        logTable.getSubTable(subsystem).getSubTable(deviceName).getEntry(v.getKey())
-                                .setDouble((double) v.getFunc().call());
-                        break;
-                    case BOOLEAN:
-                        logTable.getSubTable(subsystem).getSubTable(deviceName).getEntry(v.getKey())
-                                .setBoolean((boolean) v.getFunc().call());
-                        break;
-                    case STRING_ARRAY:
-                        logTable.getSubTable(subsystem).getSubTable(deviceName).getEntry(v.getKey())
-                                .setStringArray((String[]) v.getFunc().call());
-                        break;
-                    case NUMBER_ARRAY:
-                        logTable.getSubTable(subsystem).getSubTable(deviceName).getEntry(v.getKey())
-                                .setDoubleArray((double[]) v.getFunc().call());
-                        break;
-                    case BOOLEAN_ARRAY:
-                        logTable.getSubTable(subsystem).getSubTable(deviceName).getEntry(v.getKey())
-                                .setBooleanArray((boolean[]) v.getFunc().call());
-                        break;
-                    default:
-                        logTable.getSubTable(subsystem).getSubTable(deviceName).getEntry(v.getKey())
-                                .setString("Unspecified type.");
-                        break;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+    public void logItem(LogItem<?> item) {
+        try {
+            switch (item.getType()) {
+                case STRING:
+                    getDataTable().getEntry(item.getKey()).setString((String) item.getFunc().call());
+                    break;
+                case NUMBER:
+                    getDataTable().getEntry(item.getKey()).setDouble((double) item.getFunc().call());
+                    break;
+                case BOOLEAN:
+                    getDataTable().getEntry(item.getKey()).setBoolean((boolean) item.getFunc().call());
+                    break;
+                case STRING_ARRAY:
+                    getDataTable().getEntry(item.getKey()).setStringArray((String[]) item.getFunc().call());
+                    break;
+                case NUMBER_ARRAY:
+                    getDataTable().getEntry(item.getKey()).setDoubleArray((double[]) item.getFunc().call());
+                    break;
+                case BOOLEAN_ARRAY:
+                    getDataTable().getEntry(item.getKey()).setBooleanArray((boolean[]) item.getFunc().call());
+                    break;
+                default:
+                    getDataTable().getEntry(item.getKey()).setString("Unspecified type.");
+                    break;
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
+
+    /**
+     * Gets the data table associated with this logger. This should be overridden,
+     * so it has been made abstract. This can be either the base subsystem table or
+     * the table for a specific device.
+     * 
+     * @return the target {@link NetworkTable}
+     */
+    protected abstract NetworkTable getDataTable();
+
+    /**
+     * Inits the logger. This is useful for things that need to be inited, like a
+     * SendableLogger.
+     */
+    public abstract void init();
+
+    /**
+     * Runs the logger. This can really do anything, but should be used to run
+     * {@code logItem()} on every item you want to log.
+     */
+    public abstract void run();
 }

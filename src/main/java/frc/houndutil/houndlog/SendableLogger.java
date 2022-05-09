@@ -16,18 +16,17 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  *          since Sendables are sent to SmartDashboard declaratively. put these
  *          in an {@code init} method.
  */
-public class SendableLogger extends Logger<Sendable> {
+public class SendableLogger extends Logger {
     private String key;
     private Sendable sendable;
 
     public SendableLogger(String subsystem, String key, Sendable sendable) {
-        super(sendable, subsystem);
+        super(subsystem);
         this.key = key;
         this.sendable = sendable;
     }
 
     public SendableLogger(String key, Sendable sendable) {
-        super(sendable, "Not set");
         this.key = key;
         this.sendable = sendable;
     }
@@ -41,20 +40,34 @@ public class SendableLogger extends Logger<Sendable> {
      * @param logTable the table through which to send it
      */
     private void publishSendable(NetworkTable logTable) {
-        NetworkTable dataTable = logTable.getSubTable(subsystem).getSubTable(key);
         SendableBuilderImpl builder = new SendableBuilderImpl();
-        builder.setTable(dataTable);
+        builder.setTable(getDataTable());
         SendableRegistry.publish(sendable, builder);
         builder.startListeners();
-        dataTable.getEntry(".name").setString(key);
+        getDataTable().getEntry(".name").setString(key);
     }
 
+    /**
+     * Gets the table associated with the subsystem + Sendable.
+     */
+    @Override
+    protected NetworkTable getDataTable() {
+        return getLogTable().getSubTable(subsystem).getSubTable(key);
+    }
+
+    /**
+     * Since Sendables only need to be sent declaratively, all logic only needs to
+     * be put in an init. {@link SendableRegistry} will handle everything else.
+     */
     @Override
     public void init() {
         NetworkTable logTable = NetworkTableInstance.getDefault().getTable("HoundLog");
         publishSendable(logTable);
     }
 
+    /**
+     * Does nothing.
+     */
     @Override
     public void run() {
 

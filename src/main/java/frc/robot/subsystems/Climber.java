@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import frc.houndutil.houndlog.LogGroup;
 import frc.houndutil.houndlog.LogProfileBuilder;
 import frc.houndutil.houndlog.Logger;
+import frc.houndutil.houndlog.DeviceLogger;
 import frc.robot.Constants;
 
 /**
@@ -49,14 +50,14 @@ public class Climber extends SubsystemBase {
     private MotorControllerGroup climberMotors = new MotorControllerGroup(primaryMotor, secondaryMotor);
 
     private LogGroup logger = new LogGroup("Climber",
-            new Logger<?>[] {
-                    new Logger<CANSparkMax>(primaryMotor, "Primary Motor",
+            new Logger[] {
+                    new DeviceLogger<CANSparkMax>(primaryMotor, "Primary Motor",
                             LogProfileBuilder.buildCANSparkMaxLogItems(primaryMotor)),
-                    new Logger<CANSparkMax>(secondaryMotor, "Secondary Motor",
+                    new DeviceLogger<CANSparkMax>(secondaryMotor, "Secondary Motor",
                             LogProfileBuilder.buildCANSparkMaxLogItems(secondaryMotor)),
-                    new Logger<DoubleSolenoid>(climberSecondStage, "Second Stage",
+                    new DeviceLogger<DoubleSolenoid>(climberSecondStage, "Second Stage",
                             LogProfileBuilder.buildDoubleSolenoidLogItems(climberSecondStage)),
-                    new Logger<DoubleSolenoid>(climberLocks, "Locks",
+                    new DeviceLogger<DoubleSolenoid>(climberLocks, "Locks",
                             LogProfileBuilder.buildDoubleSolenoidLogItems(climberLocks))
             });
 

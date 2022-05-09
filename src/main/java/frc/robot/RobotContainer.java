@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.houndutil.houndlog.LogGroup;
+import frc.houndutil.houndlog.Logger;
 import frc.houndutil.houndlog.SendableLogger;
 import frc.robot.Constants.OI;
 import frc.robot.commands.DefaultDrive;
@@ -63,7 +64,7 @@ public class RobotContainer {
     XboxController operatorController = new XboxController(OI.OPERATOR_PORT);
     SendableChooser<Command> chooser = new SendableChooser<>();
     LogGroup commandViewer = new LogGroup(
-            new SendableLogger[] {
+            new Logger[] {
                     new SendableLogger("Commands", "Intake Up", new InstantCommand(intake::setUp, intake)),
                     new SendableLogger("Commands", "Intake Down", new InstantCommand(intake::setDown, intake)),
                     new SendableLogger("Commands", "Extend Climber Locks",

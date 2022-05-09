@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.houndutil.houndlog.LogGroup;
 import frc.houndutil.houndlog.LogProfileBuilder;
 import frc.houndutil.houndlog.Logger;
+import frc.houndutil.houndlog.DeviceLogger;
 import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {
@@ -19,10 +20,10 @@ public class Intake extends SubsystemBase {
             Constants.Intake.Solenoids.INTAKE_CHANNEL_1,
             Constants.Intake.Solenoids.INTAKE_CHANNEL_2);
     private LogGroup logger = new LogGroup("Intake",
-            new Logger<?>[] {
-                    new Logger<CANSparkMax>(motor, "Motor",
+            new Logger[] {
+                    new DeviceLogger<CANSparkMax>(motor, "Motor",
                             LogProfileBuilder.buildCANSparkMaxLogItems(motor)),
-                    new Logger<DoubleSolenoid>(solenoid, "Gatekeepers",
+                    new DeviceLogger<DoubleSolenoid>(solenoid, "Gatekeepers",
                             LogProfileBuilder.buildDoubleSolenoidLogItems(solenoid)),
             });
 
