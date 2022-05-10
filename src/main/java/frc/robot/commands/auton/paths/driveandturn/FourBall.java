@@ -1,4 +1,4 @@
-package frc.robot.commands.auton.paths;
+package frc.robot.commands.auton.paths.driveandturn;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;

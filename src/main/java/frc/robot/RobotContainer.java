@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -13,7 +16,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -29,11 +35,11 @@ import frc.robot.commands.DrivetrainRamsete;
 import frc.robot.commands.RunShooter;
 import frc.robot.commands.TurnToBall;
 import frc.robot.commands.TurnToGoal;
-import frc.robot.commands.auton.paths.FiveBall;
-import frc.robot.commands.auton.paths.FourBall;
-import frc.robot.commands.auton.paths.LeaveTarmac;
-import frc.robot.commands.auton.paths.ThreeBall;
-import frc.robot.commands.auton.paths.TwoBall;
+import frc.robot.commands.auton.paths.driveandturn.FiveBall;
+import frc.robot.commands.auton.paths.driveandturn.FourBall;
+import frc.robot.commands.auton.paths.driveandturn.LeaveTarmac;
+import frc.robot.commands.auton.paths.driveandturn.ThreeBall;
+import frc.robot.commands.auton.paths.driveandturn.TwoBall;
 import frc.robot.sensors.Astra;
 import frc.robot.sensors.Limelight;
 import frc.robot.subsystems.Climber;
@@ -43,9 +49,9 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Misc;
 import frc.robot.subsystems.Shooter;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
@@ -64,6 +70,7 @@ public class RobotContainer {
     XboxController driverController = new XboxController(OI.DRIVER_PORT);
     XboxController operatorController = new XboxController(OI.OPERATOR_PORT);
     SendableChooser<Command> chooser = new SendableChooser<>();
+    HashMap<String, Trajectory> trajectories = new HashMap<String, Trajectory>();
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -74,11 +81,10 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
                 new DefaultDrive(drivetrain, driverController::getLeftX, driverController::getRightX));
         climber.setDefaultCommand(
-                new FunctionalCommand(() -> {
-                }, () -> climber.setSpeed(operatorController.getLeftY()), (interrupted) -> {
-                }, () -> false, climber));
+                new RunCommand(() -> climber.setSpeed(operatorController.getLeftY()), climber));
         configureButtonBindings();
         configureAutonChooser();
+        loadTrajectories();
 
         LoggingManager.getInstance().addGroup("Commands", new LogGroup(
                 new Logger[] {
@@ -123,6 +129,19 @@ public class RobotContainer {
                                         drivetrain.getKinematics(),
                                         10)));
         SmartDashboard.putData(new DrivetrainRamsete(testTrajectory, drivetrain));
+    }
+
+    private void loadTrajectories() {
+        for (String path : new String[] {}) {
+            try {
+                Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(path);
+                Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
+                trajectories.put(path, trajectory);
+            } catch (IOException ex) {
+                DriverStation.reportError("Unable to open trajectory: " + path, ex.getStackTrace());
+            }
+        }
+
     }
 
     private void configureAutonChooser() {

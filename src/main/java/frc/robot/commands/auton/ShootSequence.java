@@ -21,10 +21,10 @@ public class ShootSequence extends SequentialCommandGroup {
     public ShootSequence(Drivetrain drivetrain, Shooter shooter, Limelight limelight, Hopper hopper) {
         addCommands(
                 new InstantCommand(limelight::setShootingMode),
+                new TurnToGoal(drivetrain, limelight).withTimeout(1.0),
                 new ParallelRaceGroup(
                         new RunShooterLockedSpeed(shooter, limelight),
                         new SequentialCommandGroup(
-                                new TurnToGoal(drivetrain, limelight),
                                 new InstantCommand(hopper::gatekeepersIn, hopper),
                                 new RunCommand(hopper::runMotor, hopper).withTimeout(1.5),
                                 new InstantCommand(hopper::gatekeepersOut, hopper))),
