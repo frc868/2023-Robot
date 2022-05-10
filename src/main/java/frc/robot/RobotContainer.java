@@ -132,9 +132,10 @@ public class RobotContainer {
     }
 
     private void loadTrajectories() {
-        for (String path : new String[] {}) {
+        for (String path : new String[] { "5Ball.To2", "5Ball.To3", "5Ball.To4and5", "5Ball.ToGoal" }) {
             try {
-                Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(path);
+                Path trajectoryPath = Filesystem.getDeployDirectory().toPath()
+                        .resolve("pathplanner/generatedJSON/" + path + ".wpilib.json");
                 Trajectory trajectory = TrajectoryUtil.fromPathweaverJson(trajectoryPath);
                 trajectories.put(path, trajectory);
             } catch (IOException ex) {
