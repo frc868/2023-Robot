@@ -32,26 +32,26 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         // Instantiate our RobotContainer. This will perform all our button bindings,
-        // and put our
-        // autonomous chooser on the dashboard.
+        // and put our autonomous chooser on the dashboard.
         m_robotContainer = new RobotContainer();
         LoggingManager.getInstance().init();
+
+        // This is something you won't see often in FRC, but I wanted to set the
+        // LoggingManager to run every 100ms instead of every 10ms, and on a 5ms offset
+        // from robotPeriodic.
+        addPeriodic(LoggingManager.getInstance()::run, 0.1, 0.005);
+
+        LiveWindow.disableAllTelemetry();
     }
 
     /**
      * This function is called every 20 ms, no matter the mode. Use this for items
      * like diagnostics that you want ran during disabled, autonomous, teleoperated
      * and test.
-     *
-     * @apiNote I tend to be wary of putting things in robotPeriodic apart from the
-     *          CommandScheduler, but due to the implementation of Test Mode and the
-     *          inability to unschedule button commands when entering test mode, I
-     *          made the decision to put the LoggingManager in here.
      */
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
-        LoggingManager.getInstance().run();
     }
 
     /** This function is called once each time the robot enters Disabled mode. */
@@ -102,7 +102,7 @@ public class Robot extends TimedRobot {
     public void testInit() {
         // Cancels all running commands at the start of test mode.
         CommandScheduler.getInstance().cancelAll();
-        LiveWindow.disableAllTelemetry();
+        LiveWindow.setEnabled(false);
     }
 
     /** This function is called periodically during test mode. */

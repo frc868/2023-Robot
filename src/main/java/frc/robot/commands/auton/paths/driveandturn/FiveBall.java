@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.DriveStraight;
-import frc.robot.commands.TurnToAngleGyro;
+import frc.robot.commands.TurnToAngle;
 import frc.robot.commands.TurnToBall;
 import frc.robot.commands.auton.ShootSequence;
 import frc.robot.sensors.Astra;
@@ -30,13 +30,13 @@ public class FiveBall extends SequentialCommandGroup {
                         new DriveStraight(0, drivetrain),
                         new RunCommand(intake::runMotors, intake)),
                 new ShootSequence(drivetrain, shooter, limelight, hopper).withTimeout(4), // shoot 1st and 2nd ball
-                new TurnToAngleGyro(150, drivetrain).withTimeout(2), // turn to general location of 3rd ball to
-                                                                     // put in camera FOV
+                new TurnToAngle(150, drivetrain).withTimeout(2), // turn to general location of 3rd ball to
+                                                                 // put in camera FOV
                 new TurnToBall(drivetrain, astra).withTimeout(1), // turn to ball precisely with camera
                 new ParallelRaceGroup(
                         new DriveStraight(0, drivetrain),
                         new RunCommand(intake::runMotors, intake)), // drive and intake 3rd ball
-                new TurnToAngleGyro(-25, drivetrain), // turn to goal enough to get in limelight frame
+                new TurnToAngle(-25, drivetrain), // turn to goal enough to get in limelight frame
                 new ShootSequence(drivetrain, shooter, limelight, hopper).withTimeout(4), // shoot 3rd ball
                 new TurnToBall(drivetrain, astra).withTimeout(1), // turn to 4th ball
                 new ParallelRaceGroup(

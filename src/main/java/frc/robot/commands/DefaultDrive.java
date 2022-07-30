@@ -7,24 +7,26 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 /**
- * The default tank drive. This could be defined as an inline command, but I
- * chose to define it as a class for verbosity.
+ * The default way to drive swerve, taking in xSpeed, ySpeed, and thetaSpeed.
+ * This will be field-oriented.
  * 
  * @author dr
  */
 public class DefaultDrive extends CommandBase {
     private Drivetrain drivetrain;
-    private DoubleSupplier leftSpeed, rightSpeed;
+    private DoubleSupplier xSpeed, ySpeed, thetaSpeed;
 
-    public DefaultDrive(Drivetrain drivetrain, DoubleSupplier leftSpeed, DoubleSupplier rightSpeed) {
+    public DefaultDrive(Drivetrain drivetrain, DoubleSupplier xSpeed, DoubleSupplier ySpeed,
+            DoubleSupplier thetaSpeed) {
         this.drivetrain = drivetrain;
-        this.leftSpeed = leftSpeed;
-        this.rightSpeed = rightSpeed;
+        this.xSpeed = xSpeed;
+        this.ySpeed = ySpeed;
+        this.thetaSpeed = thetaSpeed;
         addRequirements(drivetrain);
     }
 
     @Override
     public void execute() {
-        drivetrain.tankDrive(leftSpeed.getAsDouble(), rightSpeed.getAsDouble());
+        drivetrain.drive(xSpeed.getAsDouble(), ySpeed.getAsDouble(), thetaSpeed.getAsDouble(), true);
     }
 }

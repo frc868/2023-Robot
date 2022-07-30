@@ -4,15 +4,16 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.robot.subsystems.Drivetrain;
-import edu.wpi.first.wpilibj2.command.PIDCommand;
+import edu.wpi.first.wpilibj2.command.ProfiledPIDCommand;
 import frc.robot.Constants;
 
 /**
- * Drives a specified distance (in m) straight, using a PID loop.
+ * Drives a specified distance (in m) straight ahead, using a PID loop.
  */
-public class DriveStraight extends PIDCommand {
+public class DriveStraight extends ProfiledPIDCommand {
     private final Drivetrain drivetrain;
 
     /**
@@ -21,9 +22,13 @@ public class DriveStraight extends PIDCommand {
      * @param distance The distance to drive
      */
     public DriveStraight(double distance, Drivetrain drivetrain) {
-        super(new PIDController(Constants.Drivetrain.DriveStraightPID.kP, Constants.Drivetrain.DriveStraightPID.kI,
-                Constants.Drivetrain.DriveStraightPID.kD),
-                drivetrain::getPosition, distance, d -> drivetrain.tankDrive(d, d),
+        super(new ProfiledPIDController(Constants.Drivetrain.PIDConstants.TurnToAngle.kP,
+                Constants.Drivetrain.PIDConstants.TurnToAngle.kI,
+                Constants.Drivetrain.PIDConstants.TurnToAngle.kD,
+                new TrapezoidProfile.Constraints(Constants.Auton.MAX_VELOCITY,
+                        Constants.Auton.MAX_ACCELERATION)),
+                drivetrain::getDrivePosition, distance,
+                (output, state) -> drivetrain.drive(output, 0, 0, false),
                 drivetrain);
 
         this.drivetrain = drivetrain;
@@ -34,8 +39,7 @@ public class DriveStraight extends PIDCommand {
 
     @Override
     public void initialize() {
-        this.drivetrain.resetEncoders();
-        super.initialize();
+        drivetrain.resetDriveEncoders();
     }
 
     @Override

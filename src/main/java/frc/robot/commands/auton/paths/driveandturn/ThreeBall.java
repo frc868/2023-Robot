@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.DriveStraight;
-import frc.robot.commands.TurnToAngleGyro;
+import frc.robot.commands.TurnToAngle;
 import frc.robot.commands.TurnToBall;
 import frc.robot.commands.auton.ShootSequence;
 import frc.robot.sensors.Astra;
@@ -30,7 +30,7 @@ public class ThreeBall extends SequentialCommandGroup {
                         new DriveStraight(0, drivetrain),
                         new RunCommand(intake::runMotors, intake)),
                 new ShootSequence(drivetrain, shooter, limelight, hopper),
-                new TurnToAngleGyro(150, drivetrain),
+                new TurnToAngle(150, drivetrain),
                 new TurnToBall(drivetrain, astra),
                 new ParallelRaceGroup(
                         new DriveStraight(0, drivetrain),
