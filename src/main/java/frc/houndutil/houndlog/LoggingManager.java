@@ -11,17 +11,15 @@ import frc.houndutil.houndlog.loggers.Logger;
  * periodic methods of each subsystem (like the inability to use Test mode,
  * verbosity, etc).
  * 
+ * @apiNote The group of logging classes under {@code frc.houndutil.houndlog} is
+ *          designed to be dropped straight into any robot project, not just
+ *          this one.
+ * 
  * @author dr
  */
 public class LoggingManager {
     private static LoggingManager instance;
     private List<Loggable> loggables = new ArrayList<Loggable>();
-
-    /**
-     * Private constructor since this is a singleton.
-     */
-    private LoggingManager() {
-    };
 
     /**
      * Returns a singleton of LoggingManager.

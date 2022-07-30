@@ -46,7 +46,7 @@ public class LogGroup implements Loggable {
     }
 
     /**
-     * Setes the subsystems of all loggers in the group.
+     * Sets the subsystems of all loggers in the group.
      * 
      * @param subsystem the name of the subsystem to set.
      */

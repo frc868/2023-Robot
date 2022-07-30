@@ -29,7 +29,8 @@ public class LogItem<T> {
     private Callable<T> func;
 
     /**
-     * 
+     * The level at which to set this LogItem. This defines when this value is
+     * updated to NetworkTables.
      */
     private LogLevel level;
 

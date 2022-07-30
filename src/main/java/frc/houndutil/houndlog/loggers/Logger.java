@@ -8,11 +8,7 @@ import frc.robot.Constants;
 
 /**
  * The base representation of a logger. Since this is abstract, it will not be
- * able to be instantiated and you must use a subclass.
- * 
- * The group of logging classes under {@code frc.robot.logging} is designed to
- * be dropped straight into any
- * robot project, not just this one.
+ * able to be instantiated and you must use a superclass.
  * 
  * @author dr
  */

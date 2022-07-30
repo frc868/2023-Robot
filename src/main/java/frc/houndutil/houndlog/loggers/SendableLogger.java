@@ -36,7 +36,6 @@ public class SendableLogger extends Logger {
      * for this, so I had to copy the code to send a Sendable over NetworkTables
      * from {@link SmartDashboard}.
      * 
-     * @param s        the sendable to send
      * @param logTable the table through which to send it
      */
     private void publishSendable(NetworkTable logTable) {

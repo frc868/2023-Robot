@@ -7,7 +7,13 @@ package frc.houndutil.houndlog.loggers;
  * @author dr
  */
 public interface Loggable {
+    /**
+     * Code to run on initialization of this Loggable.
+     */
     public void init();
 
+    /**
+     * Code to run on every loop iteration for this Loggable.
+     */
     public void run();
 }

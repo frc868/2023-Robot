@@ -6,7 +6,17 @@ package frc.houndutil.houndlog.enums;
  * @author dr
  */
 public enum LogLevel {
-    DEBUG, // this will only run when debug mode is on
-    INFO, // this will only run when the bot is enabled in test mode
-    MAIN // this will run all the time
+    /**
+     * LogValues set at this level will only run when debug mode is on
+     */
+    DEBUG,
+    /**
+     * LogValues set at this level will only run when the bot is set in test mode
+     * (does not have to enabled)
+     */
+    INFO,
+    /**
+     * LogValues set at this level will run all the time.
+     */
+    MAIN
 }
