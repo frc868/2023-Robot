@@ -4,6 +4,7 @@ import java.util.concurrent.Callable;
 
 import edu.wpi.first.networktables.NetworkTable;
 import frc.houndutil.houndlog.LogItem;
+import frc.houndutil.houndlog.enums.LogLevel;
 import frc.houndutil.houndlog.enums.LogType;
 
 /**
@@ -38,6 +39,33 @@ public class SingleItemLogger<T> extends Logger {
      */
     public SingleItemLogger(LogType type, String key, Callable<T> func) {
         item = new LogItem<T>(type, key, func);
+    }
+
+    /**
+     * Instantiates a SingleItemLogger.
+     * 
+     * @param subsystem the name of the subsystem
+     * @param type      the type of log
+     * @param key       the key of the log entry
+     * @param func      the function that will provide the value for the log entry
+     * @param logLevel  the level at which to log this entry
+     */
+    public SingleItemLogger(String subsystem, LogType type, String key, Callable<T> func, LogLevel logLevel) {
+        super(subsystem);
+        item = new LogItem<T>(type, key, func, logLevel);
+    }
+
+    /**
+     * Instantiates a SingleItemLogger (without a subsystem, only use if setting
+     * the subsystem through LogGroup).
+     * 
+     * @param type     the type of log
+     * @param key      the key of the log entry
+     * @param func     the function that will provide the value for the log entry
+     * @param logLevel the level at which to log this entry
+     */
+    public SingleItemLogger(LogType type, String key, Callable<T> func, LogLevel logLevel) {
+        item = new LogItem<T>(type, key, func, logLevel);
     }
 
     /**
