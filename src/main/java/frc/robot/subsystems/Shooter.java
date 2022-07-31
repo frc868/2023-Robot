@@ -16,15 +16,26 @@ import frc.houndutil.houndlog.loggers.Logger;
 import frc.houndutil.houndlog.loggers.SingleItemLogger;
 import frc.robot.Constants;
 
+/**
+ * The shooter subsystem, created as a PID subsystem. Contains the motors that
+ * control the flywheel.
+ */
 public class Shooter extends PIDSubsystem {
+    /** The primary motor of the shooter. */
     private CANSparkMax primaryMotor = new CANSparkMax(Constants.Shooter.CANIDs.PRIMARY,
             MotorType.kBrushless);
+    /** The secondary motor of the shooter. */
     private CANSparkMax secondaryMotor = new CANSparkMax(Constants.Shooter.CANIDs.SECONDARY,
             MotorType.kBrushless);
+    /** The group that controls both shooter motors. */
     private MotorControllerGroup shooterMotors = new MotorControllerGroup(primaryMotor, secondaryMotor);
 
+    /** The feed-forward controller that runs the shooter motors. */
     private SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Constants.Shooter.kS, Constants.Shooter.kV);
 
+    /**
+     * Initializes the shooter.
+     */
     public Shooter() {
         super(new PIDController(Constants.Shooter.kP, Constants.Shooter.kI, Constants.Shooter.kD));
         shooterMotors.setInverted(Constants.Shooter.IS_INVERTED);
@@ -41,42 +52,62 @@ public class Shooter extends PIDSubsystem {
                 }));
     }
 
+    /**
+     * Gets the measurement for the PID loop. This is used through the subsystem's
+     * {@code enable} method.
+     */
     @Override
     public double getMeasurement() {
         return getVelocity();
     }
 
+    /**
+     * The consumer that uses the output of the PID calculation. This adds a
+     * feedforward value to the voltage.
+     */
     @Override
     public void useOutput(double output, double setpoint) {
         setSpeedVolts(output + feedforward.calculate(setpoint));
     }
 
+    /**
+     * Sets the speed of the motors.
+     * 
+     * @param speed the speed of the motors (-1 to 1).
+     */
     public void setSpeed(double speed) {
         shooterMotors.set(speed);
     }
 
+    /**
+     * Sets the speed of the motors in volts. This must be called regularly in order
+     * for voltage compensation to work, a fundamental component of feed-forward
+     * control.
+     * 
+     * @param volts the speed of the motors in volts (-12v to 12v)
+     */
     public void setSpeedVolts(double volts) {
         shooterMotors.setVoltage(volts);
     }
 
     /**
-     * Resets the shooter
+     * Resets the shooter.
      */
     public void resetEncoders() {
         primaryMotor.getEncoder().setPosition(0);
     }
 
     /**
-     * Gets the current velocity of the shooter
+     * Gets the current velocity of the shooter.
      * 
-     * @return current speed of the shooter, in rpm
+     * @return The current speed of the shooter, in rpm.
      */
     public double getVelocity() {
         return primaryMotor.getEncoder().getVelocity();
     }
 
     /**
-     * Stops the shooter
+     * Stops the shooter.
      */
     public void stop() {
         setSpeed(0);

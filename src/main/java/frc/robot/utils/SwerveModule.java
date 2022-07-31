@@ -23,23 +23,40 @@ import frc.houndutil.houndlog.loggers.DeviceLogger;
 import frc.robot.Constants;
 
 public class SwerveModule {
+    /** The motor used for driving. */
     private CANSparkMax driveMotor;
+    /** The motor used for turning. */
     private CANSparkMax turnMotor;
 
+    /** The encoder on the motor used for driving. */
     private RelativeEncoder driveEncoder;
+    /** The CANCoder used to tell the angle of the wheel. */
     private CANCoder turnEncoder;
 
+    /** The PID controller that controls the drive motor's velocity. */
     private PIDController drivePIDController = new PIDController(Constants.Drivetrain.PIDConstants.Drive.kP,
             Constants.Drivetrain.PIDConstants.Drive.kI, Constants.Drivetrain.PIDConstants.Drive.kD);
 
+    /** The PID controller that controls the turning motor. */
     private ProfiledPIDController turnPIDController = new ProfiledPIDController(
-            Constants.Drivetrain.PIDConstants.Drive.kP,
-            Constants.Drivetrain.PIDConstants.Drive.kI, Constants.Drivetrain.PIDConstants.Drive.kD,
-            new TrapezoidProfile.Constraints(Constants.Drivetrain.MAX_ANGULAR_VELOCITY,
-                    Constants.Drivetrain.MAX_ANGULAR_ACCELERATION));
+            Constants.Drivetrain.PIDConstants.Turn.kP,
+            Constants.Drivetrain.PIDConstants.Turn.kI, Constants.Drivetrain.PIDConstants.Turn.kD,
+            new TrapezoidProfile.Constraints(Constants.Drivetrain.Geometry.MAX_ANGULAR_VELOCITY,
+                    Constants.Drivetrain.Geometry.MAX_ANGULAR_ACCELERATION));
 
-    public SwerveModule(String name, int driveMotorChannel, int turnMotorChannel, int turnEncoderChannel,
+    /**
+     * Initalizes a SwerveModule.
+     * 
+     * @param name                the name of the module (used for logging)
+     * @param driveMotorChannel   the CAN ID of the drive motor
+     * @param turnMotorChannel    the CAN ID of the turning motor
+     * @param canCoderChannel     the CAN ID of the CANCoder
+     * @param driveMotorInverted  if the drive motor is inverted
+     * @param turnEncoderInverted if the turn encoder is inverted
+     */
+    public SwerveModule(String name, int driveMotorChannel, int turnMotorChannel, int canCoderChannel,
             boolean driveMotorInverted, boolean turnEncoderInverted) {
+
         driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
         driveMotor.setInverted(driveMotorInverted);
         driveMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
@@ -47,13 +64,14 @@ public class SwerveModule {
         turnMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
 
         driveEncoder = driveMotor.getEncoder();
-        driveEncoder.setPositionConversionFactor(2 * Math.PI * Constants.Drivetrain.WHEEL_RADIUS); // in meters
-        driveEncoder.setVelocityConversionFactor((2 * Math.PI * Constants.Drivetrain.WHEEL_RADIUS) / 60.0);
+        driveEncoder.setPositionConversionFactor(2 * Math.PI * Constants.Drivetrain.Geometry.WHEEL_RADIUS); // in meters
+        driveEncoder.setVelocityConversionFactor((2 * Math.PI * Constants.Drivetrain.Geometry.WHEEL_RADIUS) / 60.0);
 
-        turnEncoder = new CANCoder(turnEncoderChannel);
-        // there is an issue with absolute position vs position in CANCoders, namely
-        // that the abs pos is sent a lot less frequently than position (every 100ms vs
-        // every 10ms). according to this post:
+        turnEncoder = new CANCoder(canCoderChannel);
+
+        // There is an issue with absolute position vs position in CANCoders, namely
+        // that the abs pos is sent a lot less frequently than the normal pos (every
+        // 100ms vs every 10ms). According to this post:
         // https://www.chiefdelphi.com/t/official-sds-mk3-mk4-code/397109/99, setting
         // the CANCoder to "Boot to Absolute" will fix this.
         turnEncoder.setPositionToAbsolute();
@@ -73,10 +91,20 @@ public class SwerveModule {
                 }));
     }
 
+    /**
+     * Gets the state of the swerve module.
+     * 
+     * @return the state of the swerve module
+     */
     public SwerveModuleState getState() {
         return new SwerveModuleState(driveEncoder.getVelocity(), new Rotation2d(turnEncoder.getPosition()));
     }
 
+    /**
+     * Sets the PID controller setpoints to the desired state.
+     * 
+     * @param state the desired state of the swerve module
+     */
     public void setState(SwerveModuleState state) {
         double driveOutput = drivePIDController.calculate(driveEncoder.getVelocity(), state.speedMetersPerSecond);
         double turnOutput = turnPIDController.calculate(turnEncoder.getPosition(), state.angle.getRadians());
@@ -85,14 +113,27 @@ public class SwerveModule {
         turnMotor.set(turnOutput);
     }
 
-    public void resetDriveEncoder() {
-        driveEncoder.setPosition(0);
-    }
-
+    /**
+     * Gets the position of the drive encoder.
+     * 
+     * @return the position of the drive encoder.
+     */
     public double getDriveEncoderPosition() {
         return driveEncoder.getPosition();
     }
 
+    /**
+     * Reset the position of the encoder on the drive motor.
+     */
+    public void resetDriveEncoder() {
+        driveEncoder.setPosition(0);
+    }
+
+    /**
+     * Gets the current angle of the wheel.
+     * 
+     * @return the current angle of the wheel, in degrees, [0, 360) CCW.
+     */
     public double getAngle() {
         return Math.toDegrees(turnEncoder.getPosition());
     }

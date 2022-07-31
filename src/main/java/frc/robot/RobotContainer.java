@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import java.util.HashMap;
@@ -43,6 +39,9 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 
+/**
+ * The container for the robot. Contains subsystems, OI devices, and commands.
+ */
 public class RobotContainer {
     private final Drivetrain drivetrain = new Drivetrain();
     private final Hopper hopper = new Hopper();
@@ -62,7 +61,7 @@ public class RobotContainer {
     HashMap<String, Trajectory> trajectories = new HashMap<String, Trajectory>();
 
     /**
-     * The container for the robot. Contains subsystems, OI devices, and commands.
+     * Constructs the robot container.
      */
     public RobotContainer() {
         LiveWindow.disableAllTelemetry(); // livewindow is basically deprecated. using houndlog instead.

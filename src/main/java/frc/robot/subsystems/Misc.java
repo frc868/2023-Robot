@@ -9,10 +9,19 @@ import frc.houndutil.houndlog.LoggingManager;
 import frc.houndutil.houndlog.loggers.DeviceLogger;
 import frc.houndutil.houndlog.loggers.Logger;
 
+/**
+ * The "subsystem" that contains objects that don't belong anywhere else but
+ * need to have values logged for.
+ * 
+ * @author dr
+ */
 public class Misc extends SubsystemBase {
+    /** The PDH (CAN ID 1) */
     private PowerDistribution pdh = new PowerDistribution();
+    /** The PH (CAN ID ?) TODO */
     private PneumaticHub ph = new PneumaticHub();
 
+    /** Adds the loggers for the Miscellaneous group. */
     public Misc() {
         LoggingManager.getInstance().addGroup("Miscellaneous", new LogGroup(
                 new Logger[] {

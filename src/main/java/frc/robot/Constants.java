@@ -1,20 +1,13 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide
- * numerical or boolean
- * constants. This class should not be used for any other purpose. All constants
- * should be declared
- * globally (i.e. public static). Do not put anything functional in this class.
+ * The container for robot-wide numerical or boolean constants. This should not
+ * be used for any other purpose.
  *
- * <p>
- * It is advised to statically import this class (or one of its inner classes)
- * wherever the
- * constants are needed, to reduce verbosity.
+ * @author dr
  */
 public final class Constants {
     enum ControllerType {
@@ -53,13 +46,39 @@ public final class Constants {
             }
         }
 
-        public static final double WHEEL_RADIUS = 0.0;
-        public static final double MAX_VELOCITY = 1.0;
-        public static final double MAX_ACCELERATION = 1.0;
-        public static final double MAX_ANGULAR_VELOCITY = Math.PI / 4; // must be in rad/s, this is intentionally very
-                                                                       // slow for now
-        public static final double MAX_ANGULAR_ACCELERATION = 2 * Math.PI;
-        public static final double CHASSIS_WIDTH = 0.5; // for square base only
+        public static final class Geometry {
+            /** In m */
+            public static final double WHEEL_RADIUS = 0.0;
+            /** In m */
+            public static final double CHASSIS_WIDTH = 0.5; // for square base only
+            /** In m/s */
+            public static final double MAX_VELOCITY = 4.42;
+            /** In m/s/s */
+            public static final double MAX_ACCELERATION = 1.0;
+            /** In rad/s */
+            public static final double MAX_ANGULAR_VELOCITY = Math.PI / 4;
+            /** In rad/s/s */
+            public static final double MAX_ANGULAR_ACCELERATION = 2 * Math.PI;
+
+            public static final Translation2d FRONT_LEFT_LOCATION = new Translation2d(
+                    CHASSIS_WIDTH / 2,
+                    CHASSIS_WIDTH / 2);
+            public static final Translation2d FRONT_RIGHT_LOCATION = new Translation2d(
+                    CHASSIS_WIDTH / 2,
+                    -CHASSIS_WIDTH / 2);
+            public static final Translation2d BACK_LEFT_LOCATION = new Translation2d(
+                    -CHASSIS_WIDTH / 2,
+                    CHASSIS_WIDTH / 2);
+            public static final Translation2d BACK_RIGHT_LOCATION = new Translation2d(
+                    -CHASSIS_WIDTH / 2,
+                    -CHASSIS_WIDTH / 2);
+
+            public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(
+                    FRONT_LEFT_LOCATION,
+                    FRONT_RIGHT_LOCATION,
+                    BACK_LEFT_LOCATION,
+                    BACK_RIGHT_LOCATION);
+        }
 
         public static final class PIDConstants {
             public static final class Drive {
@@ -198,6 +217,8 @@ public final class Constants {
     public static final class Auton {
         public static final double MAX_VELOCITY = 1;
         public static final double MAX_ACCELERATION = 1;
+        public static final double MAX_ANGULAR_VELOCITY = Math.PI / 4;
+        public static final double MAX_ANGULAR_ACCELERATION = Math.PI;
 
     }
 }

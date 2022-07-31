@@ -19,7 +19,10 @@ import frc.robot.Constants;
  * @author dr
  */
 public class Hopper extends SubsystemBase {
-    private CANSparkMax motor = new CANSparkMax(Constants.Hopper.CANIDs.MOTOR, MotorType.kBrushless);;
+    /** The motor that drives the hopper belt. */
+    private CANSparkMax motor = new CANSparkMax(Constants.Hopper.CANIDs.MOTOR, MotorType.kBrushless);
+
+    /** The solenoid that controls the gatekeepers. */
     private DoubleSolenoid gatekeepers = new DoubleSolenoid(PneumaticsModuleType.REVPH,
             Constants.Hopper.Solenoids.GATEKEEPER_CHANNEL_2,
             Constants.Hopper.Solenoids.GATEKEEPER_CHANNEL_1);

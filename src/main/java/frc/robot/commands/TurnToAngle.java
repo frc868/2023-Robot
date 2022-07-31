@@ -17,8 +17,8 @@ public class TurnToAngle extends ProfiledPIDCommand {
         super(new ProfiledPIDController(Constants.Drivetrain.PIDConstants.TurnToAngle.kP,
                 Constants.Drivetrain.PIDConstants.TurnToAngle.kI,
                 Constants.Drivetrain.PIDConstants.TurnToAngle.kD,
-                new TrapezoidProfile.Constraints(Constants.Drivetrain.MAX_VELOCITY,
-                        Constants.Drivetrain.MAX_ACCELERATION)),
+                new TrapezoidProfile.Constraints(Constants.Auton.MAX_ANGULAR_VELOCITY,
+                        Constants.Auton.MAX_ANGULAR_ACCELERATION)),
                 drivetrain::getGyroAngle, setpoint,
                 (output, state) -> drivetrain.drive(0, 0, output, false),
                 drivetrain);

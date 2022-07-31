@@ -27,7 +27,7 @@ public class DriveStraight extends ProfiledPIDCommand {
                 Constants.Drivetrain.PIDConstants.TurnToAngle.kD,
                 new TrapezoidProfile.Constraints(Constants.Auton.MAX_VELOCITY,
                         Constants.Auton.MAX_ACCELERATION)),
-                drivetrain::getDrivePosition, distance,
+                drivetrain::getDriveEncoderPosition, distance,
                 (output, state) -> drivetrain.drive(output, 0, 0, false),
                 drivetrain);
 
