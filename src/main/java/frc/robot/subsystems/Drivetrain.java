@@ -18,6 +18,7 @@ import frc.houndutil.houndlog.loggers.DeviceLogger;
 import frc.houndutil.houndlog.loggers.Logger;
 import frc.houndutil.houndlog.loggers.SendableLogger;
 import frc.robot.Constants;
+import frc.robot.utils.SwerveModule;
 
 public class Drivetrain extends SubsystemBase {
     private SwerveModule frontLeft = new SwerveModule("Drivetrain/Front Left Module",
