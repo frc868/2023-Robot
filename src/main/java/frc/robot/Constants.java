@@ -46,51 +46,21 @@ public final class Constants {
             }
         }
 
-        public static final class Geometry {
-            /** In m */
-            public static final double WHEEL_RADIUS = 0.0;
-            /** In m */
-            public static final double CHASSIS_WIDTH = 0.5; // for square base only
-            /** In m/s */
-            public static final double MAX_VELOCITY = 4.42;
-            /** In m/s/s */
-            public static final double MAX_ACCELERATION = 1.0;
-            /** In rad/s */
-            public static final double MAX_ANGULAR_VELOCITY = Math.PI / 4;
-            /** In rad/s/s */
-            public static final double MAX_ANGULAR_ACCELERATION = 2 * Math.PI;
-
-            public static final Translation2d FRONT_LEFT_LOCATION = new Translation2d(
-                    CHASSIS_WIDTH / 2,
-                    CHASSIS_WIDTH / 2);
-            public static final Translation2d FRONT_RIGHT_LOCATION = new Translation2d(
-                    CHASSIS_WIDTH / 2,
-                    -CHASSIS_WIDTH / 2);
-            public static final Translation2d BACK_LEFT_LOCATION = new Translation2d(
-                    -CHASSIS_WIDTH / 2,
-                    CHASSIS_WIDTH / 2);
-            public static final Translation2d BACK_RIGHT_LOCATION = new Translation2d(
-                    -CHASSIS_WIDTH / 2,
-                    -CHASSIS_WIDTH / 2);
-
-            public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(
-                    FRONT_LEFT_LOCATION,
-                    FRONT_RIGHT_LOCATION,
-                    BACK_LEFT_LOCATION,
-                    BACK_RIGHT_LOCATION);
-        }
-
-        public static final class PIDConstants {
+        public static final class PID {
             public static final class Drive {
                 public static final double kP = 1.0; // recommended by SDS
                 public static final double kI = 0.0; // recommended by SDS
                 public static final double kD = 0.1; // recommended by SDS
+                public static final double kS = 0.0;
+                public static final double kV = 0.0;
             }
 
             public static final class Turn {
                 public static final double kP = 1.0; // recommended by SDS
                 public static final double kI = 0.0; // recommended by SDS
                 public static final double kD = 0.1; // recommended by SDS
+                public static final double kS = 0.0;
+                public static final double kV = 0.0;
             }
 
             public static final class DriveStraight {
@@ -137,6 +107,23 @@ public final class Constants {
                 }
 
             }
+        }
+
+        public static final class Geometry {
+            public static final double WHEEL_RADIUS_METERS = 0.0;
+            /** Distance between centers of right and left wheels on robot. */
+            public static final double TRACK_WIDTH_METERS = 0.5;
+            /** Distance between front and back wheels on robot. */
+            public static final double WHEEL_BASE_METERS = 0.5;
+            public static final double MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND = 4.42;
+            public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI / 4;
+            public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 2 * Math.PI;
+
+            public static final SwerveDriveKinematics KINEMATICS = new SwerveDriveKinematics(
+                    new Translation2d(WHEEL_BASE_METERS / 2, TRACK_WIDTH_METERS / 2),
+                    new Translation2d(WHEEL_BASE_METERS / 2, -TRACK_WIDTH_METERS / 2),
+                    new Translation2d(-WHEEL_BASE_METERS / 2, TRACK_WIDTH_METERS / 2),
+                    new Translation2d(-WHEEL_BASE_METERS / 2, -TRACK_WIDTH_METERS / 2));
         }
     }
 
@@ -212,6 +199,10 @@ public final class Constants {
             public static final int CLIMBER_LOCK_CHANNEL_2 = 4;
 
         }
+    }
+
+    public static final class Teleop {
+        public static final double POWER_LIMIT = 0.1;
     }
 
     public static final class Auton {

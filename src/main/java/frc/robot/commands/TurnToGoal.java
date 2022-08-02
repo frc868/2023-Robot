@@ -16,10 +16,10 @@ public class TurnToGoal extends PIDCommand {
     private final Drivetrain drivetrain;
 
     public TurnToGoal(Drivetrain drivetrain, Limelight limelight) {
-        super(new PIDController(Constants.Drivetrain.PIDConstants.TurnToGoal.kP,
-                Constants.Drivetrain.PIDConstants.TurnToGoal.kI,
-                Constants.Drivetrain.PIDConstants.TurnToGoal.kD), limelight::getTx, 0,
-                d -> drivetrain.drive(0, 0, d, false),
+        super(new PIDController(Constants.Drivetrain.PID.TurnToGoal.kP,
+                Constants.Drivetrain.PID.TurnToGoal.kI,
+                Constants.Drivetrain.PID.TurnToGoal.kD), limelight::getTx, 0,
+                d -> drivetrain.drive(0, 0, d, Drivetrain.DriveMode.ROBOT_RELATIVE),
                 drivetrain, limelight);
 
         this.drivetrain = drivetrain;

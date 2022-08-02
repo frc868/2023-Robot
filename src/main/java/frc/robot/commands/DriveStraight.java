@@ -22,13 +22,13 @@ public class DriveStraight extends ProfiledPIDCommand {
      * @param distance The distance to drive
      */
     public DriveStraight(double distance, Drivetrain drivetrain) {
-        super(new ProfiledPIDController(Constants.Drivetrain.PIDConstants.TurnToAngle.kP,
-                Constants.Drivetrain.PIDConstants.TurnToAngle.kI,
-                Constants.Drivetrain.PIDConstants.TurnToAngle.kD,
+        super(new ProfiledPIDController(Constants.Drivetrain.PID.TurnToAngle.kP,
+                Constants.Drivetrain.PID.TurnToAngle.kI,
+                Constants.Drivetrain.PID.TurnToAngle.kD,
                 new TrapezoidProfile.Constraints(Constants.Auton.MAX_VELOCITY,
                         Constants.Auton.MAX_ACCELERATION)),
                 drivetrain::getDriveEncoderPosition, distance,
-                (output, state) -> drivetrain.drive(output, 0, 0, false),
+                (output, state) -> drivetrain.drive(output, 0, 0, Drivetrain.DriveMode.ROBOT_RELATIVE),
                 drivetrain);
 
         this.drivetrain = drivetrain;

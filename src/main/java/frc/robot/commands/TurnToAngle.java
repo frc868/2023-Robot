@@ -14,13 +14,13 @@ import frc.robot.Constants;
  */
 public class TurnToAngle extends ProfiledPIDCommand {
     public TurnToAngle(double setpoint, Drivetrain drivetrain) {
-        super(new ProfiledPIDController(Constants.Drivetrain.PIDConstants.TurnToAngle.kP,
-                Constants.Drivetrain.PIDConstants.TurnToAngle.kI,
-                Constants.Drivetrain.PIDConstants.TurnToAngle.kD,
+        super(new ProfiledPIDController(Constants.Drivetrain.PID.TurnToAngle.kP,
+                Constants.Drivetrain.PID.TurnToAngle.kI,
+                Constants.Drivetrain.PID.TurnToAngle.kD,
                 new TrapezoidProfile.Constraints(Constants.Auton.MAX_ANGULAR_VELOCITY,
                         Constants.Auton.MAX_ANGULAR_ACCELERATION)),
                 drivetrain::getGyroAngle, setpoint,
-                (output, state) -> drivetrain.drive(0, 0, output, false),
+                (output, state) -> drivetrain.drive(0, 0, output, Drivetrain.DriveMode.ROBOT_RELATIVE),
                 drivetrain);
         getController().enableContinuousInput(-180, 180);
     }
