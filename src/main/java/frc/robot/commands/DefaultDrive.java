@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import frc.robot.Constants;
 import frc.robot.subsystems.Drivetrain;
 
 import java.util.function.DoubleSupplier;
@@ -27,6 +28,10 @@ public class DefaultDrive extends CommandBase {
 
     @Override
     public void execute() {
-        drivetrain.drive(xSpeed.getAsDouble(), ySpeed.getAsDouble(), thetaSpeed.getAsDouble(), true);
+        drivetrain.drive(
+                xSpeed.getAsDouble() * Constants.Teleop.POWER_LIMIT,
+                ySpeed.getAsDouble() * Constants.Teleop.POWER_LIMIT,
+                thetaSpeed.getAsDouble() * Constants.Teleop.POWER_LIMIT,
+                drivetrain.getDriveMode());
     }
 }
