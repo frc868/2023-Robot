@@ -9,6 +9,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -33,16 +34,20 @@ public class SwerveModule {
     /** The CANCoder used to tell the angle of the wheel. */
     private CANCoder turnEncoder;
 
-    /** The PID controller that controls the drive motor's velocity. */
-    private PIDController drivePIDController = new PIDController(Constants.Drivetrain.PIDConstants.Drive.kP,
-            Constants.Drivetrain.PIDConstants.Drive.kI, Constants.Drivetrain.PIDConstants.Drive.kD);
+    /** The PID controller that corrects the drive motor's velocity. */
+    private PIDController drivePIDController = new PIDController(Constants.Drivetrain.PID.Drive.kP,
+            Constants.Drivetrain.PID.Drive.kI, Constants.Drivetrain.PID.Drive.kD);
 
-    /** The PID controller that controls the turning motor. */
+    /** The PID controller that controls the turning motor's position. */
     private ProfiledPIDController turnPIDController = new ProfiledPIDController(
-            Constants.Drivetrain.PIDConstants.Turn.kP,
-            Constants.Drivetrain.PIDConstants.Turn.kI, Constants.Drivetrain.PIDConstants.Turn.kD,
-            new TrapezoidProfile.Constraints(Constants.Drivetrain.Geometry.MAX_ANGULAR_VELOCITY,
-                    Constants.Drivetrain.Geometry.MAX_ANGULAR_ACCELERATION));
+            Constants.Drivetrain.PID.Turn.kP,
+            Constants.Drivetrain.PID.Turn.kI, Constants.Drivetrain.PID.Turn.kD,
+            new TrapezoidProfile.Constraints(Constants.Drivetrain.Geometry.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+                    Constants.Drivetrain.Geometry.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED));
+
+    /** The feedforward controller that controls the drive motor's velocity. */
+    private SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(Constants.Drivetrain.PID.Drive.kS,
+            Constants.Drivetrain.PID.Drive.kV);
 
     /**
      * Initalizes a SwerveModule.
@@ -54,8 +59,13 @@ public class SwerveModule {
      * @param driveMotorInverted  if the drive motor is inverted
      * @param turnEncoderInverted if the turn encoder is inverted
      */
-    public SwerveModule(String name, int driveMotorChannel, int turnMotorChannel, int canCoderChannel,
-            boolean driveMotorInverted, boolean turnEncoderInverted) {
+    public SwerveModule(
+            String name,
+            int driveMotorChannel,
+            int turnMotorChannel,
+            int canCoderChannel,
+            boolean driveMotorInverted,
+            boolean turnEncoderInverted) {
 
         driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
         driveMotor.setInverted(driveMotorInverted);
@@ -64,8 +74,10 @@ public class SwerveModule {
         turnMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
 
         driveEncoder = driveMotor.getEncoder();
-        driveEncoder.setPositionConversionFactor(2 * Math.PI * Constants.Drivetrain.Geometry.WHEEL_RADIUS); // in meters
-        driveEncoder.setVelocityConversionFactor((2 * Math.PI * Constants.Drivetrain.Geometry.WHEEL_RADIUS) / 60.0);
+        driveEncoder.setPositionConversionFactor(2 * Math.PI * Constants.Drivetrain.Geometry.WHEEL_RADIUS_METERS); // in
+                                                                                                                   // meters
+        driveEncoder
+                .setVelocityConversionFactor((2 * Math.PI * Constants.Drivetrain.Geometry.WHEEL_RADIUS_METERS) / 60.0);
 
         turnEncoder = new CANCoder(canCoderChannel);
 
@@ -106,7 +118,8 @@ public class SwerveModule {
      * @param state the desired state of the swerve module
      */
     public void setState(SwerveModuleState state) {
-        double driveOutput = drivePIDController.calculate(driveEncoder.getVelocity(), state.speedMetersPerSecond);
+        double driveOutput = drivePIDController.calculate(driveEncoder.getVelocity(), state.speedMetersPerSecond)
+                + driveFeedforward.calculate(state.speedMetersPerSecond);
         double turnOutput = turnPIDController.calculate(turnEncoder.getPosition(), state.angle.getRadians());
 
         driveMotor.set(driveOutput);
