@@ -71,6 +71,13 @@ public class Drivetrain extends SubsystemBase {
                 }));
     }
 
+    public enum DriveMode {
+        ROBOT_RELATIVE,
+        FIELD_ORIENTED
+    }
+
+    private DriveMode driveMode = DriveMode.ROBOT_RELATIVE;
+
     /**
      * Runs every 20ms. Do not run anything but odometry updating and debug code
      * here.
@@ -80,6 +87,14 @@ public class Drivetrain extends SubsystemBase {
         odometry.update(new Rotation2d(navx.getYaw()), frontLeft.getState(), frontRight.getState(), backLeft.getState(),
                 backRight.getState());
         field.setRobotPose(odometry.getPoseMeters());
+    }
+
+    public DriveMode getDriveMode() {
+        return driveMode;
+    }
+
+    public void setDriveMode(DriveMode driveMode) {
+        this.driveMode = driveMode;
     }
 
     /**
@@ -96,11 +111,17 @@ public class Drivetrain extends SubsystemBase {
      * @param fieldRelative whether to control the robot relative to the field or to
      *                      the front of the bot
      */
-    public void drive(double xSpeed, double ySpeed, double thetaSpeed, boolean fieldRelative) {
-        SwerveModuleState[] states = Constants.Drivetrain.Geometry.KINEMATICS.toSwerveModuleStates(
-                fieldRelative
-                        ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, thetaSpeed, navx.getRotation2d())
-                        : new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed));
+    public void drive(double xSpeed, double ySpeed, double thetaSpeed, DriveMode driveMode) {
+        ChassisSpeeds chassisSpeeds = null;
+        switch (driveMode) {
+            case ROBOT_RELATIVE:
+                chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed);
+                break;
+            case FIELD_ORIENTED:
+                chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, thetaSpeed, navx.getRotation2d());
+                break;
+        }
+        SwerveModuleState[] states = Constants.Drivetrain.Geometry.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
         setModuleStates(states);
     }
 
@@ -111,24 +132,8 @@ public class Drivetrain extends SubsystemBase {
      *               right)
      */
     public void setModuleStates(SwerveModuleState[] states) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(states, Constants.Drivetrain.Geometry.MAX_VELOCITY);
-        frontLeft.setState(states[0]);
-        frontRight.setState(states[1]);
-        backLeft.setState(states[2]);
-        backRight.setState(states[3]);
-    }
-
-    /**
-     * Desaturates the wheel speeds to a set velocity and sets the states of the
-     * swerve modules.
-     * 
-     * @param states      An array of states (front left, front right, back left,
-     *                    back right).
-     * @param maxVelocity The maximum velocity of a single swerve module. This can
-     *                    be used to limit the speed of the robot.
-     */
-    public void setModuleStates(SwerveModuleState[] states, double maxVelocity) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(states, Constants.Drivetrain.Geometry.MAX_VELOCITY);
+        SwerveDriveKinematics.desaturateWheelSpeeds(states,
+                Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
         frontLeft.setState(states[0]);
         frontRight.setState(states[1]);
         backLeft.setState(states[2]);
@@ -148,7 +153,7 @@ public class Drivetrain extends SubsystemBase {
      * Stops the drivetrain.
      */
     public void stop() {
-        drive(0, 0, 0, false);
+        drive(0, 0, 0, DriveMode.ROBOT_RELATIVE);
     }
 
     /**
@@ -180,5 +185,4 @@ public class Drivetrain extends SubsystemBase {
         backLeft.resetDriveEncoder();
         backRight.resetDriveEncoder();
     }
-
 }
