@@ -60,6 +60,15 @@ public class Drivetrain extends SubsystemBase {
     /** Field that the robot's position can be drawn on and send via NT. */
     private Field2d field = new Field2d();
 
+    /** An enum describing the two types of drive modes. */
+    public enum DriveMode {
+        ROBOT_RELATIVE,
+        FIELD_ORIENTED
+    }
+
+    /** The mode of driving, either robot relative or field relative. */
+    private DriveMode driveMode = DriveMode.ROBOT_RELATIVE;
+
     /** Initializes the drivetrain. */
     public Drivetrain() {
         navx.reset();
@@ -70,13 +79,6 @@ public class Drivetrain extends SubsystemBase {
                         new SendableLogger("field", field),
                 }));
     }
-
-    public enum DriveMode {
-        ROBOT_RELATIVE,
-        FIELD_ORIENTED
-    }
-
-    private DriveMode driveMode = DriveMode.ROBOT_RELATIVE;
 
     /**
      * Runs every 20ms. Do not run anything but odometry updating and debug code
