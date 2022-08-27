@@ -118,9 +118,11 @@ public class SwerveModule {
      * @param state the desired state of the swerve module
      */
     public void setState(SwerveModuleState state) {
-        double driveOutput = drivePIDController.calculate(driveEncoder.getVelocity(), state.speedMetersPerSecond)
-                + driveFeedforward.calculate(state.speedMetersPerSecond);
-        double turnOutput = turnPIDController.calculate(turnEncoder.getPosition(), state.angle.getRadians());
+        SwerveModuleState optimizedState = SwerveModuleState.optimize(state, new Rotation2d(turnEncoder.getPosition()));
+        double driveOutput = drivePIDController.calculate(driveEncoder.getVelocity(),
+                optimizedState.speedMetersPerSecond)
+                + driveFeedforward.calculate(optimizedState.speedMetersPerSecond);
+        double turnOutput = turnPIDController.calculate(turnEncoder.getPosition(), optimizedState.angle.getRadians());
 
         driveMotor.set(driveOutput);
         turnMotor.set(turnOutput);
