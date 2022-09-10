@@ -42,8 +42,9 @@ public class RobotContainer {
     }
 
     private void configureAutonChooser() {
-        chooser.addOption("5 Ball",
-                SwerveTrajectoryBuilder.buildTrajectoryCommand(trajectories.get("5 Ball"), drivetrain));
+        // chooser.addOption("5 Ball",
+        // SwerveTrajectoryBuilder.buildTrajectoryCommand(trajectories.get("5 Ball"),
+        // drivetrain));
     }
 
     private void configureButtonBindings() {
