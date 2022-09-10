@@ -22,27 +22,27 @@ public final class Constants {
     public static final class Drivetrain {
         public static final class CANIDs {
             public static final class FrontLeft {
-                public static final int DRIVE_MOTOR = 1;
-                public static final int TURN_MOTOR = 2;
-                public static final int TURN_ENCODER = 1;
+                public static final int DRIVE_MOTOR = 0;
+                public static final int TURN_MOTOR = 1;
+                public static final int TURN_ENCODER = 0;
             }
 
             public static final class FrontRight {
-                public static final int DRIVE_MOTOR = 3;
-                public static final int TURN_MOTOR = 4;
-                public static final int TURN_ENCODER = 2;
+                public static final int DRIVE_MOTOR = 2;
+                public static final int TURN_MOTOR = 3;
+                public static final int TURN_ENCODER = 1;
             }
 
             public static final class BackLeft {
-                public static final int DRIVE_MOTOR = 5;
-                public static final int TURN_MOTOR = 6;
-                public static final int TURN_ENCODER = 3;
+                public static final int DRIVE_MOTOR = 4;
+                public static final int TURN_MOTOR = 5;
+                public static final int TURN_ENCODER = 2;
             }
 
             public static final class BackRight {
-                public static final int DRIVE_MOTOR = 7;
-                public static final int TURN_MOTOR = 8;
-                public static final int TURN_ENCODER = 4;
+                public static final int DRIVE_MOTOR = 6;
+                public static final int TURN_MOTOR = 7;
+                public static final int TURN_ENCODER = 3;
             }
         }
 
