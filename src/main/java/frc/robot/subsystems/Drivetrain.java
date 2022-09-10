@@ -136,10 +136,10 @@ public class Drivetrain extends SubsystemBase {
     public void setModuleStates(SwerveModuleState[] states) {
         SwerveDriveKinematics.desaturateWheelSpeeds(states,
                 Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
-        frontLeft.setState(states[0]);
-        frontRight.setState(states[1]);
-        backLeft.setState(states[2]);
-        backRight.setState(states[3]);
+        frontLeft.setStateSimple(states[0]);
+        frontRight.setStateSimple(states[1]);
+        backLeft.setStateSimple(states[2]);
+        backRight.setStateSimple(states[3]);
     }
 
     /**

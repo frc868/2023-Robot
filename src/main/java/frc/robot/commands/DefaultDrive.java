@@ -29,9 +29,9 @@ public class DefaultDrive extends CommandBase {
     @Override
     public void execute() {
         drivetrain.drive(
-                xSpeed.getAsDouble() * Constants.Teleop.POWER_LIMIT,
-                ySpeed.getAsDouble() * Constants.Teleop.POWER_LIMIT,
-                thetaSpeed.getAsDouble() * Constants.Teleop.POWER_LIMIT,
+                xSpeed.getAsDouble() * Constants.Teleop.PERCENT_LIMIT,
+                ySpeed.getAsDouble() * Constants.Teleop.PERCENT_LIMIT,
+                thetaSpeed.getAsDouble() * Constants.Teleop.PERCENT_LIMIT,
                 drivetrain.getDriveMode());
     }
 }

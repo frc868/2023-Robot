@@ -23,9 +23,9 @@ public class RobotContainer {
     @SuppressWarnings("unused")
     private final Misc misc = new Misc();
 
-    private final SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(3);
-    private final SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(3);
-    private final SlewRateLimiter thetaSpeedLimiter = new SlewRateLimiter(3);
+    private final SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(5);
+    private final SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(5);
+    private final SlewRateLimiter thetaSpeedLimiter = new SlewRateLimiter(5);
 
     SendableChooser<Command> chooser = new SendableChooser<>();
     HashMap<String, Trajectory> trajectories = new HashMap<String, Trajectory>();

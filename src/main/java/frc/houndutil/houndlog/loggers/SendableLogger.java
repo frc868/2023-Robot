@@ -65,10 +65,10 @@ public class SendableLogger extends Logger {
     }
 
     /**
-     * Does nothing.
+     * Updates data for the object.
      */
     @Override
     public void run() {
-
+        SendableRegistry.update(sendable);
     }
 }

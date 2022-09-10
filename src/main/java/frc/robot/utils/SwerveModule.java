@@ -45,6 +45,9 @@ public class SwerveModule {
             new TrapezoidProfile.Constraints(Constants.Drivetrain.Geometry.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
                     Constants.Drivetrain.Geometry.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED));
 
+    private PIDController turnPIDControllerSimple = new PIDController(Constants.Drivetrain.PID.Turn.kP,
+            Constants.Drivetrain.PID.Turn.kI, Constants.Drivetrain.PID.Turn.kD);
+
     /** The feedforward controller that controls the drive motor's velocity. */
     private SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(Constants.Drivetrain.PID.Drive.kS,
             Constants.Drivetrain.PID.Drive.kV);
@@ -99,7 +102,9 @@ public class SwerveModule {
                                 LogProfileBuilder.buildCANSparkMaxLogItems(driveMotor)),
                         new DeviceLogger<CANSparkMax>(turnMotor, "Turning Motor",
                                 LogProfileBuilder.buildCANSparkMaxLogItems(turnMotor)),
-                        new SingleItemLogger<Double>(LogType.NUMBER, "Wheel Angle", this::getAngle, LogLevel.MAIN)
+                        new SingleItemLogger<Double>(LogType.NUMBER, "Wheel Angle", this::getAngle, LogLevel.MAIN),
+                        new SingleItemLogger<Double>(LogType.NUMBER, "CANCoder Position", turnEncoder::getPosition,
+                                LogLevel.MAIN)
                 }));
     }
 
@@ -126,6 +131,18 @@ public class SwerveModule {
 
         driveMotor.set(driveOutput);
         turnMotor.set(turnOutput);
+    }
+
+    /**
+     * Sets the PID controller setpoints to the desired state.
+     * 
+     * @param state the desired state of the swerve module
+     */
+    public void setStateSimple(SwerveModuleState state) {
+        SwerveModuleState optimizedState = SwerveModuleState.optimize(state, new Rotation2d(turnEncoder.getPosition()));
+        driveMotor.set(
+                state.speedMetersPerSecond / Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
+        turnMotor.set(turnPIDControllerSimple.calculate(turnEncoder.getPosition(), optimizedState.angle.getRadians()));
     }
 
     /**
