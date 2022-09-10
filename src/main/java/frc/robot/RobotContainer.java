@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.Constants.OI;
 import frc.robot.commands.DefaultDrive;
-import frc.robot.commands.auton.SwerveTrajectoryBuilder;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Misc;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class RobotContainer {
     private final Drivetrain drivetrain = new Drivetrain();
     @SuppressWarnings("unused")
-    // private final Misc misc = new Misc();
+    private final Misc misc = new Misc();
 
     private final SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(5);
     private final SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(5);

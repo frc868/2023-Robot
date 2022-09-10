@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.houndutil.houndlog.LogGroup;
@@ -18,8 +17,6 @@ import frc.houndutil.houndlog.loggers.Logger;
 public class Misc extends SubsystemBase {
     /** The PDH (CAN ID 1) */
     private PowerDistribution pdh = new PowerDistribution();
-    /** The PH (CAN ID ?) TODO */
-    private PneumaticHub ph = new PneumaticHub();
 
     /** Adds the loggers for the Miscellaneous group. */
     public Misc() {
@@ -27,8 +24,6 @@ public class Misc extends SubsystemBase {
                 new Logger[] {
                         new DeviceLogger<PowerDistribution>(pdh, "Power Distribution Hub",
                                 LogProfileBuilder.buildPDHLogItems(pdh)),
-                        new DeviceLogger<PneumaticHub>(ph, "Pneumatic Hub",
-                                LogProfileBuilder.buildPneumaticHubLogItems(ph)),
                 }));
     }
 

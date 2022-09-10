@@ -1,5 +1,6 @@
 package frc.houndutil.houndlog;
 
+import com.ctre.phoenix.sensors.CANCoder;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
 
@@ -78,6 +79,24 @@ public class LogProfileBuilder {
                         () -> obj.getStickyFault(CANSparkMax.FaultID.kStall), LogLevel.INFO),
                 new LogItem<Boolean>(LogType.BOOLEAN, "Sticky Faults/DRV Fault",
                         () -> obj.getStickyFault(CANSparkMax.FaultID.kStall), LogLevel.INFO),
+        };
+    }
+
+    /**
+     * Builds CANSparkMax log items.
+     * 
+     * @param obj the CANSparkMax object to use
+     * @return the array of LogItems
+     */
+    public static LogItem<?>[] buildCANCoderLogItems(CANCoder obj) {
+        return new LogItem<?>[] {
+                new LogItem<Double>(LogType.NUMBER, "Absolute Position", obj::getAbsolutePosition, LogLevel.MAIN),
+                new LogItem<Double>(LogType.NUMBER, "Position", obj::getPosition, LogLevel.MAIN),
+                new LogItem<Double>(LogType.NUMBER, "Velocity", obj::getVelocity, LogLevel.MAIN),
+                new LogItem<Double>(LogType.NUMBER, "Bus Voltage", obj::getBusVoltage, LogLevel.MAIN),
+                new LogItem<Integer>(LogType.NUMBER, "Device ID", obj::getDeviceID, LogLevel.DEBUG),
+                new LogItem<String>(LogType.STRING, "Magnetic Field Strength", obj.getMagnetFieldStrength()::name,
+                        LogLevel.INFO),
         };
     }
 

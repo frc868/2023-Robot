@@ -114,7 +114,7 @@ public final class Constants {
             public static final double TRACK_WIDTH_METERS = 0.625475;
             /** Distance between front and back wheels on robot. */
             public static final double WHEEL_BASE_METERS = 0.625475;
-            public static final double WHEEL_RADIUS_METERS = 0.0;
+            public static final double WHEEL_RADIUS_METERS = 0.048;
             public static final double MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND = 4.42;
             public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI / 4;
             public static final double MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 2 * Math.PI;

@@ -29,26 +29,26 @@ public class Drivetrain extends SubsystemBase {
     /** The front left swerve module when looking at the bot from behind. */
     private SwerveModule frontLeft = new SwerveModule("Drivetrain/Front Left Module",
             Constants.Drivetrain.CANIDs.FrontLeft.DRIVE_MOTOR,
-            Constants.Drivetrain.CANIDs.FrontLeft.TURN_MOTOR, Constants.Drivetrain.CANIDs.FrontLeft.TURN_ENCODER, false,
-            false);
+            Constants.Drivetrain.CANIDs.FrontLeft.TURN_MOTOR, Constants.Drivetrain.CANIDs.FrontLeft.TURN_ENCODER,
+            false, false, false);
 
     /** The front right swerve module when looking at the bot from behind. */
     private SwerveModule frontRight = new SwerveModule("Drivetrain/Front Right Module",
             Constants.Drivetrain.CANIDs.FrontRight.DRIVE_MOTOR,
             Constants.Drivetrain.CANIDs.FrontRight.TURN_MOTOR, Constants.Drivetrain.CANIDs.FrontRight.TURN_ENCODER,
-            false, false);
+            false, false, false);
 
     /** The back left swerve module when looking at the bot from behind. */
     private SwerveModule backLeft = new SwerveModule("Drivetrain/Back Left Module",
             Constants.Drivetrain.CANIDs.BackLeft.DRIVE_MOTOR,
-            Constants.Drivetrain.CANIDs.BackLeft.TURN_MOTOR, Constants.Drivetrain.CANIDs.BackLeft.TURN_ENCODER, false,
-            false);
+            Constants.Drivetrain.CANIDs.BackLeft.TURN_MOTOR, Constants.Drivetrain.CANIDs.BackLeft.TURN_ENCODER,
+            false, false, false);
 
     /** The back right swerve module when looking at the bot from behind. */
     private SwerveModule backRight = new SwerveModule("Drivetrain/Back Right Module",
             Constants.Drivetrain.CANIDs.BackRight.DRIVE_MOTOR,
-            Constants.Drivetrain.CANIDs.BackRight.TURN_MOTOR, Constants.Drivetrain.CANIDs.BackRight.TURN_ENCODER, false,
-            false);
+            Constants.Drivetrain.CANIDs.BackRight.TURN_MOTOR, Constants.Drivetrain.CANIDs.BackRight.TURN_ENCODER,
+            false, false, false);
 
     /** The NavX, connected via MXP to the RoboRIO. */
     private AHRS navx = new AHRS();
