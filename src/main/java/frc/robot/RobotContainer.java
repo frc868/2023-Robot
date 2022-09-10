@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class RobotContainer {
     private final Drivetrain drivetrain = new Drivetrain();
     @SuppressWarnings("unused")
-    private final Misc misc = new Misc();
+    // private final Misc misc = new Misc();
 
     private final SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(5);
     private final SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(5);
