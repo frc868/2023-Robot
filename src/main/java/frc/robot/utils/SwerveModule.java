@@ -142,8 +142,8 @@ public class SwerveModule {
         SwerveModuleState optimizedState = SwerveModuleState.optimize(state, new Rotation2d(turnEncoder.getPosition()));
         driveMotor.set(
                 state.speedMetersPerSecond / Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
-        // turnMotor.set(turnPIDControllerSimple.calculate(turnEncoder.getPosition(),
-        // optimizedState.angle.getRadians()));
+        turnMotor.set(turnPIDControllerSimple.calculate(turnEncoder.getPosition(),
+                optimizedState.angle.getRadians()));
     }
 
     /**
