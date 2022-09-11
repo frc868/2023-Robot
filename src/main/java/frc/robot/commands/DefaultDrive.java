@@ -3,6 +3,7 @@ package frc.robot.commands;
 import frc.robot.Constants;
 import frc.robot.subsystems.Drivetrain;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
@@ -18,17 +19,19 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 public class DefaultDrive extends CommandBase {
     private Drivetrain drivetrain;
     private DoubleSupplier xSpeedSupplier, ySpeedSupplier, thetaSpeedSupplier;
+    private BooleanSupplier slowModeSupplier;
 
     private final SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(5);
     private final SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(5);
     private final SlewRateLimiter thetaSpeedLimiter = new SlewRateLimiter(5);
 
-    public DefaultDrive(Drivetrain drivetrain, DoubleSupplier xSpeed, DoubleSupplier ySpeed,
-            DoubleSupplier thetaSpeed) {
+    public DefaultDrive(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
+            DoubleSupplier thetaSpeedSupplier, BooleanSupplier slowModeSupplier, Drivetrain drivetrain) {
+        this.xSpeedSupplier = xSpeedSupplier;
+        this.ySpeedSupplier = ySpeedSupplier;
+        this.thetaSpeedSupplier = thetaSpeedSupplier;
+        this.slowModeSupplier = slowModeSupplier;
         this.drivetrain = drivetrain;
-        this.xSpeedSupplier = xSpeed;
-        this.ySpeedSupplier = ySpeed;
-        this.thetaSpeedSupplier = thetaSpeed;
         addRequirements(drivetrain);
     }
 
@@ -51,6 +54,12 @@ public class DefaultDrive extends CommandBase {
         xSpeed *= Constants.Teleop.PERCENT_LIMIT;
         ySpeed *= Constants.Teleop.PERCENT_LIMIT;
         thetaSpeed *= Constants.Teleop.PERCENT_LIMIT;
+
+        if (slowModeSupplier.getAsBoolean()) {
+            xSpeed *= Constants.Teleop.SLOW_MODE_ADJUSTMENT;
+            ySpeed *= Constants.Teleop.SLOW_MODE_ADJUSTMENT;
+            thetaSpeed *= Constants.Teleop.SLOW_MODE_ADJUSTMENT;
+        }
 
         // the speeds are initially values from -1.0 to 1.0, so we multiply by the max
         // physical velocity to output in m/s.

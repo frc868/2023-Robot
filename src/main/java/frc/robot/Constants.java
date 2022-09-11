@@ -127,7 +127,8 @@ public final class Constants {
     }
 
     public static final class Teleop {
-        public static final double PERCENT_LIMIT = 0.30;
+        public static final double PERCENT_LIMIT = 0.60;
+        public static final double SLOW_MODE_ADJUSTMENT = 0.20;
         public static final boolean IS_RATE_LIMITED = true;
     }
 

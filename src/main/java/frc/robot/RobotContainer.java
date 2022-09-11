@@ -45,19 +45,23 @@ public class RobotContainer {
                 XboxController driverController = new XboxController(Constants.OI.DRIVER_PORT);
                 // Driver left joystick and right joystick, drive
                 drivetrain.setDefaultCommand(
-                        new DefaultDrive(drivetrain,
+                        new DefaultDrive(
                                 () -> driverController.getLeftX(),
                                 () -> driverController.getLeftY(),
-                                () -> driverController.getRightY()));
+                                () -> driverController.getRightY(),
+                                () -> false,
+                                drivetrain));
 
             case FlightStick:
                 Joystick joystick = new Joystick(0);
 
                 drivetrain.setDefaultCommand(
-                        new DefaultDrive(drivetrain,
+                        new DefaultDrive(
                                 () -> joystick.getY() * 2.0, // because flight stick goes -0.5 to 0.5
                                 () -> joystick.getX() * 2.0,
-                                () -> joystick.getTwist() * 2.0));
+                                () -> joystick.getTwist() * 2.0,
+                                () -> joystick.getRawButton(1),
+                                drivetrain));
 
                 new JoystickButton(joystick, 7).whenPressed(new InstantCommand(drivetrain::resetGyroAngle));
 
