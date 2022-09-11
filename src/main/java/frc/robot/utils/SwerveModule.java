@@ -74,15 +74,16 @@ public class SwerveModule {
 
         driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
         driveMotor.setInverted(driveMotorInverted);
-        driveMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
+        driveMotor.setIdleMode(CANSparkMax.IdleMode.kCoast);
         turnMotor = new CANSparkMax(turnMotorChannel, MotorType.kBrushless);
         turnMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
+        turnMotor.setInverted(turnMotorInverted);
 
         driveEncoder = driveMotor.getEncoder();
         driveEncoder.setPositionConversionFactor(2 * Math.PI * Constants.Drivetrain.Geometry.WHEEL_RADIUS_METERS); // in
                                                                                                                    // meters
         driveEncoder
-                .setVelocityConversionFactor((2 * Math.PI * Constants.Drivetrain.Geometry.WHEEL_RADIUS_METERS) / 60.0);
+                .setVelocityConversionFactor((2 * Math.PI * Constants.Drivetrain.Geometry.WHEEL_RADIUS_METERS) / 360.0);
 
         turnCanCoder = new CANCoder(canCoderChannel);
 
@@ -145,10 +146,17 @@ public class SwerveModule {
      * @param state the desired state of the swerve module
      */
     public void setStateSimple(SwerveModuleState state) {
+        if (state.speedMetersPerSecond < 0.01) {
+            stop();
+            return;
+        }
+
         SwerveModuleState optimizedState = SwerveModuleState.optimize(state,
                 new Rotation2d(turnCanCoder.getPosition()));
+
         driveMotor.set(optimizedState.speedMetersPerSecond
                 / Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
+
         turnMotor.set(turnPIDControllerSimple.calculate(turnCanCoder.getPosition(),
                 optimizedState.angle.getRadians()));
     }
@@ -176,5 +184,13 @@ public class SwerveModule {
      */
     public double getAngle() {
         return Math.toDegrees(turnCanCoder.getPosition());
+    }
+
+    /**
+     * Stops the swerve module.
+     */
+    public void stop() {
+        driveMotor.set(0);
+        turnMotor.set(0);
     }
 }

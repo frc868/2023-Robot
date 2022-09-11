@@ -30,25 +30,28 @@ public class Drivetrain extends SubsystemBase {
     private SwerveModule frontLeft = new SwerveModule("Drivetrain/Front Left Module",
             Constants.Drivetrain.CANIDs.FrontLeft.DRIVE_MOTOR,
             Constants.Drivetrain.CANIDs.FrontLeft.TURN_MOTOR, Constants.Drivetrain.CANIDs.FrontLeft.TURN_ENCODER,
-            false, false, false);
+            true, true, false);
 
     /** The front right swerve module when looking at the bot from behind. */
     private SwerveModule frontRight = new SwerveModule("Drivetrain/Front Right Module",
             Constants.Drivetrain.CANIDs.FrontRight.DRIVE_MOTOR,
-            Constants.Drivetrain.CANIDs.FrontRight.TURN_MOTOR, Constants.Drivetrain.CANIDs.FrontRight.TURN_ENCODER,
-            false, false, false);
+            Constants.Drivetrain.CANIDs.FrontRight.TURN_MOTOR,
+            Constants.Drivetrain.CANIDs.FrontRight.TURN_ENCODER,
+            false, true, false);
 
     /** The back left swerve module when looking at the bot from behind. */
     private SwerveModule backLeft = new SwerveModule("Drivetrain/Back Left Module",
             Constants.Drivetrain.CANIDs.BackLeft.DRIVE_MOTOR,
-            Constants.Drivetrain.CANIDs.BackLeft.TURN_MOTOR, Constants.Drivetrain.CANIDs.BackLeft.TURN_ENCODER,
-            false, false, false);
+            Constants.Drivetrain.CANIDs.BackLeft.TURN_MOTOR,
+            Constants.Drivetrain.CANIDs.BackLeft.TURN_ENCODER,
+            false, true, false);
 
     /** The back right swerve module when looking at the bot from behind. */
     private SwerveModule backRight = new SwerveModule("Drivetrain/Back Right Module",
             Constants.Drivetrain.CANIDs.BackRight.DRIVE_MOTOR,
-            Constants.Drivetrain.CANIDs.BackRight.TURN_MOTOR, Constants.Drivetrain.CANIDs.BackRight.TURN_ENCODER,
-            false, false, false);
+            Constants.Drivetrain.CANIDs.BackRight.TURN_MOTOR,
+            Constants.Drivetrain.CANIDs.BackRight.TURN_ENCODER,
+            true, true, false);
 
     /** The NavX, connected via MXP to the RoboRIO. */
     private AHRS navx = new AHRS();
@@ -67,7 +70,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /** The mode of driving, either robot relative or field relative. */
-    private DriveMode driveMode = DriveMode.ROBOT_RELATIVE;
+    private DriveMode driveMode = DriveMode.FIELD_ORIENTED;
 
     /** Initializes the drivetrain. */
     public Drivetrain() {
@@ -86,7 +89,11 @@ public class Drivetrain extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        odometry.update(new Rotation2d(navx.getYaw()), frontLeft.getState(), frontRight.getState(), backLeft.getState(),
+        odometry.update(new Rotation2d(
+                navx.getYaw()),
+                frontLeft.getState(),
+                frontRight.getState(),
+                backLeft.getState(),
                 backRight.getState());
         field.setRobotPose(odometry.getPoseMeters());
     }
@@ -106,8 +113,8 @@ public class Drivetrain extends SubsystemBase {
      * to moving down the field.
      *
      * 
-     * @param xSpeed        the speed in the x direction
-     * @param ySpeed        the speed in the y direction
+     * @param xSpeed        the speed in the x direction in m/s
+     * @param ySpeed        the speed in the y direction in m/s
      * @param thetaSpeed    the rotational speed, in the counterclockwise direction,
      *                      and in rad/s (2pi is one rotation per second)
      * @param fieldRelative whether to control the robot relative to the field or to
@@ -120,22 +127,23 @@ public class Drivetrain extends SubsystemBase {
                 chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed);
                 break;
             case FIELD_ORIENTED:
-                chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, thetaSpeed, navx.getRotation2d());
+                chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed,
+                        thetaSpeed, navx.getRotation2d());
                 break;
         }
         SwerveModuleState[] states = Constants.Drivetrain.Geometry.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
+        SwerveDriveKinematics.desaturateWheelSpeeds(states,
+                Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
         setModuleStates(states);
     }
 
     /**
-     * Desaturates the wheel speeds and sets the states of the swerve modules.
+     * Sets the states of the swerve modules.
      * 
      * @param states an array of states (front left, front right, back left, back
      *               right)
      */
     public void setModuleStates(SwerveModuleState[] states) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(states,
-                Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
         frontLeft.setStateSimple(states[0]);
         frontRight.setStateSimple(states[1]);
         backLeft.setStateSimple(states[2]);
@@ -152,6 +160,13 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
+     * Reset gyro angle.
+     */
+    public void resetGyroAngle() {
+        navx.reset();
+    }
+
+    /**
      * Stops the drivetrain.
      */
     public void stop() {
@@ -165,26 +180,5 @@ public class Drivetrain extends SubsystemBase {
      */
     public Pose2d getPose() {
         return odometry.getPoseMeters();
-    }
-
-    /**
-     * Gets the average position of the encoders on the drive motors. This is only
-     * useful when driving straight.
-     * 
-     * @return the average position of the encoders on the drive motors
-     */
-    public double getDriveEncoderPosition() {
-        return (frontLeft.getDriveEncoderPosition() + frontRight.getDriveEncoderPosition()
-                + backLeft.getDriveEncoderPosition() + backRight.getDriveEncoderPosition()) / 4.0;
-    }
-
-    /**
-     * Resets the positions of the encoders on the drive motors.
-     */
-    public void resetDriveEncoders() {
-        frontLeft.resetDriveEncoder();
-        frontRight.resetDriveEncoder();
-        backLeft.resetDriveEncoder();
-        backRight.resetDriveEncoder();
     }
 }

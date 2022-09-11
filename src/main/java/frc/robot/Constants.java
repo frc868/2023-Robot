@@ -56,17 +56,11 @@ public final class Constants {
             }
 
             public static final class Turn {
-                public static final double kP = 1.0; // recommended by SDS
-                public static final double kI = 0.0; // recommended by SDS
-                public static final double kD = 0.1; // recommended by SDS
+                public static final double kP = 0.15;
+                public static final double kI = 0.0;
+                public static final double kD = 0.0;
                 public static final double kS = 0.0;
                 public static final double kV = 0.0;
-            }
-
-            public static final class DriveStraight {
-                public static final double kP = 1.0; // recommended by SDS
-                public static final double kI = 0.0; // recommended by SDS
-                public static final double kD = 0.1; // recommended by SDS
             }
 
             public static final class TurnToAngle {
@@ -133,13 +127,14 @@ public final class Constants {
     }
 
     public static final class Teleop {
-        public static final double PERCENT_LIMIT = 0.20;
+        public static final double PERCENT_LIMIT = 0.30;
+        public static final boolean IS_RATE_LIMITED = true;
     }
 
     public static final class Auton {
         public static final double MAX_VELOCITY = 1;
         public static final double MAX_ACCELERATION = 1;
-        public static final double MAX_ANGULAR_VELOCITY = Math.PI / 4;
+        public static final double MAX_ANGULAR_VELOCITY = Math.PI;
         public static final double MAX_ANGULAR_ACCELERATION = Math.PI;
 
     }
