@@ -129,7 +129,17 @@ public final class Constants {
     public static final class Teleop {
         public static final double PERCENT_LIMIT = 0.60;
         public static final double SLOW_MODE_ADJUSTMENT = 0.20;
-        public static final boolean IS_RATE_LIMITED = true;
+        public static final boolean IS_JOYSTICK_INPUT_RATE_LIMITED = true;
+
+        /**
+         * A value inputted into the rate limiter (the joystick input) can move from 0
+         * to 1 in 1/RATE_LIMIT seconds.
+         * 
+         * A rate limit of 3, for example, means that 0->1 in 1/3 sec.
+         * Larger numbers mean less of a rate limit.
+         */
+        public static final double JOYSTICK_INPUT_RATE_LIMIT = 8.0;
+
     }
 
     public static final class Auton {

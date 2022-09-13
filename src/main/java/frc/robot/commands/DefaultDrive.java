@@ -21,9 +21,9 @@ public class DefaultDrive extends CommandBase {
     private DoubleSupplier xSpeedSupplier, ySpeedSupplier, thetaSpeedSupplier;
     private BooleanSupplier slowModeSupplier;
 
-    private final SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(5);
-    private final SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(5);
-    private final SlewRateLimiter thetaSpeedLimiter = new SlewRateLimiter(5);
+    private final SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
+    private final SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
+    private final SlewRateLimiter thetaSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
 
     public DefaultDrive(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
             DoubleSupplier thetaSpeedSupplier, BooleanSupplier slowModeSupplier, Drivetrain drivetrain) {
@@ -45,7 +45,7 @@ public class DefaultDrive extends CommandBase {
         ySpeed = MathUtil.applyDeadband(ySpeed, 0.05);
         thetaSpeed = MathUtil.applyDeadband(thetaSpeed, 0.05);
 
-        if (Constants.Teleop.IS_RATE_LIMITED) {
+        if (Constants.Teleop.IS_JOYSTICK_INPUT_RATE_LIMITED) {
             xSpeed = xSpeedLimiter.calculate(xSpeed);
             ySpeed = ySpeedLimiter.calculate(ySpeed);
             thetaSpeed = thetaSpeedLimiter.calculate(thetaSpeed);
