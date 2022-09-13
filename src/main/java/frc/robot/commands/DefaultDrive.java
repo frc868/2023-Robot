@@ -47,8 +47,8 @@ public class DefaultDrive extends CommandBase {
 
         if (Constants.Teleop.IS_RATE_LIMITED) {
             xSpeed = xSpeedLimiter.calculate(xSpeed);
-            ySpeed = ySpeedLimiter.calculate(xSpeed);
-            thetaSpeed = thetaSpeedLimiter.calculate(xSpeed);
+            ySpeed = ySpeedLimiter.calculate(ySpeed);
+            thetaSpeed = thetaSpeedLimiter.calculate(thetaSpeed);
         }
 
         xSpeed *= Constants.Teleop.PERCENT_LIMIT;
