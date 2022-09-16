@@ -53,6 +53,12 @@ public class SwerveModule {
             Constants.Drivetrain.PID.Drive.kV);
 
     /**
+     * The offset of the CANCoder from the zero point, in radians. This will be
+     * *added* to any measurements obtained from the CANCoder.
+     */
+    private double turnCanCoderOffset;
+
+    /**
      * Initalizes a SwerveModule.
      * 
      * @param name                 the name of the module (used for logging)
@@ -62,6 +68,8 @@ public class SwerveModule {
      * @param driveMotorInverted   if the drive motor is inverted
      * @param turnMotorInverted    if the turn motor is inverted
      * @param turnCanCoderInverted if the turn encoder is inverted
+     * @param turnCanCoderOffset   the offset, in radians, to add to the CANCoder
+     *                             value to make it zero when the module is straight
      */
     public SwerveModule(
             String name,
@@ -70,7 +78,8 @@ public class SwerveModule {
             int canCoderChannel,
             boolean driveMotorInverted,
             boolean turnMotorInverted,
-            boolean turnCanCoderInverted) {
+            boolean turnCanCoderInverted,
+            double turnCanCoderOffset) {
 
         driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
         driveMotor.setInverted(driveMotorInverted);
@@ -99,6 +108,8 @@ public class SwerveModule {
 
         turnPIDController.enableContinuousInput(0, 2 * Math.PI);
 
+        this.turnCanCoderOffset = turnCanCoderOffset;
+
         LoggingManager.getInstance().addGroup(name, new LogGroup(
                 new Logger[] {
                         new DeviceLogger<CANSparkMax>(driveMotor, "Drive Motor",
@@ -120,7 +131,7 @@ public class SwerveModule {
      * @return the state of the swerve module
      */
     public SwerveModuleState getState() {
-        return new SwerveModuleState(driveEncoder.getVelocity(), new Rotation2d(turnCanCoder.getPosition()));
+        return new SwerveModuleState(driveEncoder.getVelocity(), new Rotation2d(getModuleAngle()));
     }
 
     /**
@@ -130,11 +141,11 @@ public class SwerveModule {
      */
     public void setState(SwerveModuleState state) {
         SwerveModuleState optimizedState = SwerveModuleState.optimize(state,
-                new Rotation2d(turnCanCoder.getPosition()));
+                new Rotation2d(getModuleAngle()));
         double driveOutput = drivePIDController.calculate(driveEncoder.getVelocity(),
                 optimizedState.speedMetersPerSecond)
                 + driveFeedforward.calculate(optimizedState.speedMetersPerSecond);
-        double turnOutput = turnPIDController.calculate(turnCanCoder.getPosition(), optimizedState.angle.getRadians());
+        double turnOutput = turnPIDController.calculate(getModuleAngle(), optimizedState.angle.getRadians());
 
         driveMotor.set(driveOutput);
         turnMotor.set(turnOutput);
@@ -152,12 +163,12 @@ public class SwerveModule {
         }
 
         SwerveModuleState optimizedState = SwerveModuleState.optimize(state,
-                new Rotation2d(turnCanCoder.getPosition()));
+                new Rotation2d(getModuleAngle()));
 
         driveMotor.set(optimizedState.speedMetersPerSecond
                 / Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
 
-        turnMotor.set(turnPIDControllerSimple.calculate(turnCanCoder.getPosition(),
+        turnMotor.set(turnPIDControllerSimple.calculate(getModuleAngle(),
                 optimizedState.angle.getRadians()));
     }
 
@@ -167,8 +178,17 @@ public class SwerveModule {
      * @param angle the angle of the wheel in radians
      */
     public void setRotation(double angle) {
-        turnMotor.set(turnPIDControllerSimple.calculate(turnCanCoder.getPosition(),
+        turnMotor.set(turnPIDControllerSimple.calculate(getModuleAngle(),
                 angle));
+    }
+
+    /**
+     * Gets the CANCoder position, adjusted with the offset.
+     * 
+     * @return the position of the CANCoder
+     */
+    public double getModuleAngle() {
+        return turnCanCoder.getPosition() + turnCanCoderOffset;
     }
 
     /**

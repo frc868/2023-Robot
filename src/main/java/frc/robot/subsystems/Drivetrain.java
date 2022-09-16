@@ -30,28 +30,32 @@ public class Drivetrain extends SubsystemBase {
     private SwerveModule frontLeft = new SwerveModule("Drivetrain/Front Left Module",
             Constants.Drivetrain.CANIDs.FrontLeft.DRIVE_MOTOR,
             Constants.Drivetrain.CANIDs.FrontLeft.TURN_MOTOR, Constants.Drivetrain.CANIDs.FrontLeft.TURN_ENCODER,
-            true, true, false);
+            true, true, false,
+            Constants.Drivetrain.Offsets.FRONT_LEFT);
 
     /** The front right swerve module when looking at the bot from behind. */
     private SwerveModule frontRight = new SwerveModule("Drivetrain/Front Right Module",
             Constants.Drivetrain.CANIDs.FrontRight.DRIVE_MOTOR,
             Constants.Drivetrain.CANIDs.FrontRight.TURN_MOTOR,
             Constants.Drivetrain.CANIDs.FrontRight.TURN_ENCODER,
-            false, true, false);
+            false, true, false,
+            Constants.Drivetrain.Offsets.FRONT_RIGHT);
 
     /** The back left swerve module when looking at the bot from behind. */
     private SwerveModule backLeft = new SwerveModule("Drivetrain/Back Left Module",
             Constants.Drivetrain.CANIDs.BackLeft.DRIVE_MOTOR,
             Constants.Drivetrain.CANIDs.BackLeft.TURN_MOTOR,
             Constants.Drivetrain.CANIDs.BackLeft.TURN_ENCODER,
-            false, true, false);
+            false, true, false,
+            Constants.Drivetrain.Offsets.BACK_LEFT);
 
     /** The back right swerve module when looking at the bot from behind. */
     private SwerveModule backRight = new SwerveModule("Drivetrain/Back Right Module",
             Constants.Drivetrain.CANIDs.BackRight.DRIVE_MOTOR,
             Constants.Drivetrain.CANIDs.BackRight.TURN_MOTOR,
             Constants.Drivetrain.CANIDs.BackRight.TURN_ENCODER,
-            true, true, false);
+            true, true, false,
+            Constants.Drivetrain.Offsets.BACK_RIGHT);
 
     /** The NavX, connected via MXP to the RoboRIO. */
     private AHRS navx = new AHRS();
