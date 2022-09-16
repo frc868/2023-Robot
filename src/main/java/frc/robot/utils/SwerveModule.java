@@ -97,7 +97,7 @@ public class SwerveModule {
         turnCanCoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
         turnCanCoder.configFeedbackCoefficient(2 * Math.PI / 4096.0, "rad", SensorTimeBase.PerSecond); // radians/sec
 
-        turnPIDController.enableContinuousInput(-Math.PI, Math.PI);
+        turnPIDController.enableContinuousInput(0, 2 * Math.PI);
 
         LoggingManager.getInstance().addGroup(name, new LogGroup(
                 new Logger[] {
@@ -159,6 +159,16 @@ public class SwerveModule {
 
         turnMotor.set(turnPIDControllerSimple.calculate(turnCanCoder.getPosition(),
                 optimizedState.angle.getRadians()));
+    }
+
+    /**
+     * Sets the rotation of the module. X and Y velocities will be ignored.
+     * 
+     * @param angle the angle of the wheel in radians
+     */
+    public void setRotation(double angle) {
+        turnMotor.set(turnPIDControllerSimple.calculate(turnCanCoder.getPosition(),
+                angle));
     }
 
     /**
