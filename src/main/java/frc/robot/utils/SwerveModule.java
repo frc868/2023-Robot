@@ -13,14 +13,14 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import frc.houndutil.houndlog.LogGroup;
-import frc.houndutil.houndlog.LogProfileBuilder;
-import frc.houndutil.houndlog.LoggingManager;
-import frc.houndutil.houndlog.enums.LogLevel;
-import frc.houndutil.houndlog.enums.LogType;
-import frc.houndutil.houndlog.loggers.Logger;
-import frc.houndutil.houndlog.loggers.SingleItemLogger;
-import frc.houndutil.houndlog.loggers.DeviceLogger;
+import com.techhounds.houndutil.houndlog.LogGroup;
+import com.techhounds.houndutil.houndlog.LogProfileBuilder;
+import com.techhounds.houndutil.houndlog.LoggingManager;
+import com.techhounds.houndutil.houndlog.enums.LogLevel;
+import com.techhounds.houndutil.houndlog.enums.LogType;
+import com.techhounds.houndutil.houndlog.loggers.Logger;
+import com.techhounds.houndutil.houndlog.loggers.SingleItemLogger;
+import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import frc.robot.Constants;
 
 public class SwerveModule {

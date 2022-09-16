@@ -10,12 +10,12 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.houndutil.houndlog.LogGroup;
-import frc.houndutil.houndlog.LogProfileBuilder;
-import frc.houndutil.houndlog.LoggingManager;
-import frc.houndutil.houndlog.loggers.DeviceLogger;
-import frc.houndutil.houndlog.loggers.Logger;
-import frc.houndutil.houndlog.loggers.SendableLogger;
+import com.techhounds.houndutil.houndlog.LogGroup;
+import com.techhounds.houndutil.houndlog.LogProfileBuilder;
+import com.techhounds.houndutil.houndlog.LoggingManager;
+import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
+import com.techhounds.houndutil.houndlog.loggers.Logger;
+import com.techhounds.houndutil.houndlog.loggers.SendableLogger;
 import frc.robot.Constants;
 import frc.robot.utils.SwerveModule;
 
