@@ -107,6 +107,7 @@ public class SwerveModule {
         turnCanCoder.configFeedbackCoefficient(2 * Math.PI / 4096.0, "rad", SensorTimeBase.PerSecond); // radians/sec
 
         turnPIDController.enableContinuousInput(0, 2 * Math.PI);
+        turnPIDControllerSimple.enableContinuousInput(0, 2 * Math.PI);
 
         this.turnCanCoderOffset = turnCanCoderOffset;
 
