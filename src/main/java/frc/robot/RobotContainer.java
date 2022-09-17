@@ -8,10 +8,12 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.commands.DefaultDrive;
+import frc.robot.commands.TurnWheelsToAngle;
 import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 
 /**
  * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -64,6 +66,15 @@ public class RobotContainer {
                                 drivetrain));
 
                 new JoystickButton(joystick, 7).whenPressed(new InstantCommand(drivetrain::resetGyroAngle));
+
+                new POVButton(joystick, 0).whenPressed(new TurnWheelsToAngle(0.0 * Math.PI / 4.0, drivetrain));
+                new POVButton(joystick, 45).whenPressed(new TurnWheelsToAngle(1.0 * Math.PI / 4.0, drivetrain));
+                new POVButton(joystick, 90).whenPressed(new TurnWheelsToAngle(2.0 * Math.PI / 4.0, drivetrain));
+                new POVButton(joystick, 135).whenPressed(new TurnWheelsToAngle(3.0 * Math.PI / 4.0, drivetrain));
+                new POVButton(joystick, 180).whenPressed(new TurnWheelsToAngle(4.0 * Math.PI / 4.0, drivetrain));
+                new POVButton(joystick, 225).whenPressed(new TurnWheelsToAngle(5.0 * Math.PI / 4.0, drivetrain));
+                new POVButton(joystick, 270).whenPressed(new TurnWheelsToAngle(6.0 * Math.PI / 4.0, drivetrain));
+                new POVButton(joystick, 315).whenPressed(new TurnWheelsToAngle(7.0 * Math.PI / 4.0, drivetrain));
 
         }
 
