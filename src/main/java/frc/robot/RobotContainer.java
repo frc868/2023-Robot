@@ -67,6 +67,11 @@ public class RobotContainer {
 
                 new JoystickButton(joystick, 7).whenPressed(new InstantCommand(drivetrain::resetGyroAngle));
 
+                new JoystickButton(joystick, 4)
+                        .whenPressed(new InstantCommand(() -> Constants.Teleop.PERCENT_LIMIT -= 0.05));
+                new JoystickButton(joystick, 6)
+                        .whenPressed(new InstantCommand(() -> Constants.Teleop.PERCENT_LIMIT += 0.05));
+
                 new POVButton(joystick, 0).whenPressed(new TurnWheelsToAngle(0.0 * Math.PI / 4.0, drivetrain));
                 new POVButton(joystick, 45).whenPressed(new TurnWheelsToAngle(1.0 * Math.PI / 4.0, drivetrain));
                 new POVButton(joystick, 90).whenPressed(new TurnWheelsToAngle(2.0 * Math.PI / 4.0, drivetrain));
