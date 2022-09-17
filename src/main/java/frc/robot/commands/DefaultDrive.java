@@ -51,14 +51,14 @@ public class DefaultDrive extends CommandBase {
             thetaSpeed = thetaSpeedLimiter.calculate(thetaSpeed);
         }
 
-        xSpeed *= Constants.Teleop.PERCENT_LIMIT;
-        ySpeed *= Constants.Teleop.PERCENT_LIMIT;
-        thetaSpeed *= Constants.Teleop.PERCENT_LIMIT;
-
-        if (slowModeSupplier.getAsBoolean()) {
-            xSpeed *= Constants.Teleop.SLOW_MODE_ADJUSTMENT;
-            ySpeed *= Constants.Teleop.SLOW_MODE_ADJUSTMENT;
-            thetaSpeed *= Constants.Teleop.SLOW_MODE_ADJUSTMENT;
+        if (!slowModeSupplier.getAsBoolean()) {
+            xSpeed *= Constants.Teleop.PERCENT_LIMIT;
+            ySpeed *= Constants.Teleop.PERCENT_LIMIT;
+            thetaSpeed *= Constants.Teleop.PERCENT_LIMIT;
+        } else {
+            xSpeed *= Constants.Teleop.SLOW_MODE_PERCENT_LIMIT;
+            ySpeed *= Constants.Teleop.SLOW_MODE_PERCENT_LIMIT;
+            thetaSpeed *= Constants.Teleop.SLOW_MODE_PERCENT_LIMIT;
         }
 
         // the speeds are initially values from -1.0 to 1.0, so we multiply by the max
