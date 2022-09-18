@@ -29,7 +29,8 @@ public class Drivetrain extends SubsystemBase {
     /** The front left swerve module when looking at the bot from behind. */
     private SwerveModule frontLeft = new SwerveModule("Drivetrain/Front Left Module",
             Constants.Drivetrain.CANIDs.FrontLeft.DRIVE_MOTOR,
-            Constants.Drivetrain.CANIDs.FrontLeft.TURN_MOTOR, Constants.Drivetrain.CANIDs.FrontLeft.TURN_ENCODER,
+            Constants.Drivetrain.CANIDs.FrontLeft.TURN_MOTOR,
+            Constants.Drivetrain.CANIDs.FrontLeft.TURN_ENCODER,
             true, true, false,
             Constants.Drivetrain.Offsets.FRONT_LEFT);
 
