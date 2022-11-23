@@ -1,12 +1,13 @@
 package frc.robot.subsystems;
 
-import com.kauailabs.navx.frc.AHRS;
+import com.ctre.phoenix.sensors.Pigeon2;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -59,11 +60,10 @@ public class Drivetrain extends SubsystemBase {
             Constants.Drivetrain.Offsets.BACK_RIGHT);
 
     /** The NavX, connected via MXP to the RoboRIO. */
-    private AHRS navx = new AHRS();
+    private Pigeon2 pigeon = new Pigeon2(0);
 
     /** Calculates odometry (robot's position) throughout the match. */
-    private SwerveDriveOdometry odometry = new SwerveDriveOdometry(Constants.Drivetrain.Geometry.KINEMATICS,
-            new Rotation2d(navx.getYaw()));
+    private SwerveDriveOdometry odometry;
 
     /** Field that the robot's position can be drawn on and send via NT. */
     private Field2d field = new Field2d();
@@ -79,11 +79,15 @@ public class Drivetrain extends SubsystemBase {
 
     /** Initializes the drivetrain. */
     public Drivetrain() {
-        navx.reset();
+        odometry = new SwerveDriveOdometry(
+                Constants.Drivetrain.Geometry.KINEMATICS,
+                getGyroRotation2d(),
+                getSwerveModulePositions());
+
         LoggingManager.getInstance().addGroup("Drivetrain", new LogGroup(
                 new Logger[] {
-                        new DeviceLogger<AHRS>(navx, "NavX",
-                                LogProfileBuilder.buildNavXLogItems(navx)),
+                        new DeviceLogger<Pigeon2>(pigeon, "Pigeon 2",
+                                LogProfileBuilder.buildPigeon2LogItems(pigeon)),
                         new SendableLogger("field", field),
                 }));
     }
@@ -94,12 +98,7 @@ public class Drivetrain extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        odometry.update(new Rotation2d(
-                navx.getYaw()),
-                frontLeft.getState(),
-                frontRight.getState(),
-                backLeft.getState(),
-                backRight.getState());
+        odometry.update(getGyroRotation2d(), getSwerveModulePositions());
         field.setRobotPose(odometry.getPoseMeters());
     }
 
@@ -133,13 +132,22 @@ public class Drivetrain extends SubsystemBase {
                 break;
             case FIELD_ORIENTED:
                 chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed,
-                        thetaSpeed, navx.getRotation2d());
+                        thetaSpeed, getGyroRotation2d());
                 break;
         }
         SwerveModuleState[] states = Constants.Drivetrain.Geometry.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states,
                 Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
         setModuleStates(states);
+    }
+
+    public SwerveModulePosition[] getSwerveModulePositions() {
+        return new SwerveModulePosition[] {
+                frontLeft.getPosition(),
+                frontRight.getPosition(),
+                backLeft.getPosition(),
+                backRight.getPosition()
+        };
     }
 
     /**
@@ -156,19 +164,29 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
-     * Gets the angle of the gyro in degrees.
+     * Gets the angle (yaw) of the gyro in degrees.
      * 
      * @return the angle of the gyro in degrees
      */
     public double getGyroAngle() {
-        return navx.getRotation2d().getDegrees();
+        return pigeon.getYaw();
     }
 
     /**
-     * Reset gyro angle.
+     * Zeros the gyro in whichever direction the bot is pointing. Only use this if
+     * the bot is straight, otherwise it will throw off field-oriented control.
      */
-    public void resetGyroAngle() {
-        navx.reset();
+    public void zeroGyro() {
+        pigeon.setYaw(0);
+    }
+
+    /**
+     * Gets a Rotation2d describing the angle of the gyro.
+     * 
+     * @return a Rotation2d describing the angle of the gyro
+     */
+    public Rotation2d getGyroRotation2d() {
+        return Rotation2d.fromDegrees(pigeon.getYaw());
     }
 
     /**

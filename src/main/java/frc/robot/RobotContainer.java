@@ -3,8 +3,6 @@ package frc.robot;
 import java.util.HashMap;
 
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import frc.robot.commands.DefaultDrive;
@@ -12,8 +10,8 @@ import frc.robot.commands.TurnWheelsToAngle;
 import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 /**
  * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -44,7 +42,7 @@ public class RobotContainer {
     private void configureButtonBindings() {
         switch (Constants.CONTROLLER_TYPE) {
             case XboxController:
-                XboxController driverController = new XboxController(Constants.OI.DRIVER_PORT);
+                CommandXboxController driverController = new CommandXboxController(Constants.OI.DRIVER_PORT);
                 // Driver left joystick and right joystick, drive
                 drivetrain.setDefaultCommand(
                         new DefaultDrive(
@@ -55,31 +53,23 @@ public class RobotContainer {
                                 drivetrain));
 
             case FlightStick:
-                Joystick joystick = new Joystick(0);
+                CommandJoystick joystick = new CommandJoystick(0);
 
                 drivetrain.setDefaultCommand(
                         new DefaultDrive(
                                 () -> joystick.getY() * 2.0, // because flight stick goes -0.5 to 0.5
                                 () -> joystick.getX() * 2.0,
                                 () -> joystick.getTwist() * 2.0,
-                                () -> joystick.getRawButton(1),
+                                () -> joystick.getHID().getRawButton(1),
                                 drivetrain));
 
-                new JoystickButton(joystick, 7).whenPressed(new InstantCommand(drivetrain::resetGyroAngle));
+                joystick.button(7).onTrue(new InstantCommand(drivetrain::zeroGyro));
 
-                new JoystickButton(joystick, 4)
-                        .whenPressed(new InstantCommand(() -> Constants.Teleop.PERCENT_LIMIT -= 0.05));
-                new JoystickButton(joystick, 6)
-                        .whenPressed(new InstantCommand(() -> Constants.Teleop.PERCENT_LIMIT += 0.05));
+                joystick.button(4).onTrue(new InstantCommand(() -> Constants.Teleop.PERCENT_LIMIT -= 0.05));
+                joystick.button(6).onTrue(new InstantCommand(() -> Constants.Teleop.PERCENT_LIMIT += 0.05));
 
-                new POVButton(joystick, 0).whenPressed(new TurnWheelsToAngle(0.0 * Math.PI / 4.0, drivetrain));
-                new POVButton(joystick, 45).whenPressed(new TurnWheelsToAngle(1.0 * Math.PI / 4.0, drivetrain));
-                new POVButton(joystick, 90).whenPressed(new TurnWheelsToAngle(2.0 * Math.PI / 4.0, drivetrain));
-                new POVButton(joystick, 135).whenPressed(new TurnWheelsToAngle(3.0 * Math.PI / 4.0, drivetrain));
-                new POVButton(joystick, 180).whenPressed(new TurnWheelsToAngle(4.0 * Math.PI / 4.0, drivetrain));
-                new POVButton(joystick, 225).whenPressed(new TurnWheelsToAngle(5.0 * Math.PI / 4.0, drivetrain));
-                new POVButton(joystick, 270).whenPressed(new TurnWheelsToAngle(6.0 * Math.PI / 4.0, drivetrain));
-                new POVButton(joystick, 315).whenPressed(new TurnWheelsToAngle(7.0 * Math.PI / 4.0, drivetrain));
+                for (int angle = 0; angle <= 315; angle += 45)
+                    joystick.pov(angle).onTrue(new TurnWheelsToAngle(Math.toRadians(angle), drivetrain));
 
         }
 

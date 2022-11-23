@@ -11,6 +11,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import com.techhounds.houndutil.houndlog.LogGroup;
@@ -132,7 +133,16 @@ public class SwerveModule {
      * @return the state of the swerve module
      */
     public SwerveModuleState getState() {
-        return new SwerveModuleState(driveEncoder.getVelocity(), new Rotation2d(getModuleAngle()));
+        return new SwerveModuleState(driveEncoder.getVelocity(), new Rotation2d(getWheelAngle()));
+    }
+
+    /**
+     * Gets the state of the swerve module.
+     * 
+     * @return the state of the swerve module
+     */
+    public SwerveModulePosition getPosition() {
+        return new SwerveModulePosition(driveEncoder.getPosition(), new Rotation2d(getWheelAngle()));
     }
 
     /**
@@ -142,11 +152,11 @@ public class SwerveModule {
      */
     public void setState(SwerveModuleState state) {
         SwerveModuleState optimizedState = SwerveModuleState.optimize(state,
-                new Rotation2d(getModuleAngle()));
+                new Rotation2d(getWheelAngle()));
         double driveOutput = drivePIDController.calculate(driveEncoder.getVelocity(),
                 optimizedState.speedMetersPerSecond)
                 + driveFeedforward.calculate(optimizedState.speedMetersPerSecond);
-        double turnOutput = turnPIDController.calculate(getModuleAngle(), optimizedState.angle.getRadians());
+        double turnOutput = turnPIDController.calculate(getWheelAngle(), optimizedState.angle.getRadians());
 
         driveMotor.set(driveOutput);
         turnMotor.set(turnOutput);
@@ -164,12 +174,12 @@ public class SwerveModule {
         }
 
         SwerveModuleState optimizedState = SwerveModuleState.optimize(state,
-                new Rotation2d(getModuleAngle()));
+                new Rotation2d(getWheelAngle()));
 
         driveMotor.set(optimizedState.speedMetersPerSecond
                 / Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
 
-        turnMotor.set(turnPIDControllerSimple.calculate(getModuleAngle(),
+        turnMotor.set(turnPIDControllerSimple.calculate(getWheelAngle(),
                 optimizedState.angle.getRadians()));
     }
 
@@ -179,7 +189,7 @@ public class SwerveModule {
      * @param angle the angle of the wheel in radians
      */
     public void setRotation(double angle) {
-        turnMotor.set(turnPIDControllerSimple.calculate(getModuleAngle(),
+        turnMotor.set(turnPIDControllerSimple.calculate(getWheelAngle(),
                 angle));
     }
 
@@ -188,7 +198,7 @@ public class SwerveModule {
      * 
      * @return the position of the CANCoder
      */
-    public double getModuleAngle() {
+    public double getWheelAngle() {
         return turnCanCoder.getPosition() + turnCanCoderOffset;
     }
 
