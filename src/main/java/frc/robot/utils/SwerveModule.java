@@ -14,13 +14,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.enums.LogLevel;
-import com.techhounds.houndutil.houndlog.enums.LogType;
 import com.techhounds.houndutil.houndlog.loggers.Logger;
-import com.techhounds.houndutil.houndlog.loggers.SingleItemLogger;
+import com.techhounds.houndutil.houndlog.logitems.DoubleLogItem;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import frc.robot.Constants;
 
@@ -43,7 +43,8 @@ public class SwerveModule {
     private ProfiledPIDController turnPIDController = new ProfiledPIDController(
             Constants.Drivetrain.PID.Turn.kP,
             Constants.Drivetrain.PID.Turn.kI, Constants.Drivetrain.PID.Turn.kD,
-            new TrapezoidProfile.Constraints(Constants.Drivetrain.Geometry.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+            new TrapezoidProfile.Constraints(
+                    Constants.Drivetrain.Geometry.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
                     Constants.Drivetrain.Geometry.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED));
 
     private PIDController turnPIDControllerSimple = new PIDController(Constants.Drivetrain.PID.Turn.kP,
@@ -90,10 +91,13 @@ public class SwerveModule {
         turnMotor.setInverted(turnMotorInverted);
 
         driveEncoder = driveMotor.getEncoder();
-        driveEncoder.setPositionConversionFactor(2 * Math.PI * Constants.Drivetrain.Geometry.WHEEL_RADIUS_METERS); // in
-                                                                                                                   // meters
+        driveEncoder.setPositionConversionFactor(
+                2 * Math.PI * Constants.Drivetrain.Geometry.WHEEL_RADIUS_METERS); // in
+                                                                                  // meters
         driveEncoder
-                .setVelocityConversionFactor((2 * Math.PI * Constants.Drivetrain.Geometry.WHEEL_RADIUS_METERS) / 360.0);
+                .setVelocityConversionFactor(
+                        (2 * Math.PI * Constants.Drivetrain.Geometry.WHEEL_RADIUS_METERS)
+                                / 360.0);
 
         turnCanCoder = new CANCoder(canCoderChannel);
 
@@ -120,8 +124,8 @@ public class SwerveModule {
                                 LogProfileBuilder.buildCANSparkMaxLogItems(turnMotor)),
                         new DeviceLogger<CANCoder>(turnCanCoder, "CANCoder",
                                 LogProfileBuilder.buildCANCoderLogItems(turnCanCoder)),
-                        new SingleItemLogger<Double>(LogType.NUMBER, "Wheel Angle", this::getAngle, LogLevel.MAIN),
-                        new SingleItemLogger<Double>(LogType.NUMBER, "CANCoder Position", turnCanCoder::getPosition,
+                        new DoubleLogItem("Wheel Angle", this::getAngle, LogLevel.MAIN),
+                        new DoubleLogItem("CANCoder Position", turnCanCoder::getPosition,
                                 LogLevel.MAIN)
 
                 }));
