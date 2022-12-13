@@ -10,6 +10,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.techhounds.houndutil.houndlog.LogGroup;
@@ -101,6 +102,8 @@ public class Drivetrain extends SubsystemBase {
     public void periodic() {
         odometry.update(getGyroRotation2d(), getSwerveModulePositions());
         field.setRobotPose(odometry.getPoseMeters());
+        SmartDashboard.putNumber("gyro", getGyroAngle());
+        SmartDashboard.putNumber("gyroRot2d", getGyroRotation2d().getDegrees());
     }
 
     public DriveMode getDriveMode() {

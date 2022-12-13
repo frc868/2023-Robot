@@ -188,6 +188,24 @@ public class SwerveModule {
     }
 
     /**
+     * Sets the PID controller setpoints to the desired state.
+     * 
+     * @param state the desired state of the swerve module
+     */
+    public void setStateSimpleUnoptimized(SwerveModuleState state) {
+        if (state.speedMetersPerSecond < 0.01) {
+            stop();
+            return;
+        }
+
+        driveMotor.set(state.speedMetersPerSecond
+                / Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
+
+        turnMotor.set(turnPIDControllerSimple.calculate(getWheelAngle(),
+                state.angle.getRadians()));
+    }
+
+    /**
      * Sets the rotation of the module. X and Y velocities will be ignored.
      * 
      * @param angle the angle of the wheel in radians
