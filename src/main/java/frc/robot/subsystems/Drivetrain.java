@@ -161,10 +161,10 @@ public class Drivetrain extends SubsystemBase {
      *               right)
      */
     public void setModuleStates(SwerveModuleState[] states) {
-        frontLeft.setStateSimple(states[0]);
-        frontRight.setStateSimple(states[1]);
-        backLeft.setStateSimple(states[2]);
-        backRight.setStateSimple(states[3]);
+        frontLeft.setState(states[0]);
+        frontRight.setState(states[1]);
+        backLeft.setState(states[2]);
+        backRight.setState(states[3]);
     }
 
     /**
@@ -209,27 +209,27 @@ public class Drivetrain extends SubsystemBase {
         return odometry.getPoseMeters();
     }
 
-    // public void drawRobotOnField(Field2d field) {
-    // field.setRobotPose(getPose());
-    // // Draw a pose that is based on the robot pose, but shifted by the
-    // translation of the module relative to robot center,
-    // // then rotated around its own center by the angle of the module.
-    // field.getObject("frontLeft").setPose(
-    // getPose().transformBy(new Transform2d(robotToModuleTL.get(FL),
-    // getModuleStates()[0].angle))
-    // );
-    // field.getObject("frontRight").setPose(
-    // getPose().transformBy(new
-    // Transform2d(robotToModuleTL.get(FR),getModuleStates()[1].angle))
-    // );
-    // field.getObject("backLeft").setPose(
-    // getPose().transformBy(new Transform2d(robotToModuleTL.get(BL),
-    // getModuleStates()[2].angle))
-    // );
-    // field.getObject("backRight").setPose(
-    // getPose().transformBy(new Transform2d(robotToModuleTL.get(BR),
-    // getModuleStates()[3].angle))
-    // );
-    // }
+    public void drawRobotOnField(Field2d field) {
+    field.setRobotPose(getPose());
+    // Draw a pose that is based on the robot pose, but shifted by the
+    translation of the module relative to robot center,
+    // then rotated around its own center by the angle of the module.
+    field.getObject("frontLeft").setPose(
+    getPose().transformBy(new Transform2d(robotToModuleTL.get(FL),
+    getModuleStates()[0].angle))
+    );
+    field.getObject("frontRight").setPose(
+    getPose().transformBy(new
+    Transform2d(robotToModuleTL.get(FR),getModuleStates()[1].angle))
+    );
+    field.getObject("backLeft").setPose(
+    getPose().transformBy(new Transform2d(robotToModuleTL.get(BL),
+    getModuleStates()[2].angle))
+    );
+    field.getObject("backRight").setPose(
+    getPose().transformBy(new Transform2d(robotToModuleTL.get(BR),
+    getModuleStates()[3].angle))
+    );
+    }
 
 }

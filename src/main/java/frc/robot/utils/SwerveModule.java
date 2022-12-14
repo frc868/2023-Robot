@@ -152,39 +152,44 @@ public class SwerveModule {
     /**
      * Sets the PID controller setpoints to the desired state.
      * 
-     * @param state the desired state of the swerve module
+     * @param state    the desired state of the swerve module
+     * @param openLoop whether to run open loop controls
+     * @param optimize whether to optimize the state of the modules
      */
-    public void setState(SwerveModuleState state) {
-        SwerveModuleState optimizedState = SwerveModuleState.optimize(state,
-                new Rotation2d(getWheelAngle()));
-        double driveOutput = drivePIDController.calculate(driveEncoder.getVelocity(),
-                optimizedState.speedMetersPerSecond)
-                + driveFeedforward.calculate(optimizedState.speedMetersPerSecond);
-        double turnOutput = turnPIDController.calculate(getWheelAngle(), optimizedState.angle.getRadians());
-
-        driveMotor.set(driveOutput);
-        turnMotor.set(turnOutput);
-    }
-
-    /**
-     * Sets the PID controller setpoints to the desired state.
-     * 
-     * @param state the desired state of the swerve module
-     */
-    public void setStateSimple(SwerveModuleState state) {
+    public void setState(SwerveModuleState state, boolean openLoop, boolean optimize) {
         if (state.speedMetersPerSecond < 0.01) {
             stop();
             return;
         }
+        if (optimize)
+            state = SwerveModuleState.optimize(state, new Rotation2d(getWheelAngle()));
 
-        SwerveModuleState optimizedState = SwerveModuleState.optimize(state,
-                new Rotation2d(getWheelAngle()));
+        if (openLoop) {
+            driveMotor.set(state.speedMetersPerSecond
+                    / Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
 
-        driveMotor.set(optimizedState.speedMetersPerSecond
-                / Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
+            turnMotor.set(turnPIDControllerSimple.calculate(getWheelAngle(),
+                    state.angle.getRadians()));
+        } else {
+            double driveOutput = drivePIDController.calculate(driveEncoder.getVelocity(),
+                    state.speedMetersPerSecond)
+                    + driveFeedforward.calculate(state.speedMetersPerSecond);
+            double turnOutput = turnPIDController.calculate(getWheelAngle(),
+                    state.angle.getRadians());
 
-        turnMotor.set(turnPIDControllerSimple.calculate(getWheelAngle(),
-                optimizedState.angle.getRadians()));
+            driveMotor.set(driveOutput);
+            turnMotor.set(turnOutput);
+        }
+    }
+
+    /**
+     * Sets the PID controller setpoints to the desired state.
+     * Defaults to open loop controls and optimized state.
+     * 
+     * @param state the desired state of the swerve module
+     */
+    public void setState(SwerveModuleState state) {
+        setState(state, true, true);
     }
 
     /**
