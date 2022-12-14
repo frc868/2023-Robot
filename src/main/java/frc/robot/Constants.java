@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.util.Units;
 
 /**
  * The container for robot-wide numerical or boolean constants. This should not
@@ -112,9 +113,9 @@ public final class Constants {
 
         public static final class Geometry {
             /** Distance between centers of right and left wheels on robot. */
-            public static final double TRACK_WIDTH_METERS = 0.625475;
+            public static final double TRACK_WIDTH_METERS = Units.inchesToMeters(18.9);
             /** Distance between front and back wheels on robot. */
-            public static final double WHEEL_BASE_METERS = 0.625475;
+            public static final double WHEEL_BASE_METERS = Units.inchesToMeters(18.9);
             public static final double WHEEL_RADIUS_METERS = 0.048;
             public static final double MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND = 4.42;
             public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI / 4;
