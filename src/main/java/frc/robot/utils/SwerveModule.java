@@ -36,23 +36,29 @@ public class SwerveModule {
     private CANCoder turnCanCoder;
 
     /** The PID controller that corrects the drive motor's velocity. */
-    private PIDController drivePIDController = new PIDController(Constants.Drivetrain.PID.Drive.kP,
-            Constants.Drivetrain.PID.Drive.kI, Constants.Drivetrain.PID.Drive.kD);
+    private PIDController drivePIDController = new PIDController(Constants.Drivetrain.PID.DriveMotors.kP,
+            Constants.Drivetrain.PID.DriveMotors.kI, Constants.Drivetrain.PID.DriveMotors.kD);
 
     /** The PID controller that controls the turning motor's position. */
     private ProfiledPIDController turnPIDController = new ProfiledPIDController(
-            Constants.Drivetrain.PID.Turn.kP,
-            Constants.Drivetrain.PID.Turn.kI, Constants.Drivetrain.PID.Turn.kD,
+            Constants.Drivetrain.PID.TurnMotors.kP,
+            Constants.Drivetrain.PID.TurnMotors.kI, Constants.Drivetrain.PID.TurnMotors.kD,
             new TrapezoidProfile.Constraints(
-                    Constants.Drivetrain.Geometry.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-                    Constants.Drivetrain.Geometry.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED));
+                    Constants.Drivetrain.Geometry.Turning.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+                    Constants.Drivetrain.Geometry.Turning.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED));
 
-    private PIDController turnPIDControllerSimple = new PIDController(Constants.Drivetrain.PID.Turn.kP,
-            Constants.Drivetrain.PID.Turn.kI, Constants.Drivetrain.PID.Turn.kD);
+    private PIDController turnPIDControllerSimple = new PIDController(Constants.Drivetrain.PID.TurnMotors.kP,
+            Constants.Drivetrain.PID.TurnMotors.kI, Constants.Drivetrain.PID.TurnMotors.kD);
 
     /** The feedforward controller that controls the drive motor's velocity. */
-    private SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(Constants.Drivetrain.PID.Drive.kS,
-            Constants.Drivetrain.PID.Drive.kV);
+    private SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(
+            Constants.Drivetrain.PID.DriveMotors.kS,
+            Constants.Drivetrain.PID.DriveMotors.kV);
+
+    private double drivePIDControllerOutput = 0.0;
+    private double driveFFControllerOutput = 0.0;
+    private double driveMotorVel = 0.0;
+    private double driveMotorVelCF = 0.0;
 
     /**
      * The offset of the CANCoder from the zero point, in radians. This will be
@@ -84,20 +90,23 @@ public class SwerveModule {
             double turnCanCoderOffset) {
 
         driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
+        driveMotor.restoreFactoryDefaults();
         driveMotor.setInverted(driveMotorInverted);
-        driveMotor.setIdleMode(CANSparkMax.IdleMode.kCoast);
-        turnMotor = new CANSparkMax(turnMotorChannel, MotorType.kBrushless);
-        turnMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
-        turnMotor.setInverted(turnMotorInverted);
+        driveMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
+        driveMotor.setSmartCurrentLimit(40);
 
         driveEncoder = driveMotor.getEncoder();
-        driveEncoder.setPositionConversionFactor(
-                2 * Math.PI * Constants.Drivetrain.Geometry.WHEEL_RADIUS_METERS); // in
-                                                                                  // meters
-        driveEncoder
-                .setVelocityConversionFactor(
-                        (2 * Math.PI * Constants.Drivetrain.Geometry.WHEEL_RADIUS_METERS)
-                                / 360.0);
+        driveEncoder.setPositionConversionFactor(Constants.Drivetrain.Geometry.ENCODER_DISTANCE_TO_METERS);
+        driveEncoder.setVelocityConversionFactor(Constants.Drivetrain.Geometry.ENCODER_DISTANCE_TO_METERS / 60.0);
+
+        driveMotor.burnFlash();
+
+        turnMotor = new CANSparkMax(turnMotorChannel, MotorType.kBrushless);
+        turnMotor.restoreFactoryDefaults();
+        turnMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
+        turnMotor.setInverted(turnMotorInverted);
+        turnMotor.setSmartCurrentLimit(15);
+        turnMotor.burnFlash();
 
         turnCanCoder = new CANCoder(canCoderChannel);
 
@@ -125,8 +134,13 @@ public class SwerveModule {
                         new DeviceLogger<CANCoder>(turnCanCoder, "CANCoder",
                                 LogProfileBuilder.buildCANCoderLogItems(turnCanCoder)),
                         new DoubleLogItem("Wheel Angle", this::getAngle, LogLevel.MAIN),
-                        new DoubleLogItem("CANCoder Position", turnCanCoder::getPosition,
-                                LogLevel.MAIN)
+                        new DoubleLogItem("CANCoder Position", turnCanCoder::getPosition, LogLevel.MAIN),
+                        new DoubleLogItem("Wheel Angle", this::getAngle, LogLevel.MAIN),
+                        new DoubleLogItem("CANCoder Position", turnCanCoder::getPosition, LogLevel.MAIN),
+                        new DoubleLogItem("Drive PID", () -> this.drivePIDControllerOutput, LogLevel.MAIN),
+                        new DoubleLogItem("Drive FF", () -> this.driveFFControllerOutput, LogLevel.MAIN),
+                        new DoubleLogItem("Drive Motor Vel", () -> this.driveMotorVel, LogLevel.MAIN),
+                        new DoubleLogItem("Drive Motor Vel CF", () -> this.driveMotorVelCF, LogLevel.MAIN)
 
                 }));
     }
@@ -136,8 +150,8 @@ public class SwerveModule {
      * 
      * @return the state of the swerve module
      */
-    public SwerveModuleState getState() {
-        return new SwerveModuleState(driveEncoder.getVelocity(), new Rotation2d(getWheelAngle()));
+    public SwerveModulePosition getPosition() {
+        return new SwerveModulePosition(driveEncoder.getPosition(), new Rotation2d(getWheelAngle()));
     }
 
     /**
@@ -145,8 +159,8 @@ public class SwerveModule {
      * 
      * @return the state of the swerve module
      */
-    public SwerveModulePosition getPosition() {
-        return new SwerveModulePosition(driveEncoder.getPosition(), new Rotation2d(getWheelAngle()));
+    public SwerveModuleState getState() {
+        return new SwerveModuleState(driveEncoder.getVelocity(), new Rotation2d(getWheelAngle()));
     }
 
     /**
@@ -161,23 +175,31 @@ public class SwerveModule {
             stop();
             return;
         }
+
         if (optimize)
             state = SwerveModuleState.optimize(state, new Rotation2d(getWheelAngle()));
 
         if (openLoop) {
-            driveMotor.set(state.speedMetersPerSecond
-                    / Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
+            driveMotor.setVoltage(state.speedMetersPerSecond
+                    / Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND * 12.0);
 
-            turnMotor.set(turnPIDControllerSimple.calculate(getWheelAngle(),
-                    state.angle.getRadians()));
+            double v = turnPIDControllerSimple.calculate(getWheelAngle(),
+                    state.angle.getRadians()) * 12.0;
+            if (v > 8)
+                v = 8.0;
+
+            turnMotor.setVoltage(v);
         } else {
-            double driveOutput = drivePIDController.calculate(driveEncoder.getVelocity(),
-                    state.speedMetersPerSecond)
-                    + driveFeedforward.calculate(state.speedMetersPerSecond);
+            this.drivePIDControllerOutput = drivePIDController.calculate(driveEncoder.getVelocity(),
+                    state.speedMetersPerSecond);
+            this.driveFFControllerOutput = driveFeedforward.calculate(state.speedMetersPerSecond);
+            this.driveMotorVel = driveEncoder.getVelocity();
+            this.driveMotorVelCF = driveEncoder.getVelocityConversionFactor();
+
             double turnOutput = turnPIDController.calculate(getWheelAngle(),
                     state.angle.getRadians());
 
-            driveMotor.set(driveOutput);
+            driveMotor.setVoltage(drivePIDControllerOutput + driveFFControllerOutput);
             turnMotor.set(turnOutput);
         }
     }
@@ -190,24 +212,6 @@ public class SwerveModule {
      */
     public void setState(SwerveModuleState state) {
         setState(state, true, true);
-    }
-
-    /**
-     * Sets the PID controller setpoints to the desired state.
-     * 
-     * @param state the desired state of the swerve module
-     */
-    public void setStateSimpleUnoptimized(SwerveModuleState state) {
-        if (state.speedMetersPerSecond < 0.01) {
-            stop();
-            return;
-        }
-
-        driveMotor.set(state.speedMetersPerSecond
-                / Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
-
-        turnMotor.set(turnPIDControllerSimple.calculate(getWheelAngle(),
-                state.angle.getRadians()));
     }
 
     /**

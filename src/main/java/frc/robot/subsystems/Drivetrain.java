@@ -2,23 +2,29 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.sensors.Pigeon2;
 
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import com.techhounds.houndutil.houndlib.auto.AutoManager;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import com.techhounds.houndutil.houndlog.loggers.Logger;
-import com.techhounds.houndutil.houndlog.loggers.SendableLogger;
 import frc.robot.Constants;
 import frc.robot.utils.SwerveModule;
 
@@ -34,7 +40,7 @@ public class Drivetrain extends SubsystemBase {
             Constants.Drivetrain.CANIDs.FrontLeft.DRIVE_MOTOR,
             Constants.Drivetrain.CANIDs.FrontLeft.TURN_MOTOR,
             Constants.Drivetrain.CANIDs.FrontLeft.TURN_ENCODER,
-            true, true, false,
+            false, true, false,
             Constants.Drivetrain.Offsets.FRONT_LEFT);
 
     /** The front right swerve module when looking at the bot from behind. */
@@ -58,17 +64,14 @@ public class Drivetrain extends SubsystemBase {
             Constants.Drivetrain.CANIDs.BackRight.DRIVE_MOTOR,
             Constants.Drivetrain.CANIDs.BackRight.TURN_MOTOR,
             Constants.Drivetrain.CANIDs.BackRight.TURN_ENCODER,
-            true, true, false,
+            false, true, false,
             Constants.Drivetrain.Offsets.BACK_RIGHT);
 
-    /** The NavX, connected via MXP to the RoboRIO. */
+    /** The Pigeon 2, the overpriced but really good gyro that we use. */
     private Pigeon2 pigeon = new Pigeon2(0);
 
     /** Calculates odometry (robot's position) throughout the match. */
     private SwerveDriveOdometry odometry;
-
-    /** Field that the robot's position can be drawn on and send via NT. */
-    private Field2d field = new Field2d();
 
     /** An enum describing the two types of drive modes. */
     public enum DriveMode {
@@ -79,19 +82,32 @@ public class Drivetrain extends SubsystemBase {
     /** The mode of driving, either robot relative or field relative. */
     private DriveMode driveMode = DriveMode.FIELD_ORIENTED;
 
+    private double turnRegister = 0;
+    private double startingGyroAngle = 0;
+    private boolean isTurningEnabled = false;
+
+    private ProfiledPIDController turnController = new ProfiledPIDController(Constants.Drivetrain.PID.TurnToAngle.kP,
+            Constants.Drivetrain.PID.TurnToAngle.kI,
+            Constants.Drivetrain.PID.TurnToAngle.kD,
+            new TrapezoidProfile.Constraints(Constants.Auton.MAX_ANGULAR_VELOCITY,
+                    Constants.Auton.MAX_ANGULAR_ACCELERATION));
+
     /** Initializes the drivetrain. */
     public Drivetrain() {
-        odometry = new SwerveDriveOdometry(
-                Constants.Drivetrain.Geometry.KINEMATICS,
-                getGyroRotation2d(),
-                getSwerveModulePositions());
+        zeroGyro();
+        odometry = new SwerveDriveOdometry(Constants.Drivetrain.Geometry.KINEMATICS,
+                getGyroRotation2d(), getSwerveModulePositions());
+
+        turnController.setTolerance(0.05);
 
         LoggingManager.getInstance().addGroup("Drivetrain", new LogGroup(
                 new Logger[] {
                         new DeviceLogger<Pigeon2>(pigeon, "Pigeon 2",
                                 LogProfileBuilder.buildPigeon2LogItems(pigeon)),
-                        new SendableLogger("field", field),
                 }));
+
+        AutoManager.getInstance().setResetOdometryConsumer(this::resetOdometry);
+
     }
 
     /**
@@ -101,9 +117,15 @@ public class Drivetrain extends SubsystemBase {
     @Override
     public void periodic() {
         odometry.update(getGyroRotation2d(), getSwerveModulePositions());
-        field.setRobotPose(odometry.getPoseMeters());
-        SmartDashboard.putNumber("gyro", getGyroAngle());
-        SmartDashboard.putNumber("gyroRot2d", getGyroRotation2d().getDegrees());
+        drawRobotOnField(AutoManager.getInstance().getField());
+
+        SmartDashboard.putNumber("starginGyro", startingGyroAngle);
+        SmartDashboard.putNumber("turnRegister", turnRegister);
+
+    }
+
+    public void resetOdometry(Pose2d pose) {
+        odometry.resetPosition(getGyroRotation2d(), getSwerveModulePositions(), pose);
     }
 
     public DriveMode getDriveMode() {
@@ -112,6 +134,10 @@ public class Drivetrain extends SubsystemBase {
 
     public void setDriveMode(DriveMode driveMode) {
         this.driveMode = driveMode;
+    }
+
+    public ProfiledPIDController getTurnController() {
+        return turnController;
     }
 
     /**
@@ -137,12 +163,13 @@ public class Drivetrain extends SubsystemBase {
             case FIELD_ORIENTED:
                 chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed,
                         thetaSpeed, getGyroRotation2d());
+
                 break;
         }
         SwerveModuleState[] states = Constants.Drivetrain.Geometry.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states,
                 Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
-        setModuleStates(states);
+        setModuleStates(states, true, true);
     }
 
     public SwerveModulePosition[] getSwerveModulePositions() {
@@ -151,6 +178,15 @@ public class Drivetrain extends SubsystemBase {
                 frontRight.getPosition(),
                 backLeft.getPosition(),
                 backRight.getPosition()
+        };
+    }
+
+    public SwerveModuleState[] getSwerveModuleStates() {
+        return new SwerveModuleState[] {
+                frontLeft.getState(),
+                frontRight.getState(),
+                backLeft.getState(),
+                backRight.getState()
         };
     }
 
@@ -168,6 +204,19 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
+     * Sets the states of the swerve modules.
+     * 
+     * @param states an array of states (front left, front right, back left, back
+     *               right)
+     */
+    public void setModuleStates(SwerveModuleState[] states, boolean openLoop, boolean optimize) {
+        frontLeft.setState(states[0], openLoop, optimize);
+        frontRight.setState(states[1], openLoop, optimize);
+        backLeft.setState(states[2], openLoop, optimize);
+        backRight.setState(states[3], openLoop, optimize);
+    }
+
+    /**
      * Gets the angle (yaw) of the gyro in degrees.
      * 
      * @return the angle of the gyro in degrees
@@ -177,20 +226,29 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
+     * Gets the angle (yaw) of the gyro in radians.
+     * 
+     * @return the angle of the gyro in radians
+     */
+    public double getGyroAngleRad() {
+        return Units.degreesToRadians(pigeon.getYaw());
+    }
+
+    /**
+     * Gets the angle of the gyro in degrees.
+     * 
+     * @return the angle of the gyro in degrees
+     */
+    public Rotation2d getGyroRotation2d() {
+        return Rotation2d.fromDegrees(pigeon.getYaw());
+    }
+
+    /**
      * Zeros the gyro in whichever direction the bot is pointing. Only use this if
      * the bot is straight, otherwise it will throw off field-oriented control.
      */
     public void zeroGyro() {
         pigeon.setYaw(0);
-    }
-
-    /**
-     * Gets a Rotation2d describing the angle of the gyro.
-     * 
-     * @return a Rotation2d describing the angle of the gyro
-     */
-    public Rotation2d getGyroRotation2d() {
-        return Rotation2d.fromDegrees(pigeon.getYaw());
     }
 
     /**
@@ -211,25 +269,59 @@ public class Drivetrain extends SubsystemBase {
 
     public void drawRobotOnField(Field2d field) {
         field.setRobotPose(getPose());
+
         // Draw a pose that is based on the robot pose, but shifted by the
         // translation of the module relative to robot center,
-        // // then rotated around its own center by the angle of the module.
-        // field.getObject("frontLeft").setPose(
-        // getPose().transformBy(new Transform2d(robotToModuleTL.get(FL),
-        // getModuleStates()[0].angle))
-        // );
-        // field.getObject("frontRight").setPose(
-        // getPose().transformBy(new
-        // Transform2d(robotToModuleTL.get(FR),getModuleStates()[1].angle))
-        // );
-        // field.getObject("backLeft").setPose(
-        // getPose().transformBy(new Transform2d(robotToModuleTL.get(BL),
-        // getModuleStates()[2].angle))
-        // );
-        // field.getObject("backRight").setPose(
-        // getPose().transformBy(new Transform2d(robotToModuleTL.get(BR),
-        // getModuleStates()[3].angle))
-        // );
+        // then rotated around its own center by the angle of the module.
+        field.getObject("frontLeft").setPose(
+                getPose().transformBy(
+                        new Transform2d(Constants.Drivetrain.Geometry.SWERVE_MODULE_LOCATIONS[0],
+                                getSwerveModuleStates()[0].angle)));
+        field.getObject("frontRight").setPose(
+                getPose().transformBy(
+                        new Transform2d(Constants.Drivetrain.Geometry.SWERVE_MODULE_LOCATIONS[1],
+                                getSwerveModuleStates()[1].angle)));
+        field.getObject("backLeft").setPose(
+                getPose().transformBy(
+                        new Transform2d(Constants.Drivetrain.Geometry.SWERVE_MODULE_LOCATIONS[2],
+                                getSwerveModuleStates()[2].angle)));
+        field.getObject("backRight").setPose(
+                getPose().transformBy(
+                        new Transform2d(Constants.Drivetrain.Geometry.SWERVE_MODULE_LOCATIONS[3],
+                                getSwerveModuleStates()[3].angle)));
+    }
+
+    /**
+     * Adds 90 degrees CCW to the internal register for the turning PID controller.
+     * Map this to a button input to turn 90 degrees CCW while still moving.
+     */
+    public Command turnWhileMovingCommand(boolean counterClockwise) {
+        return new InstantCommand(() -> {
+            if (!isTurningEnabled) {
+                startingGyroAngle = getGyroAngleRad();
+                turnController.reset(startingGyroAngle);
+                turnRegister = 0;
+            }
+            isTurningEnabled = true;
+            turnRegister += counterClockwise ? Math.PI / 2.0 : -Math.PI / 2.0;
+
+            turnController.setGoal(startingGyroAngle + turnRegister);
+        });
+
+    }
+
+    public double getTurnControllerOutput() {
+        return turnController.calculate(getGyroAngleRad());
+    }
+
+    public boolean getTurnControllerEnabled() {
+        if (isTurningEnabled) {
+            if (turnController.atGoal()) {
+                isTurningEnabled = false;
+                turnRegister = 0;
+            }
+        }
+        return isTurningEnabled;
     }
 
 }
