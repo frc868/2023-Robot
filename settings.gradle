@@ -25,3 +25,6 @@ pluginManagement {
         }
     }
 }
+
+include ':houndutil'
+rootProject.children[0].buildFileName = "submodule.gradle"
