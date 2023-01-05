@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
  * 
  * @author dr
  */
-public class DefaultDrive extends CommandBase {
+public class TeleopDrive extends CommandBase {
     private Drivetrain drivetrain;
     private DoubleSupplier xSpeedSupplier, ySpeedSupplier, thetaSpeedSupplier;
     private BooleanSupplier slowModeSupplier;
@@ -25,13 +25,15 @@ public class DefaultDrive extends CommandBase {
     private final SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
     private final SlewRateLimiter thetaSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
 
-    public DefaultDrive(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
-            DoubleSupplier thetaSpeedSupplier, BooleanSupplier slowModeSupplier, Drivetrain drivetrain) {
+    public TeleopDrive(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
+            DoubleSupplier thetaSpeedSupplier, BooleanSupplier slowModeSupplier,
+            Drivetrain drivetrain) {
         this.xSpeedSupplier = xSpeedSupplier;
         this.ySpeedSupplier = ySpeedSupplier;
         this.thetaSpeedSupplier = thetaSpeedSupplier;
         this.slowModeSupplier = slowModeSupplier;
         this.drivetrain = drivetrain;
+
         addRequirements(drivetrain);
     }
 
@@ -61,12 +63,18 @@ public class DefaultDrive extends CommandBase {
             thetaSpeed *= Constants.Teleop.SLOW_MODE_PERCENT_LIMIT;
         }
 
+        if (drivetrain.getTurnControllerEnabled()) {
+            thetaSpeed = drivetrain.getTurnControllerOutput();
+        }
+
         // the speeds are initially values from -1.0 to 1.0, so we multiply by the max
         // physical velocity to output in m/s.
+        xSpeed *= Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
+        ySpeed *= Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
+        thetaSpeed *= Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
+
         drivetrain.drive(
-                xSpeed * Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND,
-                ySpeed * Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND,
-                thetaSpeed * Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND,
+                xSpeed, ySpeed, thetaSpeed,
                 drivetrain.getDriveMode());
     }
 }
