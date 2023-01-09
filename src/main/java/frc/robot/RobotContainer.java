@@ -13,7 +13,6 @@ import com.techhounds.houndutil.houndlog.logitems.DoubleLogItem;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
-import frc.robot.commands.TeleopDrive;
 import frc.robot.commands.auto.Circle;
 import frc.robot.commands.auto.Figure8;
 import frc.robot.subsystems.Drivetrain;
@@ -41,7 +40,8 @@ public class RobotContainer {
 
         LoggingManager.getInstance().addGroup("Main", new LogGroup(
                 new Logger[] {
-                        new DoubleLogItem("Speed Limit", () -> Constants.Teleop.PERCENT_LIMIT, LogLevel.MAIN)
+                        new DoubleLogItem("Speed Limit", () -> Constants.Teleop.PERCENT_LIMIT,
+                                LogLevel.MAIN)
                 }));
     }
 
@@ -52,23 +52,22 @@ public class RobotContainer {
                         Constants.OI.DRIVER_PORT);
                 // Driver left joystick and right joystick, drive
                 drivetrain.setDefaultCommand(
-                        new TeleopDrive(
+                        drivetrain.teleopDriveCommand(
                                 () -> driverController.getLeftX(),
                                 () -> driverController.getLeftY(),
                                 () -> driverController.getRightY(),
-                                () -> false,
-                                drivetrain));
+                                () -> false));
 
             case FlightStick:
                 CommandJoystick joystick = new CommandJoystick(0);
 
                 drivetrain.setDefaultCommand(
-                        new TeleopDrive(
-                                () -> -joystick.getY() * 2.0, // because flight stick goes -0.5 to 0.5
+                        drivetrain.teleopDriveCommand(
+                                () -> -joystick.getY() * 2.0, // because flight stick
+                                                              // goes -0.5 to 0.5
                                 () -> -joystick.getX() * 2.0,
                                 () -> -joystick.getTwist() * 2.0,
-                                () -> joystick.getHID().getRawButton(1),
-                                drivetrain));
+                                () -> joystick.getHID().getRawButton(1)));
 
                 joystick.button(12).onTrue(
                         new InstantCommand(drivetrain::zeroGyro)
@@ -97,5 +96,10 @@ public class RobotContainer {
         AutoManager.getInstance().addRoutine(
                 new PPAutoRoutine("Figure 8",
                         new Figure8(TrajectoryLoader.getAutoPath("Figure8"), drivetrain)));
+
+        AutoManager.getInstance().addEvent("event1", new PrintCommand("1"));
+        AutoManager.getInstance().addEvent("event2", new PrintCommand("2"));
+        AutoManager.getInstance().addEvent("event3", new PrintCommand("3"));
+        AutoManager.getInstance().addEvent("event4", new PrintCommand("4"));
     }
 }

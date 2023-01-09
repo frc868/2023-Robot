@@ -1,8 +1,13 @@
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix.sensors.Pigeon2;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -17,6 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.techhounds.houndutil.houndlib.auto.AutoManager;
@@ -291,6 +297,71 @@ public class Drivetrain extends SubsystemBase {
                                 getSwerveModuleStates()[3].angle)));
     }
 
+    public double getTurnControllerOutput() {
+        return turnController.calculate(getGyroAngleRad());
+    }
+
+    public boolean getTurnControllerEnabled() {
+        if (isTurningEnabled) {
+            if (turnController.atGoal()) {
+                isTurningEnabled = false;
+                turnRegister = 0;
+            }
+        }
+        return isTurningEnabled;
+    }
+
+    /**
+     * Adds 90 degrees CCW to the internal register for the turning PID controller.
+     * Map this to a button input to turn 90 degrees CCW while still moving.
+     */
+    public Command teleopDriveCommand(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
+            DoubleSupplier thetaSpeedSupplier, BooleanSupplier slowModeSupplier) {
+        SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
+        SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
+        SlewRateLimiter thetaSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
+
+        return new RunCommand(() -> {
+            double xSpeed = xSpeedSupplier.getAsDouble();
+            double ySpeed = ySpeedSupplier.getAsDouble();
+            double thetaSpeed = thetaSpeedSupplier.getAsDouble();
+
+            xSpeed = MathUtil.applyDeadband(xSpeed, 0.05);
+            ySpeed = MathUtil.applyDeadband(ySpeed, 0.05);
+            thetaSpeed = MathUtil.applyDeadband(thetaSpeed, 0.05);
+
+            if (Constants.Teleop.IS_JOYSTICK_INPUT_RATE_LIMITED) {
+                xSpeed = xSpeedLimiter.calculate(xSpeed);
+                ySpeed = ySpeedLimiter.calculate(ySpeed);
+                thetaSpeed = thetaSpeedLimiter.calculate(thetaSpeed);
+            }
+
+            if (!slowModeSupplier.getAsBoolean()) {
+                xSpeed *= Constants.Teleop.PERCENT_LIMIT;
+                ySpeed *= Constants.Teleop.PERCENT_LIMIT;
+                thetaSpeed *= Constants.Teleop.PERCENT_LIMIT;
+            } else {
+                xSpeed *= Constants.Teleop.SLOW_MODE_PERCENT_LIMIT;
+                ySpeed *= Constants.Teleop.SLOW_MODE_PERCENT_LIMIT;
+                thetaSpeed *= Constants.Teleop.SLOW_MODE_PERCENT_LIMIT;
+            }
+
+            if (getTurnControllerEnabled()) {
+                thetaSpeed = getTurnControllerOutput();
+            }
+
+            // the speeds are initially values from -1.0 to 1.0, so we multiply by the max
+            // physical velocity to output in m/s.
+            xSpeed *= Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
+            ySpeed *= Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
+            thetaSpeed *= Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
+
+            drive(
+                    xSpeed, ySpeed, thetaSpeed,
+                    getDriveMode());
+        }, this);
+    }
+
     /**
      * Adds 90 degrees CCW to the internal register for the turning PID controller.
      * Map this to a button input to turn 90 degrees CCW while still moving.
@@ -307,21 +378,27 @@ public class Drivetrain extends SubsystemBase {
 
             turnController.setGoal(startingGyroAngle + turnRegister);
         });
-
     }
 
-    public double getTurnControllerOutput() {
-        return turnController.calculate(getGyroAngleRad());
+    public Command brakeCommand() {
+        return new InstantCommand(() -> {
+            setModuleStates(new SwerveModuleState[] {
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(-45))
+            });
+        });
     }
 
-    public boolean getTurnControllerEnabled() {
-        if (isTurningEnabled) {
-            if (turnController.atGoal()) {
-                isTurningEnabled = false;
-                turnRegister = 0;
-            }
-        }
-        return isTurningEnabled;
+    public Command brakeCommandX() {
+        return new InstantCommand(() -> {
+            setModuleStates(new SwerveModuleState[] {
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
+                    new SwerveModuleState(0, Rotation2d.fromDegrees(45))
+            });
+        });
     }
-
 }
