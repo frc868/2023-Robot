@@ -1,0 +1,26 @@
+{
+  "NetworkTables": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/HoundLog/Autonomous/Chooser": "String Chooser",
+      "/HoundLog/Autonomous/Field": "Field2d",
+      "/SmartDashboard/PPSwerveControllerCommand_field": "Field2d"
+    },
+    "windows": {
+      "/HoundLog/Autonomous/Chooser": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Autonomous/Field": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables Settings": {
+    "mode": "Client (NT4)",
+    "serverTeam": "localhost"
+  }
+}
