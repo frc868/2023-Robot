@@ -7,13 +7,13 @@ import com.ctre.phoenix.sensors.Pigeon2;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -77,7 +77,7 @@ public class Drivetrain extends SubsystemBase {
     private Pigeon2 pigeon = new Pigeon2(0);
 
     /** Calculates odometry (robot's position) throughout the match. */
-    private SwerveDriveOdometry odometry;
+    private SwerveDrivePoseEstimator poseEstimator;
 
     /** An enum describing the two types of drive modes. */
     public enum DriveMode {
@@ -101,8 +101,11 @@ public class Drivetrain extends SubsystemBase {
     /** Initializes the drivetrain. */
     public Drivetrain() {
         zeroGyro();
-        odometry = new SwerveDriveOdometry(Constants.Drivetrain.Geometry.KINEMATICS,
-                getGyroRotation2d(), getSwerveModulePositions());
+        poseEstimator = new SwerveDrivePoseEstimator(
+                Constants.Drivetrain.Geometry.KINEMATICS,
+                getGyroRotation2d(),
+                getSwerveModulePositions(),
+                new Pose2d());
 
         turnController.setTolerance(0.05);
 
@@ -122,7 +125,7 @@ public class Drivetrain extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        odometry.update(getGyroRotation2d(), getSwerveModulePositions());
+        poseEstimator.update(getGyroRotation2d(), getSwerveModulePositions());
         drawRobotOnField(AutoManager.getInstance().getField());
 
         SmartDashboard.putNumber("starginGyro", startingGyroAngle);
@@ -131,7 +134,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void resetOdometry(Pose2d pose) {
-        odometry.resetPosition(getGyroRotation2d(), getSwerveModulePositions(), pose);
+        poseEstimator.resetPosition(getGyroRotation2d(), getSwerveModulePositions(), pose);
     }
 
     public DriveMode getDriveMode() {
@@ -270,7 +273,7 @@ public class Drivetrain extends SubsystemBase {
      * @return the current pose of the drivetrain
      */
     public Pose2d getPose() {
-        return odometry.getPoseMeters();
+        return poseEstimator.getEstimatedPosition();
     }
 
     public void drawRobotOnField(Field2d field) {
