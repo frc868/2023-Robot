@@ -1,5 +1,9 @@
-# 2022-Swerve
+# 2023-Robot
 
-[![CI](https://github.com/frc868/2022-CommandBased/actions/workflows/main.yml/badge.svg)](https://github.com/frc868/2022-Swerve/actions/workflows/main.yml)
+[![CI](https://github.com/frc868/2023-Robot/actions/workflows/main.yml/badge.svg)](https://github.com/frc868/2023-Robot/actions/workflows/main.yml)
 
-This is a robot project for a swerve drive base. It includes field-oriented operation, trajectory tracking, and odometry. More to come in the future, like AprilTag tracking and dynamic trajectory generation.
+## Installation
+
+In order to get this repository fully situated on your computer, please first download the latest version of the 2023 WPILib tools, open the WPILib version of VS Code, and clone this repository. Using GitHub Desktop to clone the repository is recommended, or install Git and use the command-line.
+
+Once the repository is cloned, go to your terminal and run `git submodule init` then `git submodule update --recursive` in the repository's folder. After that, run the `WPILib: Build Robot Code` task. If that completes successfully, you have completed all of these steps.
