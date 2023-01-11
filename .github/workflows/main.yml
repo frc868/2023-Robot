@@ -22,7 +22,7 @@ jobs:
     - uses: actions/checkout@v2
     
     - name: Update Git settings to set directory as safe
-      run: git config --global --add safe.directory /__w/2023-Swerve/2023-Swerve
+      run: git config --global --add safe.directory /__w/2023-Robot/2023-Robot
     
     - name: Check out the submodule
       run: git submodule update --init
