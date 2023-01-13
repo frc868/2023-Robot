@@ -153,7 +153,7 @@ public final class Constants {
     }
 
     public static final class Vision {
-        public static final String CAMERA_NAME = "OV9281-FWD";
+        public static final String CAMERA_NAME = "OV9281-01";
         public static final Transform3d ROBOT_TO_CAM = new Transform3d(
                 new Translation3d(0.24, 0.0, 0.0),
                 new Rotation3d(0, 0, 0));
