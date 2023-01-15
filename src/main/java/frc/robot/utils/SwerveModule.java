@@ -36,7 +36,7 @@ public class SwerveModule {
     private CANCoder turnCanCoder;
 
     /** The PID controller that corrects the drive motor's velocity. */
-    private PIDController drivePIDController = new PIDController(Constants.Drivetrain.PID.DriveMotors.kP,
+    private PIDController drivePIDController = new PIDController(Constants.Drivetrain.PID.DriveMotors.kP.get(),
             Constants.Drivetrain.PID.DriveMotors.kI, Constants.Drivetrain.PID.DriveMotors.kD);
 
     /** The PID controller that controls the turning motor's position. */
@@ -124,6 +124,8 @@ public class SwerveModule {
         turnPIDControllerSimple.enableContinuousInput(0, 2 * Math.PI);
 
         this.turnCanCoderOffset = turnCanCoderOffset;
+
+        Constants.Drivetrain.PID.DriveMotors.kP.setConsumer((d) -> drivePIDController.setP(d));
 
         LoggingManager.getInstance().addGroup(name, new LogGroup(
                 new Logger[] {

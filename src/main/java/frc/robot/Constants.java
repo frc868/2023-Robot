@@ -1,5 +1,7 @@
 package frc.robot;
 
+import com.techhounds.houndutil.houndlog.loggers.TunableNumber;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
@@ -49,7 +51,7 @@ public final class Constants {
 
         public static final class PID {
             public static final class DriveMotors {
-                public static final double kP = 3.3657;
+                public static final TunableNumber kP = new TunableNumber("Drivetrain", "kP", 3.3657);
                 public static final double kI = 0.0;
                 public static final double kD = 0.0;
                 public static final double kS = 0.12817;
