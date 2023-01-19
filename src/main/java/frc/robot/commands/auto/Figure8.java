@@ -1,7 +1,7 @@
 package frc.robot.commands.auto;
 
-import com.techhounds.houndutil.houndlib.auto.AutoPath;
-import com.techhounds.houndutil.houndlib.auto.AutoTrajectoryCommand;
+import com.techhounds.houndutil.houndauto.AutoPath;
+import com.techhounds.houndutil.houndauto.AutoTrajectoryCommand;
 
 import frc.robot.commands.AutoRoutineHelpers;
 import frc.robot.subsystems.Drivetrain;

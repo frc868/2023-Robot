@@ -2,6 +2,8 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import com.techhounds.houndutil.houndlog.loggers.TunableNumber;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -52,18 +54,18 @@ public final class Constants {
 
         public static final class PID {
             public static final class DriveMotors {
-                public static final double kP = 3.3657;
-                public static final double kI = 0.0;
-                public static final double kD = 0.0;
+                public static final TunableNumber kP = new TunableNumber("Drivetrain", "driveKP", 3.3657);
+                public static final TunableNumber kI = new TunableNumber("Drivetrain", "driveKI", 0.0);
+                public static final TunableNumber kD = new TunableNumber("Drivetrain", "driveKD", 0.0);
                 public static final double kS = 0.12817;
                 public static final double kV = 2.7653;
                 public static final double kA = 0.29499;
             }
 
             public static final class TurnMotors {
-                public static final double kP = 0.4;
-                public static final double kI = 0.0;
-                public static final double kD = 0.01;
+                public static final TunableNumber kP = new TunableNumber("Drivetrain", "turnKP", 0.4);
+                public static final TunableNumber kI = new TunableNumber("Drivetrain", "turnKI", 0.0);
+                public static final TunableNumber kD = new TunableNumber("Drivetrain", "turnKD", 0.01);
             }
 
             public static final class Trajectories {

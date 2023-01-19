@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-import com.techhounds.houndutil.houndlib.auto.AutoManager;
+import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 
 /**
