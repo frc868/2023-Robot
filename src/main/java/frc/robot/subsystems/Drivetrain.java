@@ -6,6 +6,7 @@ import java.util.function.DoubleSupplier;
 import com.ctre.phoenix.sensors.Pigeon2;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -32,6 +33,7 @@ import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import com.techhounds.houndutil.houndlog.loggers.Logger;
 import frc.robot.Constants;
+import frc.robot.utils.PhotonCameraWrapper;
 import frc.robot.utils.SwerveModule;
 
 /**
@@ -75,6 +77,8 @@ public class Drivetrain extends SubsystemBase {
 
     /** The Pigeon 2, the overpriced but really good gyro that we use. */
     private Pigeon2 pigeon = new Pigeon2(0);
+
+    private PhotonCameraWrapper photonCamera = new PhotonCameraWrapper(Constants.Vision.CAMERA_NAME);
 
     /** Calculates odometry (robot's position) throughout the match. */
     private SwerveDrivePoseEstimator poseEstimator;
@@ -125,16 +129,11 @@ public class Drivetrain extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        poseEstimator.update(getGyroRotation2d(), getSwerveModulePositions());
-        drawRobotOnField(AutoManager.getInstance().getField());
+        updateOdometry();
 
         SmartDashboard.putNumber("starginGyro", startingGyroAngle);
         SmartDashboard.putNumber("turnRegister", turnRegister);
 
-    }
-
-    public void resetOdometry(Pose2d pose) {
-        poseEstimator.resetPosition(getGyroRotation2d(), getSwerveModulePositions(), pose);
     }
 
     public DriveMode getDriveMode() {
@@ -274,6 +273,27 @@ public class Drivetrain extends SubsystemBase {
      */
     public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
+    }
+
+    private void updateOdometry() {
+        poseEstimator.update(getGyroRotation2d(), getSwerveModulePositions());
+
+        Pair<Pose2d, Double> result = photonCamera.getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());
+        Pose2d camPose = result.getFirst();
+        double camPoseObsTime = result.getSecond();
+        Field2d field = AutoManager.getInstance().getField();
+        if (camPose != null) {
+            poseEstimator.addVisionMeasurement(camPose, camPoseObsTime);
+            field.getObject("AprilTag Estimated Position").setPose(camPose);
+        } else {
+            // move it way off the screen to make it disappear
+            field.getObject("AprilTag Estimated Position").setPose(new Pose2d(-100, -100, new Rotation2d()));
+        }
+        drawRobotOnField(AutoManager.getInstance().getField());
+    }
+
+    public void resetOdometry(Pose2d pose) {
+        poseEstimator.resetPosition(getGyroRotation2d(), getSwerveModulePositions(), pose);
     }
 
     public void drawRobotOnField(Field2d field) {
