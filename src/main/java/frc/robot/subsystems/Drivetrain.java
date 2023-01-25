@@ -1,12 +1,14 @@
 package frc.robot.subsystems;
 
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+
+import org.photonvision.EstimatedRobotPose;
 
 import com.ctre.phoenix.sensors.Pigeon2;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -20,20 +22,20 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.techhounds.houndutil.houndauto.AutoManager;
+import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import com.techhounds.houndutil.houndlog.loggers.Logger;
 import frc.robot.Constants;
-import frc.robot.utils.PhotonCameraWrapper;
 import frc.robot.utils.SwerveModule;
 
 /**
@@ -78,7 +80,16 @@ public class Drivetrain extends SubsystemBase {
     /** The Pigeon 2, the overpriced but really good gyro that we use. */
     private Pigeon2 pigeon = new Pigeon2(0);
 
-    private PhotonCameraWrapper photonCamera = new PhotonCameraWrapper(Constants.Vision.CAMERA_NAME);
+    private AprilTagPhotonCamera[] photonCameras = new AprilTagPhotonCamera[] {
+            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[0],
+                    Constants.Vision.ROBOT_TO_CAMS[0]),
+            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[0],
+                    Constants.Vision.ROBOT_TO_CAMS[0]),
+            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[0],
+                    Constants.Vision.ROBOT_TO_CAMS[0]),
+            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[0],
+                    Constants.Vision.ROBOT_TO_CAMS[0])
+    };
 
     /** Calculates odometry (robot's position) throughout the match. */
     private SwerveDrivePoseEstimator poseEstimator;
@@ -130,10 +141,6 @@ public class Drivetrain extends SubsystemBase {
     @Override
     public void periodic() {
         updateOdometry();
-
-        SmartDashboard.putNumber("starginGyro", startingGyroAngle);
-        SmartDashboard.putNumber("turnRegister", turnRegister);
-
     }
 
     public DriveMode getDriveMode() {
@@ -278,18 +285,24 @@ public class Drivetrain extends SubsystemBase {
     private void updateOdometry() {
         poseEstimator.update(getGyroRotation2d(), getSwerveModulePositions());
 
-        Pair<Pose2d, Double> result = photonCamera.getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());
-        Pose2d camPose = result.getFirst();
-        double camPoseObsTime = result.getSecond();
-        Field2d field = AutoManager.getInstance().getField();
-        if (camPose != null) {
-            poseEstimator.addVisionMeasurement(camPose, camPoseObsTime);
-            field.getObject("AprilTag Estimated Position").setPose(camPose);
-        } else {
-            // move it way off the screen to make it disappear
-            field.getObject("AprilTag Estimated Position").setPose(new Pose2d(-100, -100, new Rotation2d()));
+        for (int i = 0; i < photonCameras.length; i++) {
+            Optional<EstimatedRobotPose> result = photonCameras[i]
+                    .getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());
+            Field2d field = AutoManager.getInstance().getField();
+
+            FieldObject2d fieldObject = field.getObject("apriltag_cam" + i + "_est_pose");
+            if (result.isPresent()) {
+                EstimatedRobotPose camPose = result.get();
+                poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(),
+                        camPose.timestampSeconds);
+                fieldObject.setPose(camPose.estimatedPose.toPose2d());
+            } else {
+                // move it way off the screen to make it disappear
+                fieldObject.setPose(new Pose2d(-100, -100, new Rotation2d()));
+            }
+
+            drawRobotOnField(AutoManager.getInstance().getField());
         }
-        drawRobotOnField(AutoManager.getInstance().getField());
     }
 
     public void resetOdometry(Pose2d pose) {
