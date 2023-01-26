@@ -83,12 +83,12 @@ public class Drivetrain extends SubsystemBase {
     private AprilTagPhotonCamera[] photonCameras = new AprilTagPhotonCamera[] {
             new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[0],
                     Constants.Vision.ROBOT_TO_CAMS[0]),
-            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[0],
-                    Constants.Vision.ROBOT_TO_CAMS[0]),
-            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[0],
-                    Constants.Vision.ROBOT_TO_CAMS[0]),
-            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[0],
-                    Constants.Vision.ROBOT_TO_CAMS[0])
+            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[1],
+                    Constants.Vision.ROBOT_TO_CAMS[1]),
+            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[2],
+                    Constants.Vision.ROBOT_TO_CAMS[2]),
+            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[3],
+                    Constants.Vision.ROBOT_TO_CAMS[3])
     };
 
     /** Calculates odometry (robot's position) throughout the match. */
