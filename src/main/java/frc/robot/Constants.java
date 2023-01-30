@@ -1,9 +1,9 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import com.techhounds.houndutil.houndlog.loggers.TunableNumber;
 
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -51,7 +51,6 @@ public final class Constants {
                 public static final int TURN_ENCODER = 3; // untested
             }
         }
-
         public static final class PID {
             public static final class DriveMotors {
                 public static final TunableNumber kP = new TunableNumber("Drivetrain", "driveKP", 3.3657); // untested
@@ -119,6 +118,23 @@ public final class Constants {
                     SWERVE_MODULE_LOCATIONS[1],
                     SWERVE_MODULE_LOCATIONS[2],
                     SWERVE_MODULE_LOCATIONS[3]);
+        }
+    }
+    public static final class Elbow {
+        public final class CANIDs {
+            public static final int ELBOW_MOTOR = 0; //untested
+        }
+        public final class PIDIDs {
+            public static final int kP = 0; //untested
+            public static final int kI = 0; //untested
+            public static final int kD = 0; //untested
+        }
+        public final class FeedForward {
+            public static final int kS = 0; //untested
+            public static final int kG = 0; //untested
+            public static final int kV = 0; //untested
+            public static final int kA = 0; //untested
+
         }
     }
 
