@@ -168,4 +168,9 @@ public final class Constants {
         public static final double MAX_ANGULAR_ACCELERATION = 8 * Math.PI; // untested
 
     }
+
+    public static final class Intake {
+        public static final int RIGHT_PASSOVER_MOTOR = 12; // untested
+        public static final int LEFT_PASSOVER_MOTOR = 13; // untesteed
+    }
 }
