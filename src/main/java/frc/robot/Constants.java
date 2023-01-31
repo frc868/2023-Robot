@@ -168,4 +168,25 @@ public final class Constants {
         public static final double MAX_ANGULAR_ACCELERATION = 8 * Math.PI; // untested
 
     }
+
+    public static final class Elevator {
+        public static final class CANIDs {
+            public static final int PRIMARY_MOTOR = 65537; // untested
+            public static final int SECONDARY_MOTOR = 65537; // untested
+            public static final int ELEVATOR_TOP = 65537; // untested
+            public static final int ELEVATOR_BOTTOM = 65537; // untested
+        }
+        public static final class PID {
+            public static final TunableNumber kP = new TunableNumber("Elevator", "elevKP", 0.0); // untested
+            public static final TunableNumber kI = new TunableNumber("Elevator", "elevKI", 0.0); // untested
+            public static final TunableNumber kD = new TunableNumber("Elevator", "elevKD", 0.0); // untested
+            public static final double kS = 0.0; // untested
+            public static final double kV = 0.0; // untested
+            public static final double kA = 0.0; // untested
+        }
+
+
+        
+
+    }
 }
