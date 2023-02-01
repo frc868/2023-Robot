@@ -168,4 +168,11 @@ public final class Constants {
         public static final double MAX_ANGULAR_ACCELERATION = 8 * Math.PI; // untested
 
     }
+
+    public static final class Manipulator {
+        public static final class Solenoids {
+            public static final int FORWARD = 0; // untested
+            public static final int REVERSE = 0; // untested
+        }
+    }
 }
