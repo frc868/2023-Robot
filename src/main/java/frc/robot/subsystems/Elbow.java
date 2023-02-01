@@ -4,6 +4,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.AnalogEncoder;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
@@ -12,27 +13,37 @@ import frc.robot.Constants;
 
 public class Elbow extends ProfiledPIDSubsystem{
     private CANSparkMax elbowMotor = new CANSparkMax(Constants.Elbow.CANIDs.ELBOW_MOTOR, MotorType.kBrushless);
-    private ArmFeedforward feedfoward = new ArmFeedforward(Constants.Elbow.FeedForward.kS,
+    private ArmFeedforward feedForward = new ArmFeedforward(Constants.Elbow.FeedForward.kS,
     Constants.Elbow.FeedForward.kG, Constants.Elbow.FeedForward.kV, Constants.Elbow.FeedForward.kA);
     private AnalogEncoder elbowEncoder = new AnalogEncoder(0); //untested channel
-
+    private DigitalInput bottomhallSensor = new DigitalInput(0); //untested channel
+    private DigitalInput tophallSensor = new DigitalInput(0); //untested channel
+    
     public Elbow(ProfiledPIDController controller) {
         super(new ProfiledPIDController(Constants.Elbow.PIDIDs.kP, Constants.Elbow.PIDIDs.kP,
          Constants.Elbow.PIDIDs.kP, null));
          getController().setTolerance(1.0);
         }
-
+    
     @Override
     protected void useOutput(double output, State setpoint) {
-        // elbowMotor.setVoltage(output + feedforward.calculate(getMeasurement(), setpoint)); 
+         elbowMotor.setVoltage(feedForward.calculate(setpoint.position, setpoint.velocity) + output); 
     }
    
-     
-
     @Override
     protected double getMeasurement() {
         return elbowEncoder.getAbsolutePosition();
         
     }
-    
+
+    protected void tophallTrip(){
+        if ((tophallSensor.get() == true) && (elbowMotor.getBusVoltage() > 0)){
+            elbowMotor.setVoltage(0);
+        }
+    }
+    protected void bottomhallTrip(){
+        if ((bottomhallSensor.get() == true) && (elbowMotor.getBusVoltage() < 0)){
+            elbowMotor.setVoltage(0);
+        }
+    }
 }
