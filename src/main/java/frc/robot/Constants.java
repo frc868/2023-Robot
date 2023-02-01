@@ -123,6 +123,9 @@ public final class Constants {
     public static final class Elbow {
         public final class CANIDs {
             public static final int ELBOW_MOTOR = 0; //untested
+            public static final int ENCODER_CHANNEL = 0; //untested
+            public static final int B_HALL_SENSOR_CHANNEL = 0; //untested
+            public static final int T_HALL_SENSOR_CHANNEL = 0; //untested
         }
         public final class PIDIDs {
             public static final int kP = 0; //untested
