@@ -186,6 +186,7 @@ public final class Constants {
         }
         public static final double MAX_VELOCITY = 0.0; // untested
         public static final double MAX_ACCELERATION = 0.0; // untested
+        public static final double  ELEVATOR_HEIGHT = 65537; //untested
 
 
 

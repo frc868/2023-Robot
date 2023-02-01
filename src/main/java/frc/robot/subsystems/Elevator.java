@@ -9,6 +9,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -45,6 +46,11 @@ public class Elevator extends SubsystemBase{
     public Elevator(){
 
     }
+
+// Two different positions for the elevator
+  State eleUp = new TrapezoidProfile.State(Constants.Elevator.ELEVATOR_HEIGHT, 0);
+  State eleDown = new TrapezoidProfile.State(0, 0);
+  TrapezoidProfile elevatorProfile = new TrapezoidProfile(null, eleDown, eleUp);
 
 
 }
