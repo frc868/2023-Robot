@@ -1,6 +1,9 @@
 package frc.robot.subsystems;
 
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -21,5 +24,21 @@ import frc.robot.Constants;
  */
 
 public class Elevator extends SubsystemBase{
-    
+    private CANSparkMax primary = new CANSparkMax(Constants.Elevator.CANIDs.PRIMARY_MOTOR, MotorType.kBrushless);
+    private CANSparkMax secondary = new CANSparkMax(Constants.Elevator.CANIDs.SECONDARY_MOTOR, MotorType.kBrushless);
+
+    private DigitalInput topLimit = new DigitalInput(Constants.Elevator.CANIDs.ELEVATOR_TOP);
+    private DigitalInput bottomLimit = new DigitalInput(Constants.Elevator.CANIDs.ELEVATOR_BOTTOM);
+
+    private ProfiledPIDController elevatorController = new ProfiledPIDController(Constants.Elevator.PID.kP.get(),
+            Constants.Elevator.PID.kI.get(),
+            Constants.Elevator.PID.kD.get(),
+            new TrapezoidProfile.Constraints(Constants.Elevator.MAX_VELOCITY,
+                    Constants.Elevator.MAX_ACCELERATION));
+
+    public Elevator(){
+
+    }
+
+
 }
