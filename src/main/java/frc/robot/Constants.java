@@ -170,7 +170,10 @@ public final class Constants {
     }
 
     public static final class Intake {
-        public static final int RIGHT_PASSOVER_MOTOR = 12; // untested
-        public static final int LEFT_PASSOVER_MOTOR = 13; // untesteed
+        public static final class CANIDs {
+            public static final int RIGHT_PASSOVER_MOTOR = 12; // untested
+            public static final int LEFT_PASSOVER_MOTOR = 13; // untesteed
+        }
+
     }
 }
