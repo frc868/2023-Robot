@@ -71,7 +71,7 @@ public class Elevator extends SubsystemBase{
     }
 
     public void retractElevator(){
-        setElevatorPosition(0);
+        setElevatorPosition(Constants.Elevator.MIN_LENGTH);
     }
 
     public void setSpeed(double speed){
