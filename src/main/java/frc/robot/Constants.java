@@ -139,8 +139,10 @@ public final class Constants {
             public static final double kA = 0.0; //untested
 
         }
-        public final class ArmState {
+        public final class ArmStates {
             public static final double INITIAL_POSITION = 0.0; //untested
+            public static final double SCORING_POSITION = 0.0; //untested
+            public static final double COLLECT_GAME_PIECE_POSITION = 0.0;
         }
     }
 

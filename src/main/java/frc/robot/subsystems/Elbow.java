@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+import edu.wpi.first.wpilibj2.command.ProfiledPIDCommand;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
 import frc.robot.Constants;
 /**
@@ -38,6 +39,7 @@ public class Elbow extends ProfiledPIDSubsystem{
     private DigitalInput tophallEffect = new DigitalInput(Constants.Elbow.CANIDs.T_HALL_SENSOR_CHANNEL); 
     /**
      * Constructs profiled pid controller and motor logger objects.
+     * Resets arm angle.
      */
     public Elbow() {
         super(new ProfiledPIDController(Constants.Elbow.PID.kP, Constants.Elbow.PID.kP,
@@ -47,6 +49,7 @@ public class Elbow extends ProfiledPIDSubsystem{
                     new DeviceLogger<CANSparkMax>(elbowMotor, "Elbow Motor",
                         LogProfileBuilder.buildCANSparkMaxLogItems(elbowMotor))
             ));
+        setGoal(Constants.Elbow.ArmStates.INITIAL_POSITION);
         }
     /**
      * Gets the output of pid controller and calculates setpoint using feedforward.
@@ -65,14 +68,6 @@ public class Elbow extends ProfiledPIDSubsystem{
     @Override
     protected double getMeasurement() {
         return elbowEncoder.getAbsolutePosition();
-        
-    }
-    /**
-     * Sets angle to desired angle.
-     * @param angle sets motor to specified angle.
-     */
-    protected void setAngle(double angle){
-        setGoal(angle);
     }
     /**
      * Checks if top hall effect is triggered and stops elbow from going up.
@@ -89,5 +84,24 @@ public class Elbow extends ProfiledPIDSubsystem{
         if ((bottomhallEffect.get() == true) && (elbowMotor.getBusVoltage() < 0)){
             elbowMotor.setVoltage(0);
         }
+    }
+     /**
+     * Sets angle to desired angle.
+     * @param angle sets motor to specified angle.
+     */
+    protected void SetDesiredPositionCommand(double angle){
+        setGoal(angle);
+    }
+    /**
+     * Scoring position for cone, hole above the pole.
+     */
+    protected void SetScoringPositionCommand(){
+        SetDesiredPositionCommand(Constants.Elbow.ArmStates.SCORING_POSITION);
+    }
+    /**
+     * Elbow pointing manipulator straight forward.
+     */
+    protected void SetGamePieceCollectCommand(){
+        SetDesiredPositionCommand(Constants.Elbow.ArmStates.COLLECT_GAME_PIECE_POSITION);
     }
 }
