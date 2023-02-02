@@ -139,6 +139,9 @@ public final class Constants {
             public static final double kA = 0.0; //untested
 
         }
+        public final class ArmState {
+            public static final double INITIAL_POSITION = 0.0; //untested
+        }
     }
 
     public static final class OI {
