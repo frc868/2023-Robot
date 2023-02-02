@@ -171,8 +171,15 @@ public final class Constants {
 
     public static final class Manipulator {
         public static final class Solenoids {
-            public static final int FORWARD = 0; // untested
-            public static final int REVERSE = 0; // untested
+            public static final class Wrist {
+                public static final int FORWARD = 0; // untested
+                public static final int REVERSE = 0; // untested
+            }
+
+            public static final class Pincer {
+                public static final int FORWARD = 0; // untested
+                public static final int REVERSE = 0; // untested
+            }
         }
 
         public static final int POLE_DETECTOR = 0; // untested

@@ -20,30 +20,39 @@ import frc.robot.Constants;
  * @author gc
  */
 public class Manipulator extends SubsystemBase {
-    private DoubleSolenoid wristSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH, Constants.Manipulator.Solenoids.FORWARD, Constants.Manipulator.Solenoids.REVERSE);
-    private DigitalInput poleDetector = new DigitalInput(Constants.Manipulator.POLE_DETECTOR);
+    private DoubleSolenoid wrist = new DoubleSolenoid(PneumaticsModuleType.REVPH, Constants.Manipulator.Solenoids.Wrist.FORWARD, Constants.Manipulator.Solenoids.Wrist.REVERSE);
+    private DoubleSolenoid pincer = new DoubleSolenoid(PneumaticsModuleType.REVPH, Constants.Manipulator.Solenoids.Pincer.FORWARD, Constants.Manipulator.Solenoids.Pincer.REVERSE);
     private PneumaticHub pneumaticHub = new PneumaticHub();
+    private DigitalInput poleDetector = new DigitalInput(Constants.Manipulator.POLE_DETECTOR);
 
     public Manipulator() {
         pneumaticHub.enableCompressorDigital();
         
         LoggingManager.getInstance().addGroup("Manipulator", new LogGroup(
             new Logger[] {
-                new DeviceLogger<DoubleSolenoid>(wristSolenoid, "Wrist Solenoid",
-                LogProfileBuilder.buildDoubleSolenoidLogItems(wristSolenoid))
+                new DeviceLogger<DoubleSolenoid>(wrist, "Wrist Solenoid", LogProfileBuilder.buildDoubleSolenoidLogItems(wrist)),
+                new DeviceLogger<DoubleSolenoid>(pincer, "Pincer", LogProfileBuilder.buildDoubleSolenoidLogItems(pincer))
             }
         ));
     }
 
     public void setWristUp() {
-        wristSolenoid.set(Value.kForward); // untested
+        wrist.set(Value.kForward); // untested
     }
 
     public void setWristDown() {
-        wristSolenoid.set(Value.kReverse); // untested
+        wrist.set(Value.kReverse); // untested
+    }
+
+    public void setPincerUp() {
+        pincer.set(Value.kForward); // untested
+    }
+
+    public void setPincerDown() {
+        pincer.set(Value.kReverse); // untested
     }
 
     public boolean poleDetected() {
-        return poleDetector.get();
+        return poleDetector.get(); // untested
     }
 }
