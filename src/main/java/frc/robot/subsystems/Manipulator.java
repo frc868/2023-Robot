@@ -8,6 +8,7 @@ import com.techhounds.houndutil.houndlog.loggers.Logger;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -21,8 +22,11 @@ import frc.robot.Constants;
 public class Manipulator extends SubsystemBase {
     private DoubleSolenoid wristSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH, Constants.Manipulator.Solenoids.FORWARD, Constants.Manipulator.Solenoids.REVERSE);
     private DigitalInput poleDetector = new DigitalInput(Constants.Manipulator.POLE_DETECTOR);
+    private PneumaticHub pneumaticHub = new PneumaticHub();
 
     public Manipulator() {
+        pneumaticHub.enableCompressorDigital();
+        
         LoggingManager.getInstance().addGroup("Manipulator", new LogGroup(
             new Logger[] {
                 new DeviceLogger<DoubleSolenoid>(wristSolenoid, "Wrist Solenoid",
