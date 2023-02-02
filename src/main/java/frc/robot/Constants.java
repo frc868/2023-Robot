@@ -171,23 +171,28 @@ public final class Constants {
 
     public static final class Elevator {
         public static final class CANIDs {
-            public static final int PRIMARY_MOTOR = 65537; // untested
-            public static final int SECONDARY_MOTOR = 65537; // untested
-            public static final int ELEVATOR_TOP = 65537; // untested
+            public static final int PRIMARY_MOTOR = 5; // untested
+            public static final int SECONDARY_MOTOR = 17; // untested
+            public static final int ELEVATOR_TOP = 257; // untested
             public static final int ELEVATOR_BOTTOM = 65537; // untested
         }
         public static final class PID {
-            public static final TunableNumber kP = new TunableNumber("Elevator", "elevKP", 6.6); // untested
-            public static final TunableNumber kI = new TunableNumber("Elevator", "elevKI", 6.6); // untested
-            public static final TunableNumber kD = new TunableNumber("Elevator", "elevKD", 6.6); // untested
-            public static final double kS = 0.0; // untested
-            public static final double kV = 0.0; // untested
-            public static final double kA = 0.0; // untested
+            public static final TunableNumber kP = new TunableNumber("Elevator", "elevKP", 3.14); // untested
+            public static final TunableNumber kI = new TunableNumber("Elevator", "elevKI", 2.72); // untested
+            public static final TunableNumber kD = new TunableNumber("Elevator", "elevKD", 3.00); // untested
+            public static final double kS = 1.337; // untested
+            public static final double kV = 6.9; // untested
+            public static final double kA = 4.20; // untested
         }
-        public static final double MAX_VELOCITY = 0.0; // untested
-        public static final double MAX_ACCELERATION = 0.0; // untested
-        public static final double MAX_LENGTH = 0.0; // untested
-        public static final double MIN_LENGTH = 0.0; // untested
+        public static final class Scoring{
+            public static final double HIGH_SCORE = 15.11; // untested
+            public static final double MEDIUM_SCORE = 0.1101000; // untested
+            public static final double LOW_SCORE = 1.729; //untested
+        }
+        public static final double MAX_VELOCITY = 12.3456789; // untested
+        public static final double MAX_ACCELERATION = -1.0; // untested
+        public static final double MAX_LENGTH = 0.01; // untested
+        public static final double MIN_LENGTH = 19.84; // untested
 
 
 
