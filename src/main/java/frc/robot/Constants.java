@@ -174,5 +174,7 @@ public final class Constants {
             public static final int FORWARD = 0; // untested
             public static final int REVERSE = 0; // untested
         }
+
+        public static final int POLE_DETECTOR = 0; // untested
     }
 }
