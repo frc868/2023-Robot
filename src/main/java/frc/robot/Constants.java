@@ -127,16 +127,16 @@ public final class Constants {
             public static final int B_HALL_SENSOR_CHANNEL = 0; //untested
             public static final int T_HALL_SENSOR_CHANNEL = 0; //untested
         }
-        public final class PIDIDs {
-            public static final int kP = 0; //untested
-            public static final int kI = 0; //untested
-            public static final int kD = 0; //untested
+        public final class PID {
+            public static final double kP = 0.0; //untested
+            public static final double kI = 0.0; //untested
+            public static final double kD = 0.0; //untested
         }
         public final class FeedForward {
-            public static final int kS = 0; //untested
-            public static final int kG = 0; //untested
-            public static final int kV = 0; //untested
-            public static final int kA = 0; //untested
+            public static final double kS = 0.0; //untested
+            public static final double kG = 0.0; //untested
+            public static final double kV = 0.0; //untested
+            public static final double kA = 0.0; //untested
 
         }
     }
