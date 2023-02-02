@@ -11,9 +11,11 @@ import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
-import edu.wpi.first.wpilibj2.command.ProfiledPIDCommand;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.Constants;
 /**
  * Elbow subsystem, one CAN Motor and encoder, one feedforward object, and two hall effect sensors.         
@@ -43,7 +45,8 @@ public class Elbow extends ProfiledPIDSubsystem{
      */
     public Elbow() {
         super(new ProfiledPIDController(Constants.Elbow.PID.kP, Constants.Elbow.PID.kP,
-         Constants.Elbow.PID.kP, null));
+         Constants.Elbow.PID.kP, new TrapezoidProfile.Constraints(Constants.Elbow.PID.MAX_VELOCITY,
+         Constants.Elbow.PID.MAX_ACCELERATION)));
          getController().setTolerance(1.0);
          LoggingManager.getInstance().addGroup("Elbow", new LogGroup(
                     new DeviceLogger<CANSparkMax>(elbowMotor, "Elbow Motor",
@@ -53,7 +56,7 @@ public class Elbow extends ProfiledPIDSubsystem{
         }
     /**
      * Gets the output of pid controller and calculates setpoint using feedforward.
-     * New voltage will be calculated setpiont + output of pid.
+     * New voltage will be calculated setpoint + output of pid.
      * @param output from pid controller and desired position.
      */
     
@@ -95,13 +98,23 @@ public class Elbow extends ProfiledPIDSubsystem{
     /**
      * Scoring position for cone, hole above the pole.
      */
-    protected void SetScoringPositionCommand(){
-        SetDesiredPositionCommand(Constants.Elbow.ArmStates.SCORING_POSITION);
+    protected Command SetScoringCommand(){
+        return new RunCommand(()-> {
+            SetDesiredPositionCommand(Constants.Elbow.ArmStates.SCORING_POSITION);
+        });
     }
     /**
      * Elbow pointing manipulator straight forward.
      */
-    protected void SetGamePieceCollectCommand(){
-        SetDesiredPositionCommand(Constants.Elbow.ArmStates.COLLECT_GAME_PIECE_POSITION);
+    protected Command SetGamePieceCollectCommand(){
+        return new RunCommand(()-> {
+            SetDesiredPositionCommand(Constants.Elbow.ArmStates.COLLECT_GAME_PIECE_POSITION);
+        });
+    }
+    /**
+     * Stops the motor.
+     */
+    protected void Stop(){
+        elbowMotor.setVoltage(0);
     }
 }

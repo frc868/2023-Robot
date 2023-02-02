@@ -128,21 +128,23 @@ public final class Constants {
             public static final int T_HALL_SENSOR_CHANNEL = 0; //untested
         }
         public final class PID {
-            public static final double kP = 0.0; //untested
+            public static final double kP = 1.0; //untested
             public static final double kI = 0.0; //untested
             public static final double kD = 0.0; //untested
+            public static final double MAX_VELOCITY = 12.0; //untested
+            public static final double MAX_ACCELERATION = 12.0; //untested
         }
         public final class FeedForward {
-            public static final double kS = 0.0; //untested
+            public static final double kS = 1.0; //untested
             public static final double kG = 0.0; //untested
             public static final double kV = 0.0; //untested
             public static final double kA = 0.0; //untested
 
         }
         public final class ArmStates {
-            public static final double INITIAL_POSITION = 0.0; //untested
+            public static final double INITIAL_POSITION = 90.0; //untested
             public static final double SCORING_POSITION = 0.0; //untested
-            public static final double COLLECT_GAME_PIECE_POSITION = 0.0;
+            public static final double COLLECT_GAME_PIECE_POSITION = 90.0; //untested
         }
     }
 
