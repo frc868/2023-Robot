@@ -40,8 +40,8 @@ public class Elbow extends ProfiledPIDSubsystem{
      * Constructs profiled pid controller and motor logger objects.
      */
     public Elbow() {
-        super(new ProfiledPIDController(Constants.Elbow.PIDIDs.kP, Constants.Elbow.PIDIDs.kP,
-         Constants.Elbow.PIDIDs.kP, null));
+        super(new ProfiledPIDController(Constants.Elbow.PID.kP, Constants.Elbow.PID.kP,
+         Constants.Elbow.PID.kP, null));
          getController().setTolerance(1.0);
          LoggingManager.getInstance().addGroup("Elbow", new LogGroup(
                     new DeviceLogger<CANSparkMax>(elbowMotor, "Elbow Motor",
