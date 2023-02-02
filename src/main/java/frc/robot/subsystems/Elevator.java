@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -12,16 +11,11 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.XboxController;
 
 import com.techhounds.houndutil.houndauto.AutoManager;
-import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
@@ -30,62 +24,95 @@ import com.techhounds.houndutil.houndlog.loggers.Logger;
 import frc.robot.Constants;
 
 /**
- * elevator
+ * The elevator subsystem, with two motors and motion profling.
  * 
  * @author hr jt
  */
 
-public class Elevator extends SubsystemBase{
+public class Elevator extends ProfiledPIDSubsystem{
+    /** The top motor. */
     private CANSparkMax primary = new CANSparkMax(Constants.Elevator.CANIDs.PRIMARY_MOTOR, MotorType.kBrushless);
+
+    /** The bottom motor. */
     private CANSparkMax secondary = new CANSparkMax(Constants.Elevator.CANIDs.SECONDARY_MOTOR, MotorType.kBrushless);
 
+    /** Limit switch that represents max extension.  */
     private DigitalInput topLimit = new DigitalInput(Constants.Elevator.CANIDs.ELEVATOR_TOP);
+
+    /** Limit switch that represents minimum extension. */
     private DigitalInput bottomLimit = new DigitalInput(Constants.Elevator.CANIDs.ELEVATOR_BOTTOM);
 
+    /** Feedforward controller. */
     private SimpleMotorFeedforward elevatorFeedforward = new SimpleMotorFeedforward(Constants.Elevator.PID.kS, Constants.Elevator.PID.kV);
 
-    private ProfiledPIDController elevatorController = new ProfiledPIDController(Constants.Elevator.PID.kP.get(),
-            Constants.Elevator.PID.kI.get(),
-            Constants.Elevator.PID.kD.get(),
-            new TrapezoidProfile.Constraints(Constants.Elevator.MAX_VELOCITY,
-                    Constants.Elevator.MAX_ACCELERATION));
-
+    /** Initialization code. */
     public Elevator(){
-
-        LoggingManager.getInstance().addGroup("Elevator", new LogGroup(
+        super(new ProfiledPIDController(Constants.Elevator.PID.kP.get(),
+                Constants.Elevator.PID.kI.get(),
+                Constants.Elevator.PID.kD.get(),
+                new TrapezoidProfile.Constraints(Constants.Elevator.MAX_VELOCITY,
+                    Constants.Elevator.MAX_ACCELERATION)));
+            
+            LoggingManager.getInstance().addGroup("Elevator", new LogGroup(
                 new Logger[] {
                         new DeviceLogger<CANSparkMax>(primary, "Primary Elevator Motor",
                             LogProfileBuilder.buildCANSparkMaxLogItems(primary)),
                         new DeviceLogger<CANSparkMax>(secondary, "Secondary Elevator Motor",
                                 LogProfileBuilder.buildCANSparkMaxLogItems(secondary))
                 }));
-
     }
 
-    public void setElevatorPosition(double position){
-        elevatorController.setGoal(position);
+    @Override
+    public void useOutput(double output, TrapezoidProfile.State setpoint) {
+        double feedforward = elevatorFeedforward.calculate(setpoint.position, setpoint.velocity);
+        primary.setVoltage(output+feedforward);
+        secondary.setVoltage(output+feedforward);
     }
 
-    public void extendElevator(){
-        setElevatorPosition(Constants.Elevator.MAX_LENGTH);
+    @Override
+    public double getMeasurement(){
+        return primary.getEncoder().getPosition();
     }
 
-    public void retractElevator(){
-        setElevatorPosition(Constants.Elevator.MIN_LENGTH);
+    /** Sets the value of each encoder to the minimum distance. */
+    public void resetEncoders(){
+        primary.getEncoder().setPosition(Constants.Elevator.MIN_LENGTH);
+        secondary.getEncoder().setPosition(Constants.Elevator.MIN_LENGTH);
     }
 
+    /** Stops both motors. */
+    public void stop(){
+        primary.set(0);
+        secondary.set(0);
+    }
+
+    /** Sets the speed of each motors, while neither limit switch has been activated. */
     public void setSpeed(double speed){
-        if(!topLimit.get()){
-            primary.set(0);
-            secondary.set(0);
+        if(topLimit.get() && bottomLimit.get()){
+            primary.set(speed);
+            secondary.set(speed);
         }
-        if(!bottomLimit.get()){
-            primary.set(0);
-            secondary.set(0);
+        else{
+            stop();
         }
-        primary.set(speed);
-        secondary.set(speed);
     }
+
+    /** Moves the elevator to a desired position.
+     * 
+     * 
+     * @param position the extension distance in meters.
+     */
+    public Command setElevatorPositionCommand(double position){
+        return new RunCommand(() -> {
+            if(topLimit.get() && bottomLimit.get()){
+                this.setGoal(position);
+            }
+            else{
+                stop();
+            }
+        });
+    }
+
     
 
     
