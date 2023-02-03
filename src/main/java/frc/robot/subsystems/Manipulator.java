@@ -22,13 +22,13 @@ import frc.robot.Constants;
 public class Manipulator extends SubsystemBase {
     /** The wrist of the manipulator */
     private DoubleSolenoid wrist = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-        Constants.Manipulator.Solenoids.Wrist.FORWARD,
-        Constants.Manipulator.Solenoids.Wrist.REVERSE);
+            Constants.Manipulator.Solenoids.Wrist.FORWARD,
+            Constants.Manipulator.Solenoids.Wrist.REVERSE);
 
     /** Pincer to grab game pieces with */
     private DoubleSolenoid pincer = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-        Constants.Manipulator.Solenoids.Pincer.FORWARD,
-        Constants.Manipulator.Solenoids.Pincer.REVERSE);
+            Constants.Manipulator.Solenoids.Pincer.FORWARD,
+            Constants.Manipulator.Solenoids.Pincer.REVERSE);
 
     /** Will become obsolete after vendor dep update */
     private PneumaticHub pneumaticHub = new PneumaticHub();
@@ -38,15 +38,14 @@ public class Manipulator extends SubsystemBase {
 
     public Manipulator() {
         pneumaticHub.enableCompressorDigital();
-        
+
         LoggingManager.getInstance().addGroup("Manipulator", new LogGroup(
-            new Logger[] {
-                new DeviceLogger<DoubleSolenoid>(wrist, "Wrist Solenoid",
-                    LogProfileBuilder.buildDoubleSolenoidLogItems(wrist)),
-                new DeviceLogger<DoubleSolenoid>(pincer, "Pincer",
-                    LogProfileBuilder.buildDoubleSolenoidLogItems(pincer))
-            }
-        ));
+                new Logger[] {
+                        new DeviceLogger<DoubleSolenoid>(wrist, "Wrist Solenoid",
+                                LogProfileBuilder.buildDoubleSolenoidLogItems(wrist)),
+                        new DeviceLogger<DoubleSolenoid>(pincer, "Pincer",
+                                LogProfileBuilder.buildDoubleSolenoidLogItems(pincer))
+                }));
     }
 
     /** Sets wrist to up position */
@@ -67,7 +66,7 @@ public class Manipulator extends SubsystemBase {
         pincer.set(Value.kReverse); // untested
     }
 
-    /** 
+    /**
      * Detects whether infrared beam is broken by pole
      * 
      * @return true if IR beam broken by pole
