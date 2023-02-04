@@ -76,7 +76,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setPassoverExtended() {
+    public CommandBase setPassoverExtendedCommand() {
         return runOnce(() -> passoverSolenoid.set(Value.kForward)); // untested
     }
 
@@ -89,7 +89,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setPassoverRetracted() {
+    public CommandBase setPassoverRetractedCommand() {
         return runOnce(() -> passoverSolenoid.set(Value.kReverse)); // untested
     }
 
@@ -99,7 +99,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setIntakeDown() {
+    public CommandBase setIntakeDownCommand() {
         return runOnce(() -> intakeSolenoid.set(Value.kForward)); // untested
     }
 
@@ -109,7 +109,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setIntakeUp() {
+    public CommandBase setIntakeUpCommand() {
         return runOnce(() -> intakeSolenoid.set(Value.kReverse)); // untested
     }
 
