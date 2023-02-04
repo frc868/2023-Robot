@@ -49,7 +49,7 @@ public class Manipulator extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setWristDown() {
+    public CommandBase setWristDownCommand() {
         return runOnce(() -> wrist.set(Value.kReverse)); // untested
     }
 
@@ -59,7 +59,7 @@ public class Manipulator extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setWristUp() {
+    public CommandBase setWristUpCommand() {
         return runOnce(() -> wrist.set(Value.kReverse)); // untested
     }
 
@@ -69,7 +69,7 @@ public class Manipulator extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setPincerOpen() {
+    public CommandBase setPincerOpenCommand() {
         return runOnce(() -> pincer.set(Value.kForward)); // untested
     }
 
@@ -79,7 +79,7 @@ public class Manipulator extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setPincerDown() {
+    public CommandBase setPincerDownCommand() {
         return runOnce(() -> pincer.set(Value.kReverse)); // untested
     }
 
