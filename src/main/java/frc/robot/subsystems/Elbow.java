@@ -1,120 +1,143 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 
-import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.Constants;
+
 /**
- * Elbow subsystem, one CAN Motor and encoder, one feedforward object, and two hall effect sensors.         
+ * Elbow subsystem, one CAN Motor and encoder, one feedforward object, and two
+ * hall effect sensors.
+ * 
+ * @author jc
  */
-public class Elbow extends ProfiledPIDSubsystem{
+public class Elbow extends ProfiledPIDSubsystem {
+    public static enum ElbowPosition {
+        LOW(0),
+        MID(0),
+        HIGH(0);
+
+        public final int value;
+
+        private ElbowPosition(int value) {
+            this.value = value;
+        }
+    }
+
     /**
-     * Motor that controls the elbow.
+     * The motor that controls the elbow.
      */
-    private CANSparkMax elbowMotor = new CANSparkMax(Constants.Elbow.CANIDs.ELBOW_MOTOR, MotorType.kBrushless);
+    private CANSparkMax motor = new CANSparkMax(Constants.Elbow.CANIDs.ELBOW_MOTOR, MotorType.kBrushless);
+
     /**
-     * Feedforward object for calculating future disturbances 
+     * The encoder (connected to the Spark MAX) that detects the angle of the elbow.
      */
-    private ArmFeedforward feedForward = new ArmFeedforward(Constants.Elbow.FeedForward.kS,
-        Constants.Elbow.FeedForward.kG, Constants.Elbow.FeedForward.kV, Constants.Elbow.FeedForward.kA);
+    private SparkMaxAbsoluteEncoder encoder = motor.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
+
     /**
-     * Encoder that returns position in the motor.
+     * The feedforward controller (calculates voltage based on the setpoint's
+     * velocity and acceleration).
      */
-    private AnalogEncoder elbowEncoder = new AnalogEncoder(Constants.Elbow.CANIDs.ENCODER_CHANNEL); 
+    private ArmFeedforward feedforwardController = new ArmFeedforward(Constants.Elbow.Gains.kS.get(),
+            Constants.Elbow.Gains.kG.get(), Constants.Elbow.Gains.kV.get(), Constants.Elbow.Gains.kA.get());
+
     /**
-     * Hall effect sensors in the motor that will limit freedom of movement.    
+     * Hall effect sensors in the motor that will limit freedom of movement.
      */
-    private DigitalInput bottomhallEffect = new DigitalInput(Constants.Elbow.CANIDs.B_HALL_SENSOR_CHANNEL); 
-    private DigitalInput tophallEffect = new DigitalInput(Constants.Elbow.CANIDs.T_HALL_SENSOR_CHANNEL); 
+    private DigitalInput bottomHallEffect = new DigitalInput(Constants.Elbow.BOTTOM_HALL_EFFECT_PORT);
+    private DigitalInput topHallEffect = new DigitalInput(Constants.Elbow.TOP_HALL_EFFECT_PORT);
+
     /**
-     * Constructs profiled pid controller and motor logger objects.
-     * Resets arm angle.
+     * Initializes the elbow.
      */
     public Elbow() {
-        super(new ProfiledPIDController(Constants.Elbow.PID.kP, Constants.Elbow.PID.kP,
-         Constants.Elbow.PID.kP, new TrapezoidProfile.Constraints(Constants.Elbow.PID.MAX_VELOCITY,
-         Constants.Elbow.PID.MAX_ACCELERATION)));
-         getController().setTolerance(1.0);
-         LoggingManager.getInstance().addGroup("Elbow", new LogGroup(
-                    new DeviceLogger<CANSparkMax>(elbowMotor, "Elbow Motor",
-                        LogProfileBuilder.buildCANSparkMaxLogItems(elbowMotor))
-            ));
-        setGoal(Constants.Elbow.ArmStates.INITIAL_POSITION);
-        }
+        super(new ProfiledPIDController(
+                Constants.Elbow.Gains.kP.get(),
+                Constants.Elbow.Gains.kP.get(),
+                Constants.Elbow.Gains.kP.get(),
+                new TrapezoidProfile.Constraints(
+                        Constants.Elbow.MAX_VELOCITY_METERS_PER_SECOND.get(),
+                        Constants.Elbow.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
+
+        getController().setTolerance(Constants.Elbow.Gains.TOLERANCE.get());
+
+        LoggingManager.getInstance().addGroup("Elbow", new LogGroup(
+                new DeviceLogger<CANSparkMax>(motor, "Elbow Motor",
+                        LogProfileBuilder.buildCANSparkMaxLogItems(motor))));
+    }
+
     /**
-     * Gets the output of pid controller and calculates setpoint using feedforward.
-     * New voltage will be calculated setpoint + output of pid.
-     * @param output from pid controller and desired position.
+     * Uses the output from the ProfiledPIDController. Adds the output to the result
+     * of the calculation from the feedforward controller.
+     * 
+     * @param output   the output of the ProfiledPIDController
+     * @param setpoint the setpoint state of the ProfiledPIDController, for
+     *                 feedforward
      */
-    
+
     @Override
     protected void useOutput(double output, State setpoint) {
-         elbowMotor.setVoltage(feedForward.calculate(setpoint.position, setpoint.velocity) + output); 
+        motor.setVoltage(output + feedforwardController.calculate(setpoint.position, setpoint.velocity));
     }
+
     /**
-     * Returns absolute angle measurement of encoder. 
+     * Returns the measurement of the process variable used by the
+     * ProfiledPIDController.
+     * 
+     * @return the encoder output
      */
-   
     @Override
     protected double getMeasurement() {
-        return elbowEncoder.getAbsolutePosition();
+        return encoder.getPosition();
     }
+
     /**
-     * Checks if top hall effect is triggered and stops elbow from going up.
+     * Sets the speed of the motor. Will refuse to go past the bottom or top points
+     * of the elbow.
+     * 
+     * @param speed the speed, from -1.0 to 1.0
      */
-    protected void tophallTrip(){
-        if ((tophallEffect.get() == true) && (elbowMotor.getBusVoltage() > 0)){
-            elbowMotor.setVoltage(0);
-        }
+    public void setSpeed(double speed) {
+        if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(), speed))
+            motor.set(speed);
+        else
+            motor.stopMotor();
     }
+
     /**
-     * Checks if bottom hall effect is triggered and stops elbow from going down.
+     * Sets the voltage of the motor. Will refuse to go past the bottom or top
+     * points of the elbow.
+     * 
+     * @param voltage the voltage, from -12.0v to 12.0v
      */
-    protected void bottomhallTrip(){
-        if ((bottomhallEffect.get() == true) && (elbowMotor.getBusVoltage() < 0)){
-            elbowMotor.setVoltage(0);
-        }
+    public void setVoltage(double voltage) {
+        if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(), voltage))
+            motor.setVoltage(voltage);
+        else
+            motor.stopMotor();
     }
-     /**
-     * Sets angle to desired angle.
-     * @param angle sets motor to specified angle.
-     */
-    protected void SetDesiredPositionCommand(double angle){
-        setGoal(angle);
-    }
+
     /**
-     * Scoring position for cone, hole above the pole.
+     * Returns an InstantCommand that sets the goal position of the elbow, and
+     * enables the controller.
+     * 
+     * @param position an ElbowPosition to set the elbow to
+     * @return the command
      */
-    protected Command SetScoringCommand(){
-        return new RunCommand(()-> {
-            SetDesiredPositionCommand(Constants.Elbow.ArmStates.SCORING_POSITION);
-        });
-    }
-    /**
-     * Elbow pointing manipulator straight forward.
-     */
-    protected Command SetGamePieceCollectCommand(){
-        return new RunCommand(()-> {
-            SetDesiredPositionCommand(Constants.Elbow.ArmStates.COLLECT_GAME_PIECE_POSITION);
-        });
-    }
-    /**
-     * Stops the motor.
-     */
-    protected void Stop(){
-        elbowMotor.setVoltage(0);
+    public CommandBase setDesiredPositionCommand(ElbowPosition position) {
+        return runOnce(() -> setGoal(position.value)).andThen(this::enable);
     }
 }

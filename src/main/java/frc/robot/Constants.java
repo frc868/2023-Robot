@@ -51,6 +51,7 @@ public final class Constants {
                 public static final int TURN_ENCODER = 3; // untested
             }
         }
+
         public static final class PID {
             public static final class DriveMotors {
                 public static final TunableNumber kP = new TunableNumber("Drivetrain", "driveKP", 3.3657); // untested
@@ -120,32 +121,30 @@ public final class Constants {
                     SWERVE_MODULE_LOCATIONS[3]);
         }
     }
-    public static final class Elbow {
-        public final class CANIDs {
-            public static final int ELBOW_MOTOR = 0; //untested
-            public static final int ENCODER_CHANNEL = 0; //untested
-            public static final int B_HALL_SENSOR_CHANNEL = 0; //untested
-            public static final int T_HALL_SENSOR_CHANNEL = 0; //untested
-        }
-        public final class PID {
-            public static final double kP = 1.0; //untested
-            public static final double kI = 0.0; //untested
-            public static final double kD = 0.0; //untested
-            public static final double MAX_VELOCITY = 12.0; //untested
-            public static final double MAX_ACCELERATION = 12.0; //untested
-        }
-        public final class FeedForward {
-            public static final double kS = 1.0; //untested
-            public static final double kG = 0.0; //untested
-            public static final double kV = 0.0; //untested
-            public static final double kA = 0.0; //untested
 
+    public static final class Elbow {
+        public static final class CANIDs {
+            public static final int ELBOW_MOTOR = 11;
         }
-        public final class ArmStates {
-            public static final double INITIAL_POSITION = 90.0; //untested
-            public static final double SCORING_POSITION = 0.0; //untested
-            public static final double COLLECT_GAME_PIECE_POSITION = 90.0; //untested
+
+        public static final class Gains {
+            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 0); // untested
+            public static final TunableNumber kI = new TunableNumber("Elbow", "kI", 0); // untested
+            public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0); // untested
+            public static final TunableNumber kS = new TunableNumber("Elbow", "kS", 0); // untested
+            public static final TunableNumber kG = new TunableNumber("Elbow", "kG", 0); // untested
+            public static final TunableNumber kV = new TunableNumber("Elbow", "kV", 0); // untested
+            public static final TunableNumber kA = new TunableNumber("Elbow", "kA", 0); // untested
+            public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 1); // untested
         }
+
+        public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new TunableNumber("Elbow", "Max Velocity",
+                1.0); // untested
+        public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elbow",
+                "Max Acceleration", 1.0); // untested
+
+        public static final int BOTTOM_HALL_EFFECT_PORT = 2;
+        public static final int TOP_HALL_EFFECT_PORT = 3;
     }
 
     public static final class OI {
