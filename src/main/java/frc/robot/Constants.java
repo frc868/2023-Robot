@@ -1,9 +1,9 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import com.techhounds.houndutil.houndlog.loggers.TunableNumber;
 
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -120,6 +120,31 @@ public final class Constants {
                     SWERVE_MODULE_LOCATIONS[2],
                     SWERVE_MODULE_LOCATIONS[3]);
         }
+    }
+
+    public static final class Elbow {
+        public static final class CANIDs {
+            public static final int ELBOW_MOTOR = 11;
+        }
+
+        public static final class Gains {
+            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 0); // untested
+            public static final TunableNumber kI = new TunableNumber("Elbow", "kI", 0); // untested
+            public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0); // untested
+            public static final TunableNumber kS = new TunableNumber("Elbow", "kS", 0); // untested
+            public static final TunableNumber kG = new TunableNumber("Elbow", "kG", 0); // untested
+            public static final TunableNumber kV = new TunableNumber("Elbow", "kV", 0); // untested
+            public static final TunableNumber kA = new TunableNumber("Elbow", "kA", 0); // untested
+            public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 1); // untested
+        }
+
+        public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new TunableNumber("Elbow", "Max Velocity",
+                1.0); // untested
+        public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elbow",
+                "Max Acceleration", 1.0); // untested
+
+        public static final int BOTTOM_HALL_EFFECT_PORT = 2;
+        public static final int TOP_HALL_EFFECT_PORT = 3;
     }
 
     public static final class OI {
