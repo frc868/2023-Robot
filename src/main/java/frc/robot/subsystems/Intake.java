@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * Intake subsystem, contains two passover motor controllers, passover solenoid,
  * and intake solenoid.
  * 
- * @author BAM
+ * @author bam
  */
 
 public class Intake extends SubsystemBase {
