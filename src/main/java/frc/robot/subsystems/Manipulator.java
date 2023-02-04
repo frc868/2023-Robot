@@ -4,13 +4,12 @@ import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
-import com.techhounds.houndutil.houndlog.loggers.Logger;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -20,58 +19,76 @@ import frc.robot.Constants;
  * @author gc
  */
 public class Manipulator extends SubsystemBase {
-    /** The wrist of the manipulator */
+    /** The solenoid that controls the wrist of the manipulator. */
     private DoubleSolenoid wrist = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-            Constants.Manipulator.Solenoids.Wrist.FORWARD,
-            Constants.Manipulator.Solenoids.Wrist.REVERSE);
+            Constants.Manipulator.Pneumatics.WRIST[0],
+            Constants.Manipulator.Pneumatics.WRIST[1]);
 
-    /** Pincer to grab game pieces with */
+    /** The solenoid that controls the pincer to hold game pieces. */
     private DoubleSolenoid pincer = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-            Constants.Manipulator.Solenoids.Pincer.FORWARD,
-            Constants.Manipulator.Solenoids.Pincer.REVERSE);
-
-    /** Will become obsolete after vendor dep update */
-    private PneumaticHub pneumaticHub = new PneumaticHub();
+            Constants.Manipulator.Pneumatics.PINCERS[0],
+            Constants.Manipulator.Pneumatics.PINCERS[1]);
 
     /** Beam break sensor used to detect pole to put cones on */
-    private DigitalInput poleDetector = new DigitalInput(Constants.Manipulator.POLE_DETECTOR);
+    private DigitalInput poleSwitch = new DigitalInput(Constants.Manipulator.POLE_SWITCH);
 
+    /**
+     * Initializes the manipulator.
+     */
     public Manipulator() {
-        pneumaticHub.enableCompressorDigital();
-
         LoggingManager.getInstance().addGroup("Manipulator", new LogGroup(
-                new Logger[] {
-                        new DeviceLogger<DoubleSolenoid>(wrist, "Wrist Solenoid",
-                                LogProfileBuilder.buildDoubleSolenoidLogItems(wrist)),
-                        new DeviceLogger<DoubleSolenoid>(pincer, "Pincer",
-                                LogProfileBuilder.buildDoubleSolenoidLogItems(pincer))
-                }));
-    }
-
-    /** Sets wrist to up position */
-    public void setWristUp() {
-        wrist.set(Value.kForward); // untested
-    }
-
-    /** Sets wrist to down position */
-    public void setWristDown() {
-        wrist.set(Value.kReverse); // untested
-    }
-
-    public void setPincerUp() {
-        pincer.set(Value.kForward); // untested
-    }
-
-    public void setPincerDown() {
-        pincer.set(Value.kReverse); // untested
+                new DeviceLogger<DoubleSolenoid>(wrist, "Wrist",
+                        LogProfileBuilder.buildDoubleSolenoidLogItems(wrist)),
+                new DeviceLogger<DoubleSolenoid>(pincer, "Pincer",
+                        LogProfileBuilder.buildDoubleSolenoidLogItems(pincer))));
     }
 
     /**
-     * Detects whether infrared beam is broken by pole
+     * Command factory that creates an InstantCommand that sets the wrist to the
+     * down position.
+     * 
+     * @return the command
+     */
+    public CommandBase setWristDown() {
+        return runOnce(() -> wrist.set(Value.kReverse)); // untested
+    }
+
+    /**
+     * Command factory that creates an InstantCommand that sets the wrist to the
+     * down position.
+     * 
+     * @return the command
+     */
+    public CommandBase setWristUp() {
+        return runOnce(() -> wrist.set(Value.kReverse)); // untested
+    }
+
+    /**
+     * Command factory that creates an InstantCommand that sets the pincers to the
+     * open position (space between the wedges).
+     * 
+     * @return the command
+     */
+    public CommandBase setPincerOpen() {
+        return runOnce(() -> pincer.set(Value.kForward)); // untested
+    }
+
+    /**
+     * Command factory that creates an InstantCommand that sets the pincers to the
+     * closed position (no space between the wedges).
+     * 
+     * @return the command
+     */
+    public CommandBase setPincerDown() {
+        return runOnce(() -> pincer.set(Value.kReverse)); // untested
+    }
+
+    /**
+     * Detects whether the limit switch that detects the pole has been tripped.
      * 
      * @return true if IR beam broken by pole
      */
-    public boolean poleDetected() {
-        return !poleDetector.get(); // untested
+    public boolean isPoleDetected() {
+        return poleSwitch.get(); // untested
     }
 }

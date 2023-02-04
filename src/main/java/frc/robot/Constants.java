@@ -122,6 +122,15 @@ public final class Constants {
         }
     }
 
+    public static final class Manipulator {
+        public static final class Pneumatics {
+            public static final int[] PINCERS = { 0, 1 };
+            public static final int[] WRIST = { 2, 3 };
+        }
+
+        public static final int POLE_SWITCH = 4;
+    }
+
     public static final class OI {
         public static final int DRIVER_PORT = 0;
         public static final int OPERATOR_PORT = 1;
@@ -167,21 +176,5 @@ public final class Constants {
         public static final double MAX_ANGULAR_VELOCITY = 6 * Math.PI; // untested
         public static final double MAX_ANGULAR_ACCELERATION = 8 * Math.PI; // untested
 
-    }
-
-    public static final class Manipulator {
-        public static final class Solenoids {
-            public static final class Wrist {
-                public static final int FORWARD = 0; // untested
-                public static final int REVERSE = 0; // untested
-            }
-
-            public static final class Pincer {
-                public static final int FORWARD = 0; // untested
-                public static final int REVERSE = 0; // untested
-            }
-        }
-
-        public static final int POLE_DETECTOR = 0; // untested
     }
 }
