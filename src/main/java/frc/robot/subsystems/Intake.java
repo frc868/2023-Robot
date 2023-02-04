@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
@@ -68,42 +69,55 @@ public class Intake extends SubsystemBase {
     }
 
     /**
-     * Sets the passover to the extended position. This means that it is outside of
-     * frame perimeter and is able to grip and index a game piece.
+     * Command factory that creates an InstantCommand that sets the passovers to the
+     * extended position.
+     * This means that it is outside of frame perimeter and able to grip and
+     * index a game piece.
+     * 
+     * @return the command
      */
-    public void setPassoverExtended() {
-        passoverSolenoid.set(Value.kForward); // untested
+    public CommandBase setPassoverExtended() {
+        return runOnce(() -> passoverSolenoid.set(Value.kForward)); // untested
     }
 
     /**
-     * Sets the passover to the retracted position. This means that it is retracted
-     * into the robot and is not able to grip or index a game piece.
+     * Command factory that creates an InstantCommand that sets the passover to the
+     * retracted position.
+     * 
+     * This means that it is retracted into the robot and is not able to grip or
+     * index a game piece.
+     * 
+     * @return the command
      */
-    public void setPassoverRetracted() {
-        passoverSolenoid.set(Value.kReverse); // untested
+    public CommandBase setPassoverRetracted() {
+        return runOnce(() -> passoverSolenoid.set(Value.kReverse)); // untested
     }
 
     /**
-     * Sets the intake to the down position. This means that it is outside of frame
-     * perimeter and able to manipulate a game piece.
+     * Command factory that creates an InstantCommand that sets the intake to the up
+     * position. This means that it is inside frame perimeter.
+     * 
+     * @return the command
      */
-    public void setIntakeDown() {
-        intakeSolenoid.set(Value.kForward); // untested
+    public CommandBase setIntakeDown() {
+        return runOnce(() -> intakeSolenoid.set(Value.kForward)); // untested
     }
 
     /**
-     * Sets the intake to the up position. This means that it is inside frame
-     * perimeter.
+     * Command factory that creates an InstantCommand that sets the intake to the up
+     * position. This means that it is inside frame perimeter.
+     * 
+     * @return the command
      */
-    public void setIntakeUp() {
-        intakeSolenoid.set(Value.kReverse); // untested
+    public CommandBase setIntakeUp() {
+        return runOnce(() -> intakeSolenoid.set(Value.kReverse)); // untested
     }
 
     /**
      * Runs the passover motors.
      */
-    public void runPassoverMotors() {
-        passoverMotors.set(.5); // untested
+    public CommandBase runPassoverMotors() {
+        return runOnce(() -> passoverMotors.set(.5)); // untested
     }
 
     /**
@@ -111,5 +125,16 @@ public class Intake extends SubsystemBase {
      */
     public void stopPassoverMotors() {
         passoverMotors.set(0);
+    }
+
+    /**
+     * Creates a StartEndCommand (requiring this subsystem) to run the passover
+     * motors.
+     * This will run the motors until the command is interrupted/cancelled.
+     * 
+     * @return the command
+     */
+    public CommandBase runPassoverMotorsCommand() {
+        return startEnd(this::runPassoverMotors, this::stopPassoverMotors);
     }
 }
