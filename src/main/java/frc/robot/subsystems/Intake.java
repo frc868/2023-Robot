@@ -10,56 +10,50 @@ import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import frc.robot.Constants;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
- * Intake subsystem, contains two passover motor controllers, passover solenoid,
- * and intake solenoid.
+ * Intake subsystem, contains the motors that run the passovers, and the
+ * pneumatics for the passover and intake.
  * 
  * @author bam
  */
 
 public class Intake extends SubsystemBase {
     /**
-     * Motors that drive the left passover.
+     * The motor that drives the left side of the passover.
      */
-    private CANSparkMax leftPassoverMotor = new CANSparkMax(Constants.Intake.CANIDs.LEFT_PASSOVER_MOTOR,
+    private CANSparkMax leftPassoverMotor = new CANSparkMax(Constants.Intake.CANIDs.LEFT_MOTOR,
             MotorType.kBrushless);
     /**
-     * Motors that drive the right passover.
+     * The motor that drives the right side of the passover.
      */
-    private CANSparkMax rightPassoverMotor = new CANSparkMax(Constants.Intake.CANIDs.RIGHT_PASSOVER_MOTOR,
+    private CANSparkMax rightPassoverMotor = new CANSparkMax(Constants.Intake.CANIDs.RIGHT_MOTOR,
             MotorType.kBrushless);
     /**
-     * Solenoid that extends and retracts passover wheels.
+     * The solenoid that controls the passover extending or retracting.
      */
     private DoubleSolenoid passoverSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-            6, 7); // untested
+            Constants.Intake.Pneumatics.PASSOVER[0], Constants.Intake.Pneumatics.PASSOVER[1]);
     /**
-     * Solenoid that extends and retracts the intake system.
+     * The solenoid that controls the intake moving up or down.
      */
     private DoubleSolenoid intakeSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-            4, 5); // untested
+            Constants.Intake.Pneumatics.INTAKE[0], Constants.Intake.Pneumatics.INTAKE[1]);
     /**
-     * Motor controller group for the passover motors.
+     * The object that controlls both passover motors.
      */
     MotorControllerGroup passoverMotors = new MotorControllerGroup(leftPassoverMotor,
             rightPassoverMotor);
-    /**
-     * Pnuematic Hub will become obsolete after rev updates their vendor rep.
-     */
-    private PneumaticHub pneumaticHub = new PneumaticHub();
 
     /**
-     * Constructs the intake system.
+     * Initializes the intake system.
      */
     public Intake() {
         rightPassoverMotor.setInverted(true);
-        pneumaticHub.enableCompressorDigital();
         LoggingManager.getInstance().addGroup("Intake", new LogGroup(
                 new Logger[] {
                         new DeviceLogger<CANSparkMax>(leftPassoverMotor, "Left Passover Motor",
@@ -70,35 +64,36 @@ public class Intake extends SubsystemBase {
                                 LogProfileBuilder.buildDoubleSolenoidLogItems(intakeSolenoid)),
                         new DeviceLogger<DoubleSolenoid>(passoverSolenoid, "Passover Solenoid",
                                 LogProfileBuilder.buildDoubleSolenoidLogItems(passoverSolenoid)),
-                        new DeviceLogger<PneumaticHub>(pneumaticHub, "Pneumatic Hub",
-                                LogProfileBuilder.buildPneumaticHubLogItems(pneumaticHub))
-
                 }));
     }
 
     /**
-     * Sets Passover wheels to the down position.
+     * Sets the passover to the extended position. This means that it is outside of
+     * frame perimeter and is able to grip and index a game piece.
      */
     public void setPassoverExtended() {
         passoverSolenoid.set(Value.kForward); // untested
     }
 
     /**
-     * Sets Passover wheels to the up position.
+     * Sets the passover to the retracted position. This means that it is retracted
+     * into the robot and is not able to grip or index a game piece.
      */
     public void setPassoverRetracted() {
         passoverSolenoid.set(Value.kReverse); // untested
     }
 
     /**
-     * Sets the intake to the down position.
+     * Sets the intake to the down position. This means that it is outside of frame
+     * perimeter and able to manipulate a game piece.
      */
     public void setIntakeDown() {
         intakeSolenoid.set(Value.kForward); // untested
     }
 
     /**
-     * Sets the intake to the up position.
+     * Sets the intake to the up position. This means that it is inside frame
+     * perimeter.
      */
     public void setIntakeUp() {
         intakeSolenoid.set(Value.kReverse); // untested
@@ -108,7 +103,7 @@ public class Intake extends SubsystemBase {
      * Runs the passover motors.
      */
     public void runPassoverMotors() {
-        passoverMotors.set(.5);
+        passoverMotors.set(.5); // untested
     }
 
     /**

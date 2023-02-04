@@ -122,6 +122,21 @@ public final class Constants {
         }
     }
 
+    public static final class Intake {
+        public static final class Pneumatics {
+            public static final int[] INTAKE = { 4, 5 };
+            public static final int[] PASSOVER = { 6, 7 };
+        }
+
+        public static final class CANIDs {
+            public static final int LEFT_MOTOR = 12;
+            public static final int RIGHT_MOTOR = 13;
+        }
+
+        public static final int GAME_PIECE_SENSOR_PORT = 5;
+
+    }
+
     public static final class OI {
         public static final int DRIVER_PORT = 0;
         public static final int OPERATOR_PORT = 1;
@@ -166,14 +181,6 @@ public final class Constants {
         public static final double MAX_ACCELERATION = 1; // untested
         public static final double MAX_ANGULAR_VELOCITY = 6 * Math.PI; // untested
         public static final double MAX_ANGULAR_ACCELERATION = 8 * Math.PI; // untested
-
-    }
-
-    public static final class Intake {
-        public static final class CANIDs {
-            public static final int RIGHT_PASSOVER_MOTOR = 12; // untested
-            public static final int LEFT_PASSOVER_MOTOR = 13; // untesteed
-        }
 
     }
 }
