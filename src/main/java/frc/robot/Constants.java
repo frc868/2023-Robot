@@ -145,6 +145,14 @@ public final class Constants {
 
         public static final int BOTTOM_HALL_EFFECT_PORT = 2;
         public static final int TOP_HALL_EFFECT_PORT = 3;
+
+    public static final class Manipulator {
+        public static final class Pneumatics {
+            public static final int[] PINCERS = { 0, 1 };
+            public static final int[] WRIST = { 2, 3 };
+        }
+
+        public static final int POLE_SWITCH = 4;
     }
 
     public static final class OI {
