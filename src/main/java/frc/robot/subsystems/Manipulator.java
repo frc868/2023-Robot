@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 /**
- * The manipulator class, containing the wrist, pincer, and pole detector
+ * The manipulator class, containing the wrist, pincer, and pole detector.
  * 
  * @author gc
  */
@@ -29,7 +29,7 @@ public class Manipulator extends SubsystemBase {
             Constants.Manipulator.Pneumatics.PINCERS[0],
             Constants.Manipulator.Pneumatics.PINCERS[1]);
 
-    /** Beam break sensor used to detect pole to put cones on */
+    /** Beam break sensor that detects if the wingdong is hitting the pole. */
     private DigitalInput poleSwitch = new DigitalInput(Constants.Manipulator.POLE_SWITCH);
 
     /**
