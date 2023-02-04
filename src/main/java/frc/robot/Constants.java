@@ -153,6 +153,19 @@ public final class Constants {
         }
 
         public static final int POLE_SWITCH = 4;
+    public static final class Intake {
+        public static final class Pneumatics {
+            public static final int[] INTAKE = { 4, 5 };
+            public static final int[] PASSOVER = { 6, 7 };
+        }
+
+        public static final class CANIDs {
+            public static final int LEFT_MOTOR = 12;
+            public static final int RIGHT_MOTOR = 13;
+        }
+
+        public static final int GAME_PIECE_SENSOR_PORT = 5;
+
     }
 
     public static final class OI {
