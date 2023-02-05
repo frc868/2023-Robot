@@ -25,34 +25,36 @@ public final class Constants {
 
     public static final ControllerType CONTROLLER_TYPE = ControllerType.FlightStick;
 
+    public static final double ROBOT_SIDE_LENGTH = Units.inchesToMeters(34.75);
+
     public static final class Drivetrain {
         public static final class CANIDs {
             public static final class FrontLeft {
-                public static final int DRIVE_MOTOR = 1; // untested
-                public static final int TURN_MOTOR = 2; // untested
-                public static final int TURN_ENCODER = 0; // untested
+                public static final int DRIVE_MOTOR = 1;
+                public static final int TURN_MOTOR = 2;
+                public static final int TURN_ENCODER = 0;
             }
 
             public static final class FrontRight {
-                public static final int DRIVE_MOTOR = 3; // untested
-                public static final int TURN_MOTOR = 4; // untested
-                public static final int TURN_ENCODER = 1; // untested
+                public static final int DRIVE_MOTOR = 3;
+                public static final int TURN_MOTOR = 4;
+                public static final int TURN_ENCODER = 1;
             }
 
             public static final class BackLeft {
-                public static final int DRIVE_MOTOR = 5; // untested
-                public static final int TURN_MOTOR = 6; // untested
-                public static final int TURN_ENCODER = 2; // untested
+                public static final int DRIVE_MOTOR = 5;
+                public static final int TURN_MOTOR = 6;
+                public static final int TURN_ENCODER = 2;
             }
 
             public static final class BackRight {
-                public static final int DRIVE_MOTOR = 7; // untested
-                public static final int TURN_MOTOR = 8; // untested
-                public static final int TURN_ENCODER = 3; // untested
+                public static final int DRIVE_MOTOR = 7;
+                public static final int TURN_MOTOR = 8;
+                public static final int TURN_ENCODER = 3;
             }
         }
 
-        public static final class PID {
+        public static final class Gains {
             public static final class DriveMotors {
                 public static final TunableNumber kP = new TunableNumber("Drivetrain", "driveKP", 3.3657); // untested
                 public static final TunableNumber kI = new TunableNumber("Drivetrain", "driveKI", 0.0); // untested
@@ -69,8 +71,8 @@ public final class Constants {
             }
 
             public static final class Trajectories {
-                public static final double xkP = 1.5; // untested
-                public static final double ykP = 1.5; // untested
+                public static final double xkP = 5; // untested
+                public static final double ykP = 5; // untested
                 public static final double thetakP = 1.5; // untested
             }
 
@@ -120,6 +122,90 @@ public final class Constants {
                     SWERVE_MODULE_LOCATIONS[2],
                     SWERVE_MODULE_LOCATIONS[3]);
         }
+    }
+
+    public static final class Elevator {
+        public static final class CANIDs {
+            public static final int LEFT_MOTOR = 9;
+            public static final int RIGHT_MOTOR = 10;
+        }
+
+        public static final class Gains {
+            public static final TunableNumber kP = new TunableNumber("Elevator", "kP", 0); // untested
+            public static final TunableNumber kI = new TunableNumber("Elevator", "kI", 0); // untested
+            public static final TunableNumber kD = new TunableNumber("Elevator", "kD", 0); // untested
+            public static final TunableNumber kS = new TunableNumber("Elevator", "kS", 0); // untested
+            public static final TunableNumber kG = new TunableNumber("Elevator", "kG", 0); // untested
+            public static final TunableNumber kV = new TunableNumber("Elevator", "kV", 0); // untested
+            public static final TunableNumber kA = new TunableNumber("Elevator", "kA", 0); // untested
+        }
+
+        public static final int TOP_HALL_EFFECT_PORT = 0;
+        public static final int BOTTOM_HALL_EFFECT_PORT = 1;
+
+        public static final double OFFSET_METERS = 0.0; // untested
+        public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new TunableNumber("Elevator", "Max Velocity",
+                1.0); // untested
+        public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elevator",
+                "Max Acceleration", 1.0); // untested
+
+    }
+
+    public static final class Elbow {
+        public static final class CANIDs {
+            public static final int MOTOR = 11;
+        }
+
+        public static final class Gains {
+            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 0); // untested
+            public static final TunableNumber kI = new TunableNumber("Elbow", "kI", 0); // untested
+            public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0); // untested
+            public static final TunableNumber kS = new TunableNumber("Elbow", "kS", 0); // untested
+            public static final TunableNumber kG = new TunableNumber("Elbow", "kG", 0); // untested
+            public static final TunableNumber kV = new TunableNumber("Elbow", "kV", 0); // untested
+            public static final TunableNumber kA = new TunableNumber("Elbow", "kA", 0); // untested
+            public static final TunableNumber TOLERANCE = new TunableNumber("Elevator", "Tolerance", 0); // untested
+        }
+
+        public static final int TOP_HALL_EFFECT_PORT = 2;
+        public static final int BOTTOM_HALL_EFFECT_PORT = 3;
+
+        public static final double OFFSET_METERS = 0.0; // untested
+
+        public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new TunableNumber("Elevator", "Max Velocity",
+                1.0); // untested
+        public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elevator",
+                "Max Acceleration", 1.0); // untested
+
+    }
+
+    public static final class Manipulator {
+        public static final class Pneumatics {
+            public static final int[] PINCERS = { 0, 1 };
+            public static final int[] WRIST = { 2, 3 };
+        }
+
+        public static final int POLE_SWITCH_PORT = 4;
+    }
+
+    public static final class Intake {
+        public static final class Pneumatics {
+            public static final int[] INTAKE = { 4, 5 };
+            public static final int[] PASSOVER = { 6, 7 };
+        }
+
+        public static final class CANIDs {
+            public static final int LEFT_MOTOR = 12;
+            public static final int RIGHT_MOTOR = 13;
+        }
+
+        public static final int GAME_PIECE_SENSOR_PORT = 5;
+
+    }
+
+    public static final class LEDs {
+        public static final int PORT = 0;
+        public static final int LENGTH = 50;
     }
 
     public static final class OI {
