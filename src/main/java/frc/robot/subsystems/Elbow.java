@@ -30,9 +30,9 @@ public class Elbow extends ProfiledPIDSubsystem {
         MID(0),
         HIGH(0);
 
-        public final int value;
+        public final double value;
 
-        private ElbowPosition(int value) {
+        private ElbowPosition(double value) {
             this.value = value;
         }
     }
