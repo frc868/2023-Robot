@@ -1,14 +1,18 @@
 package frc.robot.subsystems;
 
+import java.util.Map;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
 import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlog.LogGroup;
@@ -17,6 +21,8 @@ import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import com.techhounds.houndutil.houndlog.loggers.Logger;
 import frc.robot.Constants;
+import frc.robot.GamePieceLocation.GamePiece;
+import frc.robot.GamePieceLocation.Level;
 
 /**
  * The elevator subsystem, with two motors and motion profling.
@@ -45,28 +51,29 @@ public class Elevator extends ProfiledPIDSubsystem {
     }
 
     /** The left motor of the elevator. */
-    private CANSparkMax leftMotor = new CANSparkMax(Constants.Elevator.CANIDs.PRIMARY_MOTOR, MotorType.kBrushless);
+    private CANSparkMax leftMotor = new CANSparkMax(Constants.Elevator.CANIDs.LEFT_MOTOR, MotorType.kBrushless);
 
     /** The right motor of the elevator. */
-    private CANSparkMax rightMotor = new CANSparkMax(Constants.Elevator.CANIDs.SECONDARY_MOTOR, MotorType.kBrushless);
+    private CANSparkMax rightMotor = new CANSparkMax(Constants.Elevator.CANIDs.RIGHT_MOTOR, MotorType.kBrushless);
 
-    /**
-     * The object that controlls both elevator motors.
-     */
+    /** The object that controlls both elevator motors. */
     private MotorControllerGroup motors = new MotorControllerGroup(leftMotor, rightMotor);
 
     /** Hall effect sensor that represents the minimum extension of the elevator. */
-    private DigitalInput bottomHallEffect = new DigitalInput(Constants.Elevator.CANIDs.ELEVATOR_BOTTOM);
+    private DigitalInput bottomHallEffect = new DigitalInput(Constants.Elevator.BOTTOM_HALL_EFFECT_PORT);
 
     /** Hall effect sensor that represents the maximum extension of the elevator. */
-    private DigitalInput topHallEffect = new DigitalInput(Constants.Elevator.CANIDs.ELEVATOR_TOP);
+    private DigitalInput topHallEffect = new DigitalInput(Constants.Elevator.TOP_HALL_EFFECT_PORT);
 
     /**
      * The feedforward controller (calculates voltage based on the setpoint's
      * velocity and acceleration).
      */
-    private SimpleMotorFeedforward elevatorFeedforward = new SimpleMotorFeedforward(Constants.Elevator.PID.kS,
-            Constants.Elevator.PID.kV);
+    private ElevatorFeedforward feedforwardController = new ElevatorFeedforward(
+            Constants.Elevator.Gains.kS.get(),
+            Constants.Elevator.Gains.kG.get(),
+            Constants.Elevator.Gains.kV.get(),
+            Constants.Elevator.Gains.kA.get());
 
     /**
      * Used to make sure that the PID controller does not enable unless the elevator
@@ -74,13 +81,17 @@ public class Elevator extends ProfiledPIDSubsystem {
      */
     private boolean isInitialized = false;
 
-    /** Initializes the elevator. */
+    /**
+     * Initializes the elevator.
+     */
     public Elevator() {
-        super(new ProfiledPIDController(Constants.Elevator.PID.kP.get(),
-                Constants.Elevator.PID.kI.get(),
-                Constants.Elevator.PID.kD.get(),
-                new TrapezoidProfile.Constraints(Constants.Elevator.MAX_VELOCITY,
-                        Constants.Elevator.MAX_ACCELERATION)));
+        super(new ProfiledPIDController(
+                Constants.Elevator.Gains.kP.get(),
+                Constants.Elevator.Gains.kI.get(),
+                Constants.Elevator.Gains.kD.get(),
+                new TrapezoidProfile.Constraints(
+                        Constants.Elevator.MAX_VELOCITY_METERS_PER_SECOND.get(),
+                        Constants.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
 
         LoggingManager.getInstance().addGroup("Elevator", new LogGroup(
                 new Logger[] {
@@ -101,7 +112,7 @@ public class Elevator extends ProfiledPIDSubsystem {
      */
     @Override
     public void useOutput(double output, TrapezoidProfile.State setpoint) {
-        double feedforward = elevatorFeedforward.calculate(setpoint.position, setpoint.velocity);
+        double feedforward = feedforwardController.calculate(setpoint.position, setpoint.velocity);
         leftMotor.setVoltage(output + feedforward);
         rightMotor.setVoltage(output + feedforward);
     }
@@ -126,13 +137,17 @@ public class Elevator extends ProfiledPIDSubsystem {
         return getController().atGoal();
     }
 
-    /** Sets the value of each encoder to the minimum distance. */
+    /**
+     * Sets the value of each encoder to the minimum distance.
+     */
     public void resetEncoders() {
         leftMotor.getEncoder().setPosition(0);
         rightMotor.getEncoder().setPosition(0);
     }
 
-    /** Stops both motors. */
+    /**
+     * Stops both motors.
+     */
     public void stop() {
         leftMotor.stopMotor();
         rightMotor.stopMotor();
@@ -161,13 +176,52 @@ public class Elevator extends ProfiledPIDSubsystem {
     }
 
     /**
-     * Returns an InstantCommand that sets the goal position of the elbow, and
+     * Creates an InstantCommand that sets the goal position of the elbow, and
      * enables the controller.
      * 
      * @param position an ElevatorPosition to set the elbow to
      * @return the command
      */
-    public Command setDesiredPositionCommand(ElevatorPosition position) {
-        return runOnce(() -> setGoal(position.value)).andThen(this::enable);
+    public CommandBase setDesiredPositionCommand(ElevatorPosition position, LEDs leds) {
+        return Commands.either(runOnce(() -> setGoal(position.value)).andThen(this::enable), leds.errorCommand(),
+                () -> isInitialized);
+    }
+
+    public Command setScoringPositionCommand(GamePiece gamePieceMode,
+            Level scoringMode, LEDs leds) {
+        return Commands.select(
+                Map.of(
+                        GamePiece.CONE,
+                        Commands.select(
+                                Map.of(
+                                        Level.LOW,
+                                        setDesiredPositionCommand(ElevatorPosition.CONE_LOW, leds),
+                                        Level.MIDDLE,
+                                        setDesiredPositionCommand(ElevatorPosition.CONE_MID, leds),
+                                        Level.HIGH,
+                                        setDesiredPositionCommand(ElevatorPosition.CONE_HIGH, leds)),
+                                () -> scoringMode),
+                        GamePiece.CUBE,
+                        Commands.select(
+                                Map.of(
+                                        Level.LOW,
+                                        setDesiredPositionCommand(ElevatorPosition.CUBE_LOW, leds),
+                                        Level.MIDDLE,
+                                        setDesiredPositionCommand(ElevatorPosition.CUBE_MID, leds),
+                                        Level.HIGH,
+                                        setDesiredPositionCommand(ElevatorPosition.CUBE_HIGH, leds)),
+                                () -> scoringMode)),
+                () -> gamePieceMode);
+    }
+
+    /**
+     * Creates a psuedo-StartEndCommand that runs the motors down at 10% speed until
+     * the bottom hall effect sensor is reached, then zeros the encoders.
+     */
+    public CommandBase zeroEncoderCommand() {
+        return runEnd(() -> setSpeed(-0.1), () -> {
+            this.resetEncoders();
+            isInitialized = true;
+        }).until(bottomHallEffect::get);
     }
 }
