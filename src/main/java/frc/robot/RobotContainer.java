@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.commands.Autos;
 import frc.robot.commands.RobotStates;
 import frc.robot.subsystems.Drivetrain;
@@ -24,7 +25,6 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Manipulator;
 import frc.robot.subsystems.Misc;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 
 /**
  * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -87,10 +87,10 @@ public class RobotContainer {
                 new TrajectorySettings("Figure8").withMaxVelocity(1).withMaxAcceleration(3));
         TrajectoryLoader.loadAutoPaths();
 
-        AutoManager.getInstance().addEvent("event1", new PrintCommand("1"));
-        AutoManager.getInstance().addEvent("event2", new PrintCommand("2"));
-        AutoManager.getInstance().addEvent("event3", new PrintCommand("3"));
-        AutoManager.getInstance().addEvent("event4", new PrintCommand("4"));
+        AutoManager.getInstance().addEvent("event1", Commands.print("1"));
+        AutoManager.getInstance().addEvent("event2", Commands.print("2"));
+        AutoManager.getInstance().addEvent("event3", Commands.print("3"));
+        AutoManager.getInstance().addEvent("event4", Commands.print("4"));
 
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("Circle", Autos.circle(TrajectoryLoader.getAutoPath("Circle"), drivetrain)));

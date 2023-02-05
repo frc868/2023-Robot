@@ -1,5 +1,7 @@
 package frc.robot;
 
+import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
+
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -9,8 +11,6 @@ import com.techhounds.houndutil.houndlog.enums.LogLevel;
 import com.techhounds.houndutil.houndlog.logitems.StringLogItem;
 
 import edu.wpi.first.wpilibj2.command.Command;
-
-import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 public class GridInterface {
 

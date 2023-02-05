@@ -1,12 +1,13 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.PneumaticHub;
-import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
+
+import edu.wpi.first.wpilibj.PneumaticHub;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
  * The "subsystem" that contains objects that don't belong anywhere else but

@@ -5,16 +5,17 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
-import com.techhounds.houndutil.houndlog.loggers.Logger;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
-import frc.robot.Constants;
+import com.techhounds.houndutil.houndlog.loggers.Logger;
+
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 /**
  * Intake subsystem, contains the motors that run the passovers, and the

@@ -4,6 +4,12 @@ import java.util.Map;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.techhounds.houndutil.houndlib.Utils;
+import com.techhounds.houndutil.houndlog.LogGroup;
+import com.techhounds.houndutil.houndlog.LogProfileBuilder;
+import com.techhounds.houndutil.houndlog.LoggingManager;
+import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
+import com.techhounds.houndutil.houndlog.loggers.Logger;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -14,12 +20,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
-import com.techhounds.houndutil.houndlib.Utils;
-import com.techhounds.houndutil.houndlog.LogGroup;
-import com.techhounds.houndutil.houndlog.LogProfileBuilder;
-import com.techhounds.houndutil.houndlog.LoggingManager;
-import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
-import com.techhounds.houndutil.houndlog.loggers.Logger;
 import frc.robot.Constants;
 import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.GamePieceLocation.Level;

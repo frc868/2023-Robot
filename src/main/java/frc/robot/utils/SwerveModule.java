@@ -4,8 +4,15 @@ import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.SensorTimeBase;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.RelativeEncoder;
+import com.techhounds.houndutil.houndlog.LogGroup;
+import com.techhounds.houndutil.houndlog.LogProfileBuilder;
+import com.techhounds.houndutil.houndlog.LoggingManager;
+import com.techhounds.houndutil.houndlog.enums.LogLevel;
+import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
+import com.techhounds.houndutil.houndlog.loggers.Logger;
+import com.techhounds.houndutil.houndlog.logitems.DoubleLogItem;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -14,14 +21,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-
-import com.techhounds.houndutil.houndlog.LogGroup;
-import com.techhounds.houndutil.houndlog.LogProfileBuilder;
-import com.techhounds.houndutil.houndlog.LoggingManager;
-import com.techhounds.houndutil.houndlog.enums.LogLevel;
-import com.techhounds.houndutil.houndlog.loggers.Logger;
-import com.techhounds.houndutil.houndlog.logitems.DoubleLogItem;
-import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import frc.robot.Constants;
 
 public class SwerveModule {
