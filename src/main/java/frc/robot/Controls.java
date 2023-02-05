@@ -34,8 +34,7 @@ public class Controls {
                 drivetrain.teleopDriveCommand(
                         () -> -joystick.getY() * 2.0,
                         () -> -joystick.getX() * 2.0,
-                        () -> -joystick.getTwist() * 2.0,
-                        () -> joystick.getHID().getRawButton(1)));
+                        () -> -joystick.getTwist() * 2.0));
 
         joystick.button(12)
                 .onTrue(runOnce(drivetrain::zeroGyro).beforeStarting(print("resetting")));
@@ -44,9 +43,18 @@ public class Controls {
         joystick.button(9).onTrue(drivetrain.turnWhileMovingCommand(false));
 
         joystick.button(8).onTrue(
-                runOnce(() -> Constants.Teleop.PERCENT_LIMIT += 0.05, drivetrain));
+                runOnce(
+                        () -> drivetrain.getSpeedMode().setLimit(drivetrain.getSpeedMode().getLimit() + 0.05),
+                        drivetrain));
         joystick.button(10).onTrue(
-                runOnce(() -> Constants.Teleop.PERCENT_LIMIT -= 0.05, drivetrain));
+                runOnce(
+                        () -> drivetrain.getSpeedMode().setLimit(drivetrain.getSpeedMode().getLimit() - 0.05),
+                        drivetrain));
+
+        joystick.button(1).onTrue(drivetrain.setSpeedModeCommand(Drivetrain.SpeedMode.SLOW));
+        joystick.button(1).onFalse(drivetrain.setSpeedModeCommand(Drivetrain.SpeedMode.FAST));
+        joystick.button(2).onTrue(drivetrain.setSpeedModeCommand(Drivetrain.SpeedMode.ULTRA_FAST));
+        joystick.button(2).onFalse(drivetrain.setSpeedModeCommand(Drivetrain.SpeedMode.FAST));
 
         joystick.button(1)
                 .onTrue(drivetrain.pathFollowingCommand(PathPlanner.generatePath(
@@ -102,5 +110,8 @@ public class Controls {
         xbox.povUp().onTrue(intake.setIntakeUpCommand());
         xbox.povDown().onTrue(intake.setIntakeDownCommand());
         xbox.rightBumper().onTrue(startEnd(() -> intake.runPassoverMotors(), () -> intake.stopPassoverMotors()));
+    }
+
+    public class SpeedMode {
     }
 }

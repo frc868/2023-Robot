@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import org.photonvision.EstimatedRobotPose;
@@ -103,15 +102,6 @@ public class Drivetrain extends SubsystemBase {
      */
     private SwerveDrivePoseEstimator poseEstimator;
 
-    /** An enum describing the two types of drive modes. */
-    public enum DriveMode {
-        ROBOT_RELATIVE,
-        FIELD_ORIENTED
-    }
-
-    /** The mode of driving, either robot relative or field relative. */
-    private DriveMode driveMode = DriveMode.FIELD_ORIENTED;
-
     /**
      * The internal register for the automatic 90° turns, so that the driver is able
      * to press the button multiple times.
@@ -132,6 +122,66 @@ public class Drivetrain extends SubsystemBase {
             Constants.Drivetrain.Gains.TurnToAngle.kD,
             new TrapezoidProfile.Constraints(Constants.Auton.MAX_ANGULAR_VELOCITY,
                     Constants.Auton.MAX_ANGULAR_ACCELERATION));
+
+    /** An enum describing the two types of drive modes. */
+    public enum DriveMode {
+        ROBOT_RELATIVE,
+        FIELD_ORIENTED
+    }
+
+    /** The mode of driving, either robot relative or field relative. */
+    private DriveMode driveMode = DriveMode.FIELD_ORIENTED;
+
+    /**
+     * An enum describing the speed of the drivetrain.
+     */
+    public enum SpeedMode {
+        // these limits are the defaults, but they can be adjusted by the driver
+        /**
+         * The slow mode, where the robot runs at 25% speed and the controller is lit up
+         * red.
+         */
+        SLOW(0.25),
+        /**
+         * The fast mode, where the robot runs at 65% speed and the controller is lit up
+         * green.
+         */
+        FAST(0.65),
+        /**
+         * The ultra-fast mode, where the robot is not limited (be careful) and the
+         * controller is lit up blue.
+         */
+        ULTRA_FAST(1.0);
+
+        /** The percent limit for this speedMode */
+        private double limit;
+
+        /** Initializes the SpeedMode. */
+        private SpeedMode(double limit) {
+            this.limit = limit;
+        }
+
+        /**
+         * Gets the limit of this speed mode.
+         * 
+         * @param limit the current limit
+         */
+        public double getLimit() {
+            return limit;
+        }
+
+        /**
+         * Sets the limit of this speed mode.
+         * 
+         * @param limit the new limit
+         */
+        public void setLimit(double limit) {
+            this.limit = limit;
+        }
+    }
+
+    /** The speed that the robot is set to go at. */
+    private SpeedMode speedMode = SpeedMode.SLOW;
 
     /** Initializes the drivetrain. */
     public Drivetrain() {
@@ -175,12 +225,12 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
-     * Sets the current drive mode of the swerve (robot-relative or field-oriented).
+     * Returns the current speed mode of the swerve (slow, fast, or ultra-fast).
      * 
-     * @param driveMode the drive mode to set
+     * @return the speed drive mode
      */
-    public void setDriveMode(DriveMode driveMode) {
-        this.driveMode = driveMode;
+    public SpeedMode getSpeedMode() {
+        return speedMode;
     }
 
     /**
@@ -426,6 +476,26 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
+     * Creates a command that sets the current drive mode of the swerve
+     * (robot-relative or field-oriented).
+     * 
+     * @param driveMode the drive mode to set
+     */
+    public CommandBase setDriveModeCommand(DriveMode driveMode) {
+        return runOnce(() -> this.driveMode = driveMode);
+    }
+
+    /**
+     * Createas a command that sets the current speed mode of the swerve (slow,
+     * fast, or ultra-fast).
+     * 
+     * @param speedMode the speed mode to set
+     */
+    public CommandBase setSpeedModeCommand(SpeedMode speedMode) {
+        return runOnce(() -> this.speedMode = speedMode);
+    }
+
+    /**
      * Creates a command that drives the robot based off of the X speed, Y speed,
      * and θ speed.
      * 
@@ -438,7 +508,7 @@ public class Drivetrain extends SubsystemBase {
      * @return the command
      */
     public CommandBase teleopDriveCommand(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
-            DoubleSupplier thetaSpeedSupplier, BooleanSupplier slowModeSupplier) {
+            DoubleSupplier thetaSpeedSupplier) {
         SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
         SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
         SlewRateLimiter thetaSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
@@ -458,15 +528,9 @@ public class Drivetrain extends SubsystemBase {
                 thetaSpeed = thetaSpeedLimiter.calculate(thetaSpeed);
             }
 
-            if (!slowModeSupplier.getAsBoolean()) {
-                xSpeed *= Constants.Teleop.PERCENT_LIMIT;
-                ySpeed *= Constants.Teleop.PERCENT_LIMIT;
-                thetaSpeed *= Constants.Teleop.PERCENT_LIMIT;
-            } else {
-                xSpeed *= Constants.Teleop.SLOW_MODE_PERCENT_LIMIT;
-                ySpeed *= Constants.Teleop.SLOW_MODE_PERCENT_LIMIT;
-                thetaSpeed *= Constants.Teleop.SLOW_MODE_PERCENT_LIMIT;
-            }
+            xSpeed *= speedMode.limit;
+            ySpeed *= speedMode.limit;
+            thetaSpeed *= speedMode.limit;
 
             if (getTurnControllerEnabled()) {
                 thetaSpeed = getTurnControllerOutput();

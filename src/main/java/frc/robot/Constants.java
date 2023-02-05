@@ -214,7 +214,9 @@ public final class Constants {
     }
 
     public static final class Teleop {
-        public static double PERCENT_LIMIT = 0.60; // untested
+        public static double SLOW_PERCENT_LIMIT = 0.25; // untested
+        public static double FAST_PERCENT_LIMIT = 0.65; // untested
+        public static double ULTRA_PERCENT_LIMIT = 1.0; // untested
         public static final double SLOW_MODE_PERCENT_LIMIT = 0.20; // untested
         public static final boolean IS_JOYSTICK_INPUT_RATE_LIMITED = true;
 
