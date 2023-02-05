@@ -51,8 +51,11 @@ public class Elbow extends ProfiledPIDSubsystem {
      * The feedforward controller (calculates voltage based on the setpoint's
      * velocity and acceleration).
      */
-    private ArmFeedforward feedforwardController = new ArmFeedforward(Constants.Elbow.Gains.kS.get(),
-            Constants.Elbow.Gains.kG.get(), Constants.Elbow.Gains.kV.get(), Constants.Elbow.Gains.kA.get());
+    private ArmFeedforward feedforwardController = new ArmFeedforward(
+            Constants.Elbow.Gains.kS,
+            Constants.Elbow.Gains.kG,
+            Constants.Elbow.Gains.kV,
+            Constants.Elbow.Gains.kA);
 
     /**
      * Hall effect sensors in the motor that will limit freedom of movement.
@@ -73,6 +76,22 @@ public class Elbow extends ProfiledPIDSubsystem {
                         Constants.Elbow.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
 
         getController().setTolerance(Constants.Elbow.Gains.TOLERANCE.get());
+
+        Constants.Elbow.Gains.kP.setConsumer((d) -> getController().setP(d));
+        Constants.Elbow.Gains.kI.setConsumer((d) -> getController().setI(d));
+        Constants.Elbow.Gains.kD.setConsumer((d) -> getController().setD(d));
+        Constants.Elbow.Gains.TOLERANCE.setConsumer((d) -> getController().setTolerance(d));
+        Constants.Elbow.MAX_VELOCITY_METERS_PER_SECOND.setConsumer((d) -> getController()
+                .setConstraints(
+                        new TrapezoidProfile.Constraints(
+                                d,
+                                Constants.Elbow.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
+
+        Constants.Elbow.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.setConsumer((d) -> getController()
+                .setConstraints(
+                        new TrapezoidProfile.Constraints(
+                                Constants.Elbow.MAX_VELOCITY_METERS_PER_SECOND.get(),
+                                d)));
 
         LoggingManager.getInstance().addGroup("Elbow", new LogGroup(
                 new DeviceLogger<CANSparkMax>(motor, "Elbow Motor",

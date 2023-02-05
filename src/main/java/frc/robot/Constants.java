@@ -134,10 +134,11 @@ public final class Constants {
             public static final TunableNumber kP = new TunableNumber("Elevator", "kP", 0); // untested
             public static final TunableNumber kI = new TunableNumber("Elevator", "kI", 0); // untested
             public static final TunableNumber kD = new TunableNumber("Elevator", "kD", 0); // untested
-            public static final TunableNumber kS = new TunableNumber("Elevator", "kS", 0); // untested
-            public static final TunableNumber kG = new TunableNumber("Elevator", "kG", 0); // untested
-            public static final TunableNumber kV = new TunableNumber("Elevator", "kV", 0); // untested
-            public static final TunableNumber kA = new TunableNumber("Elevator", "kA", 0); // untested
+            public static final TunableNumber TOLERANCE = new TunableNumber("Elevator", "Tolerance", 0); // untested
+            public static final double kS = 0.0; // untested
+            public static final double kG = 0.0; // untested
+            public static final double kV = 0.0; // untested
+            public static final double kA = 0.0; // untested
         }
 
         public static final int TOP_HALL_EFFECT_PORT = 0;
@@ -160,11 +161,11 @@ public final class Constants {
             public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 0); // untested
             public static final TunableNumber kI = new TunableNumber("Elbow", "kI", 0); // untested
             public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0); // untested
-            public static final TunableNumber kS = new TunableNumber("Elbow", "kS", 0); // untested
-            public static final TunableNumber kG = new TunableNumber("Elbow", "kG", 0); // untested
-            public static final TunableNumber kV = new TunableNumber("Elbow", "kV", 0); // untested
-            public static final TunableNumber kA = new TunableNumber("Elbow", "kA", 0); // untested
-            public static final TunableNumber TOLERANCE = new TunableNumber("Elevator", "Tolerance", 0); // untested
+            public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 0); // untested
+            public static final double kS = 0.0; // untested
+            public static final double kG = 0.0; // untested
+            public static final double kV = 0.0; // untested
+            public static final double kA = 0.0; // untested
         }
 
         public static final int TOP_HALL_EFFECT_PORT = 2;

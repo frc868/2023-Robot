@@ -70,10 +70,10 @@ public class Elevator extends ProfiledPIDSubsystem {
      * velocity and acceleration).
      */
     private ElevatorFeedforward feedforwardController = new ElevatorFeedforward(
-            Constants.Elevator.Gains.kS.get(),
-            Constants.Elevator.Gains.kG.get(),
-            Constants.Elevator.Gains.kV.get(),
-            Constants.Elevator.Gains.kA.get());
+            Constants.Elevator.Gains.kS,
+            Constants.Elevator.Gains.kG,
+            Constants.Elevator.Gains.kV,
+            Constants.Elevator.Gains.kA);
 
     /**
      * Used to make sure that the PID controller does not enable unless the elevator
@@ -92,6 +92,24 @@ public class Elevator extends ProfiledPIDSubsystem {
                 new TrapezoidProfile.Constraints(
                         Constants.Elevator.MAX_VELOCITY_METERS_PER_SECOND.get(),
                         Constants.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
+
+        getController().setTolerance(Constants.Elevator.Gains.TOLERANCE.get());
+
+        Constants.Elevator.Gains.kP.setConsumer((d) -> getController().setP(d));
+        Constants.Elevator.Gains.kI.setConsumer((d) -> getController().setI(d));
+        Constants.Elevator.Gains.kD.setConsumer((d) -> getController().setD(d));
+        Constants.Elevator.Gains.TOLERANCE.setConsumer((d) -> getController().setTolerance(d));
+        Constants.Elevator.MAX_VELOCITY_METERS_PER_SECOND.setConsumer((d) -> getController()
+                .setConstraints(
+                        new TrapezoidProfile.Constraints(
+                                d,
+                                Constants.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
+
+        Constants.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.setConsumer((d) -> getController()
+                .setConstraints(
+                        new TrapezoidProfile.Constraints(
+                                Constants.Elevator.MAX_VELOCITY_METERS_PER_SECOND.get(),
+                                d)));
 
         LoggingManager.getInstance().addGroup("Elevator", new LogGroup(
                 new Logger[] {
