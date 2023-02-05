@@ -40,7 +40,7 @@ public class Elbow extends ProfiledPIDSubsystem {
     /**
      * The motor that controls the elbow.
      */
-    private CANSparkMax motor = new CANSparkMax(Constants.Elbow.CANIDs.ELBOW_MOTOR, MotorType.kBrushless);
+    private CANSparkMax motor = new CANSparkMax(Constants.Elbow.CANIDs.MOTOR, MotorType.kBrushless);
 
     /**
      * The encoder (connected to the Spark MAX) that detects the angle of the elbow.
