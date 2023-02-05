@@ -43,9 +43,9 @@ public class Elevator extends ProfiledPIDSubsystem {
         HUMAN_PLAYER(0),
         TOP(0);
 
-        public final int value;
+        public final double value;
 
-        private ElevatorPosition(int value) {
+        private ElevatorPosition(double value) {
             this.value = value;
         }
     }
