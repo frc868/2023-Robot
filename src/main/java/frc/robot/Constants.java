@@ -1,9 +1,9 @@
 package frc.robot;
 
-import com.techhounds.houndutil.houndlog.loggers.TunableNumber;
-
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import com.techhounds.houndutil.houndlog.loggers.TunableNumber;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -25,34 +25,36 @@ public final class Constants {
 
     public static final ControllerType CONTROLLER_TYPE = ControllerType.FlightStick;
 
+    public static final double ROBOT_SIDE_LENGTH = Units.inchesToMeters(34.75);
+
     public static final class Drivetrain {
         public static final class CANIDs {
             public static final class FrontLeft {
-                public static final int DRIVE_MOTOR = 1; // untested
-                public static final int TURN_MOTOR = 2; // untested
-                public static final int TURN_ENCODER = 0; // untested
+                public static final int DRIVE_MOTOR = 1;
+                public static final int TURN_MOTOR = 2;
+                public static final int TURN_ENCODER = 0;
             }
 
             public static final class FrontRight {
-                public static final int DRIVE_MOTOR = 3; // untested
-                public static final int TURN_MOTOR = 4; // untested
-                public static final int TURN_ENCODER = 1; // untested
+                public static final int DRIVE_MOTOR = 3;
+                public static final int TURN_MOTOR = 4;
+                public static final int TURN_ENCODER = 1;
             }
 
             public static final class BackLeft {
-                public static final int DRIVE_MOTOR = 5; // untested
-                public static final int TURN_MOTOR = 6; // untested
-                public static final int TURN_ENCODER = 2; // untested
+                public static final int DRIVE_MOTOR = 5;
+                public static final int TURN_MOTOR = 6;
+                public static final int TURN_ENCODER = 2;
             }
 
             public static final class BackRight {
-                public static final int DRIVE_MOTOR = 7; // untested
-                public static final int TURN_MOTOR = 8; // untested
-                public static final int TURN_ENCODER = 3; // untested
+                public static final int DRIVE_MOTOR = 7;
+                public static final int TURN_MOTOR = 8;
+                public static final int TURN_ENCODER = 3;
             }
         }
 
-        public static final class PID {
+        public static final class Gains {
             public static final class DriveMotors {
                 public static final TunableNumber kP = new TunableNumber("Drivetrain", "driveKP", 3.3657); // untested
                 public static final TunableNumber kI = new TunableNumber("Drivetrain", "driveKI", 0.0); // untested
@@ -69,8 +71,8 @@ public final class Constants {
             }
 
             public static final class Trajectories {
-                public static final double xkP = 1.5; // untested
-                public static final double ykP = 1.5; // untested
+                public static final double xkP = 5; // untested
+                public static final double ykP = 5; // untested
                 public static final double thetakP = 1.5; // untested
             }
 
@@ -122,9 +124,36 @@ public final class Constants {
         }
     }
 
+    public static final class Elevator {
+        public static final class CANIDs {
+            public static final int LEFT_MOTOR = 9;
+            public static final int RIGHT_MOTOR = 10;
+        }
+
+        public static final class Gains {
+            public static final TunableNumber kP = new TunableNumber("Elevator", "kP", 0); // untested
+            public static final TunableNumber kI = new TunableNumber("Elevator", "kI", 0); // untested
+            public static final TunableNumber kD = new TunableNumber("Elevator", "kD", 0); // untested
+            public static final TunableNumber kS = new TunableNumber("Elevator", "kS", 0); // untested
+            public static final TunableNumber kG = new TunableNumber("Elevator", "kG", 0); // untested
+            public static final TunableNumber kV = new TunableNumber("Elevator", "kV", 0); // untested
+            public static final TunableNumber kA = new TunableNumber("Elevator", "kA", 0); // untested
+        }
+
+        public static final int TOP_HALL_EFFECT_PORT = 0;
+        public static final int BOTTOM_HALL_EFFECT_PORT = 1;
+
+        public static final double OFFSET_METERS = 0.0; // untested
+        public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new TunableNumber("Elevator", "Max Velocity",
+                1.0); // untested
+        public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elevator",
+                "Max Acceleration", 1.0); // untested
+
+    }
+
     public static final class Elbow {
         public static final class CANIDs {
-            public static final int ELBOW_MOTOR = 11;
+            public static final int MOTOR = 11;
         }
 
         public static final class Gains {
@@ -135,16 +164,20 @@ public final class Constants {
             public static final TunableNumber kG = new TunableNumber("Elbow", "kG", 0); // untested
             public static final TunableNumber kV = new TunableNumber("Elbow", "kV", 0); // untested
             public static final TunableNumber kA = new TunableNumber("Elbow", "kA", 0); // untested
-            public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 1); // untested
+            public static final TunableNumber TOLERANCE = new TunableNumber("Elevator", "Tolerance", 0); // untested
         }
 
-        public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new TunableNumber("Elbow", "Max Velocity",
+        public static final int TOP_HALL_EFFECT_PORT = 2;
+        public static final int BOTTOM_HALL_EFFECT_PORT = 3;
+
+        public static final double OFFSET_METERS = 0.0; // untested
+
+        public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new TunableNumber("Elevator", "Max Velocity",
                 1.0); // untested
-        public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elbow",
+        public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elevator",
                 "Max Acceleration", 1.0); // untested
 
-        public static final int BOTTOM_HALL_EFFECT_PORT = 2;
-        public static final int TOP_HALL_EFFECT_PORT = 3;
+    }
 
     public static final class Manipulator {
         public static final class Pneumatics {
@@ -152,7 +185,9 @@ public final class Constants {
             public static final int[] WRIST = { 2, 3 };
         }
 
-        public static final int POLE_SWITCH = 4;
+        public static final int POLE_SWITCH_PORT = 4;
+    }
+
     public static final class Intake {
         public static final class Pneumatics {
             public static final int[] INTAKE = { 4, 5 };
@@ -166,6 +201,11 @@ public final class Constants {
 
         public static final int GAME_PIECE_SENSOR_PORT = 5;
 
+    }
+
+    public static final class LEDs {
+        public static final int PORT = 0;
+        public static final int LENGTH = 50;
     }
 
     public static final class OI {
@@ -212,38 +252,6 @@ public final class Constants {
         public static final double MAX_ACCELERATION = 1; // untested
         public static final double MAX_ANGULAR_VELOCITY = 6 * Math.PI; // untested
         public static final double MAX_ANGULAR_ACCELERATION = 8 * Math.PI; // untested
-
-    }
-
-    public static final class Elevator {
-        public static final class CANIDs {
-            public static final int PRIMARY_MOTOR = 5; // untested
-            public static final int SECONDARY_MOTOR = 17; // untested
-            public static final int ELEVATOR_TOP = 257; // untested
-            public static final int ELEVATOR_BOTTOM = 65537; // untested
-        }
-        public static final class PID {
-            public static final TunableNumber kP = new TunableNumber("Elevator", "elevKP", 3.14); // untested
-            public static final TunableNumber kI = new TunableNumber("Elevator", "elevKI", 2.72); // untested
-            public static final TunableNumber kD = new TunableNumber("Elevator", "elevKD", 3.00); // untested
-            public static final double kS = 1.337; // untested
-            public static final double kV = 6.9; // untested
-            public static final double kA = 4.20; // untested
-        }
-        public static final class Scoring{
-            public static final double HIGH_SCORE = 15.11; // untested
-            public static final double MEDIUM_SCORE = 0.1101000; // untested
-            public static final double LOW_SCORE = 1.729; //untested
-        }
-        public static final double MAX_VELOCITY = 12.3456789; // untested
-        public static final double MAX_ACCELERATION = -1.0; // untested
-        public static final double MAX_LENGTH = 0.01; // untested
-        public static final double MIN_LENGTH = 19.84; // untested
-
-
-
-
-        
 
     }
 }
