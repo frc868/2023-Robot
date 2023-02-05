@@ -24,6 +24,7 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Manipulator;
+import frc.robot.subsystems.Misc;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 
 /**
@@ -37,6 +38,8 @@ public class RobotContainer {
     private final Manipulator manipulator = new Manipulator();
     private final LEDs leds = new LEDs();
     private final GridInterface gridInterface = new GridInterface();
+    @SuppressWarnings("unused")
+    private final Misc misc = new Misc();
 
     // private GamePieceMode gamePieceMode = GamePieceMode.CONE;
 
