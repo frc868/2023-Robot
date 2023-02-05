@@ -39,7 +39,9 @@ public class LEDs extends SubsystemBase {
         /** Illuminated purple to signify the cube pickup mode. */
         CubePickup(LEDState::cubePickup),
         /** Blinking red to signify an error state. */
-        Error(LEDState::error);
+        Error(LEDState::error),
+        /** Blinking red to signify an error state. */
+        Uninitialized(LEDState::uninitialized);
 
         /**
          * The hue of the first pixel in the strand, used to "move" the rainbow down the
@@ -114,6 +116,22 @@ public class LEDs extends SubsystemBase {
             for (int i = 0; i < buffer.getLength(); i++) {
                 // every 0.5 seconds it will switch from off to on
                 if (timeStep / 25 == 1) {
+                    buffer.setHSV(i, 0, 255, 128);
+                } else {
+                    buffer.setHSV(i, 0, 0, 0);
+                }
+            }
+        }
+
+        /**
+         * Changes the contents of the AddressableLEDBuffer to the uninitialized state.
+         */
+        private static void uninitialized() {
+            timeStep++; // 50 timesteps is one second
+            timeStep %= 50; // every 1 second it will roll over
+            for (int i = 0; i < buffer.getLength(); i++) {
+                // every 0.2 seconds it will switch from off to on
+                if (timeStep / 10 == 1) {
                     buffer.setHSV(i, 0, 255, 128);
                 } else {
                     buffer.setHSV(i, 0, 0, 0);

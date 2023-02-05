@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -16,7 +17,6 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
@@ -205,8 +205,8 @@ public class Elevator extends ProfiledPIDSubsystem {
                 () -> isInitialized);
     }
 
-    public Command setScoringPositionCommand(GamePiece gamePieceMode,
-            Level scoringMode, LEDs leds) {
+    public CommandBase setScoringPositionCommand(Supplier<GamePiece> gamePieceMode,
+            Supplier<Level> scoringMode, LEDs leds) {
         return Commands.select(
                 Map.of(
                         GamePiece.CONE,
@@ -218,7 +218,7 @@ public class Elevator extends ProfiledPIDSubsystem {
                                         setDesiredPositionCommand(ElevatorPosition.CONE_MID, leds),
                                         Level.HIGH,
                                         setDesiredPositionCommand(ElevatorPosition.CONE_HIGH, leds)),
-                                () -> scoringMode),
+                                scoringMode::get),
                         GamePiece.CUBE,
                         Commands.select(
                                 Map.of(
@@ -228,8 +228,8 @@ public class Elevator extends ProfiledPIDSubsystem {
                                         setDesiredPositionCommand(ElevatorPosition.CUBE_MID, leds),
                                         Level.HIGH,
                                         setDesiredPositionCommand(ElevatorPosition.CUBE_HIGH, leds)),
-                                () -> scoringMode)),
-                () -> gamePieceMode);
+                                scoringMode::get)),
+                gamePieceMode::get);
     }
 
     /**

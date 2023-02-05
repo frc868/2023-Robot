@@ -63,6 +63,20 @@ public class RobotStates {
         RobotStates.intakeMode = Optional.empty();
     }
 
+    public static CommandBase initializeMechanisms(
+            Intake intake,
+            Manipulator manipulator,
+            Elevator elevator,
+            Elbow elbow,
+            LEDs leds) {
+        return Commands.sequence(
+                intake.setPassoverRetractedCommand(),
+                manipulator.setWristDownCommand(),
+                elbow.setDesiredPositionCommand(ElbowPosition.MID),
+                elevator.zeroEncoderCommand());
+
+    }
+
     /**
      * Creates a command to "prepare" the robot for intaking
      * game pieces.
@@ -92,7 +106,7 @@ public class RobotStates {
                 Commands.sequence(
                         elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, leds),
                         elbow.setDesiredPositionCommand(ElbowPosition.MID),
-                        manipulator.setPincersReleasedCommand(intakeMode.orElse(GamePiece.NONE))),
+                        manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow())),
                 leds.errorCommand(),
                 () -> intakeMode.isPresent()).withName("prepareToIntakeGamePiece");
     }
@@ -131,7 +145,7 @@ public class RobotStates {
                         intake.setIntakeDownCommand(),
                         intake.setPassoverExtendedCommand(),
                         intake.runPassoverMotorsCommand().until(intake::isGamePieceDetected),
-                        manipulator.setPincersPincingCommand(intakeMode.orElse(GamePiece.NONE)),
+                        manipulator.setPincersPincingCommand(() -> intakeMode.orElseThrow()),
                         intake.setPassoverRetractedCommand(),
                         elbow.setDesiredPositionCommand(ElbowPosition.HIGH),
                         intake.setIntakeUpCommand(),
@@ -185,9 +199,9 @@ public class RobotStates {
                 Commands.sequence(
                         Commands.parallel(
                                 elevator.setScoringPositionCommand(
-                                        gridInterface.getSetLocation()
-                                                .orElse(GamePieceLocation.NONE).gamePiece,
-                                        gridInterface.getSetLocation().orElse(GamePieceLocation.NONE).level, leds),
+                                        () -> gridInterface.getSetLocation()
+                                                .orElseThrow().gamePiece,
+                                        () -> gridInterface.getSetLocation().orElseThrow().level, leds),
                                 Commands.sequence(
                                         elbow.setDesiredPositionCommand(ElbowPosition.MID),
                                         Commands.select(
@@ -201,25 +215,25 @@ public class RobotStates {
                                                         GamePiece.CUBE,
                                                         Commands.none()),
                                                 () -> gridInterface.getSetLocation()
-                                                        .orElse(GamePieceLocation.NONE).gamePiece))),
+                                                        .orElseThrow().gamePiece))),
                         Commands.select(
                                 Map.of(
                                         GamePiece.CONE,
                                         Commands.waitUntil(manipulator::isPoleDetected)
                                                 .andThen(manipulator
                                                         .setPincersReleasedCommand(
-                                                                gridInterface.getSetLocation()
-                                                                        .orElse(GamePieceLocation.NONE).gamePiece)
+                                                                () -> gridInterface.getSetLocation()
+                                                                        .orElseThrow().gamePiece)
                                                         .alongWith(elbow.setDesiredPositionCommand(ElbowPosition.LOW))),
 
                                         GamePiece.CUBE,
                                         Commands.waitUntil(elevator::isAtGoal)
                                                 .andThen(manipulator
                                                         .setPincersReleasedCommand(
-                                                                gridInterface.getSetLocation()
-                                                                        .orElse(GamePieceLocation.NONE).gamePiece))),
+                                                                () -> gridInterface.getSetLocation()
+                                                                        .orElseThrow().gamePiece))),
                                 () -> gridInterface.getSetLocation()
-                                        .orElse(GamePieceLocation.NONE).gamePiece)),
+                                        .orElseThrow().gamePiece)),
                 leds.errorCommand(),
                 () -> gridInterface.getSetLocation().isPresent()).withName("scoreGamePiece");
     }

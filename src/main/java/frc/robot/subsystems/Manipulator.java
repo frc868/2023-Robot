@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
@@ -100,15 +101,15 @@ public class Manipulator extends SubsystemBase {
      * Command factory that sets the pincers to the "released" position depending on
      * the GamePiece mode.
      * 
-     * @param mode the object to set the pincers to "released" for
+     * @param modeSupplier the object to set the pincers to "released" for
      * @return the command
      */
-    public CommandBase setPincersReleasedCommand(GamePiece mode) {
+    public CommandBase setPincersReleasedCommand(Supplier<GamePiece> modeSupplier) {
         return Commands.select(
                 Map.of(
                         GamePiece.CONE, setPincersClosedCommand(),
                         GamePiece.CUBE, setPincersOpenCommand()),
-                () -> mode);
+                modeSupplier::get);
     }
 
     /**
@@ -118,11 +119,11 @@ public class Manipulator extends SubsystemBase {
      * @param mode the object to set the pincers to "pincing" for
      * @return the command
      */
-    public CommandBase setPincersPincingCommand(GamePiece mode) {
+    public CommandBase setPincersPincingCommand(Supplier<GamePiece> modeSupplier) {
         return Commands.select(
                 Map.of(
                         GamePiece.CONE, setPincersOpenCommand(),
                         GamePiece.CUBE, setPincersClosedCommand()),
-                () -> mode);
+                modeSupplier::get);
     }
 }
