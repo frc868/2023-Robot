@@ -8,7 +8,7 @@ import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.loggers.Logger;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import frc.robot.Constants;
-
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -50,6 +50,9 @@ public class Intake extends SubsystemBase {
     MotorControllerGroup passoverMotors = new MotorControllerGroup(leftPassoverMotor,
             rightPassoverMotor);
 
+    /** The beam break that detects if a game piece is in the robot. */
+    private DigitalInput gamePieceDetector = new DigitalInput(Constants.Intake.GAME_PIECE_SENSOR_PORT);
+
     /**
      * Initializes the intake system.
      */
@@ -69,7 +72,7 @@ public class Intake extends SubsystemBase {
     }
 
     /**
-     * Command factory that creates an InstantCommand that sets the passovers to the
+     * Creates an InstantCommand that sets the passovers to the
      * extended position.
      * This means that it is outside of frame perimeter and able to grip and
      * index a game piece.
@@ -81,7 +84,7 @@ public class Intake extends SubsystemBase {
     }
 
     /**
-     * Command factory that creates an InstantCommand that sets the passover to the
+     * Creates an InstantCommand that sets the passover to the
      * retracted position.
      * 
      * This means that it is retracted into the robot and is not able to grip or
@@ -94,7 +97,7 @@ public class Intake extends SubsystemBase {
     }
 
     /**
-     * Command factory that creates an InstantCommand that sets the intake to the up
+     * Creates an InstantCommand that sets the intake to the up
      * position. This means that it is inside frame perimeter.
      * 
      * @return the command
@@ -104,7 +107,7 @@ public class Intake extends SubsystemBase {
     }
 
     /**
-     * Command factory that creates an InstantCommand that sets the intake to the up
+     * Creates an InstantCommand that sets the intake to the up
      * position. This means that it is inside frame perimeter.
      * 
      * @return the command
@@ -136,5 +139,14 @@ public class Intake extends SubsystemBase {
      */
     public CommandBase runPassoverMotorsCommand() {
         return startEnd(this::runPassoverMotors, this::stopPassoverMotors);
+    }
+
+    /**
+     * Check if a game piece is detected to be ready to be pinced.
+     * 
+     * @return true if a game piece is detected inside the robot
+     */
+    public boolean isGamePieceDetected() {
+        return gamePieceDetector.get();
     }
 }
