@@ -9,7 +9,6 @@ import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.enums.LogLevel;
 import com.techhounds.houndutil.houndlog.loggers.Logger;
 import com.techhounds.houndutil.houndlog.loggers.SendableLogger;
-import com.techhounds.houndutil.houndlog.logitems.DoubleLogItem;
 import com.techhounds.houndutil.houndlog.logitems.StringLogItem;
 
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -59,8 +58,6 @@ public class RobotContainer {
         configureAuto();
 
         LoggingManager.getInstance().addGroup("Main", new LogGroup(new Logger[] {
-                new DoubleLogItem("Speed Limit", () -> Constants.Teleop.PERCENT_LIMIT,
-                        LogLevel.MAIN),
                 new StringLogItem("Intake Mode",
                         () -> RobotStates.getIntakeMode().isEmpty() ? "null"
                                 : RobotStates.getIntakeMode().get().toString(),

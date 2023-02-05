@@ -13,8 +13,9 @@ import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
+import com.techhounds.houndutil.houndlog.enums.LogLevel;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
-import com.techhounds.houndutil.houndlog.loggers.Logger;
+import com.techhounds.houndutil.houndlog.logitems.DoubleLogItem;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -196,10 +197,14 @@ public class Drivetrain extends SubsystemBase {
         turnController.setTolerance(0.05);
 
         LoggingManager.getInstance().addGroup("Drivetrain", new LogGroup(
-                new Logger[] {
-                        new DeviceLogger<Pigeon2>(pigeon, "Pigeon 2",
-                                LogProfileBuilder.buildPigeon2LogItems(pigeon)),
-                }));
+                new DeviceLogger<Pigeon2>(pigeon, "Pigeon 2",
+                        LogProfileBuilder.buildPigeon2LogItems(pigeon)),
+                new DoubleLogItem("Slow Speed Limit", () -> SpeedMode.SLOW.getLimit(),
+                        LogLevel.MAIN),
+                new DoubleLogItem("Fast Speed Limit", () -> SpeedMode.FAST.getLimit(),
+                        LogLevel.MAIN),
+                new DoubleLogItem("Ultra Fast Speed Limit", () -> SpeedMode.ULTRA_FAST.getLimit(),
+                        LogLevel.MAIN)));
 
         AutoManager.getInstance().setResetOdometryConsumer(this::resetPoseEstimator);
 
