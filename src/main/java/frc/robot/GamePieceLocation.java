@@ -73,8 +73,7 @@ public enum GamePieceLocation {
 
     G3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.LOW, Grid.RIGHT, GridPosition.LEFT)),
     H3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.LOW, Grid.RIGHT, GridPosition.MIDDLE)),
-    I3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.LOW, Grid.RIGHT, GridPosition.RIGHT)),
-    NONE(new GamePieceLocationMetadata(GamePiece.NONE, Level.NONE, Grid.NONE, GridPosition.NONE));
+    I3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.LOW, Grid.RIGHT, GridPosition.RIGHT));
 
     public final GamePiece gamePiece;
     public final Level level;
@@ -92,22 +91,19 @@ public enum GamePieceLocation {
     public enum GamePiece {
         CONE,
         CUBE,
-        HYBRID,
-        NONE;
+        HYBRID;
     }
 
     public enum Level {
         LOW,
         MIDDLE,
-        HIGH,
-        NONE;
+        HIGH;
     }
 
     public enum Grid {
         LEFT,
         MIDDLE,
-        RIGHT,
-        NONE;
+        RIGHT;
 
         @Override
         public String toString() {
@@ -118,8 +114,7 @@ public enum GamePieceLocation {
     public enum GridPosition {
         LEFT,
         MIDDLE,
-        RIGHT,
-        NONE;
+        RIGHT;
     }
 
     private GamePieceLocation(GamePieceLocationMetadata metadata) {
