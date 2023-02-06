@@ -15,6 +15,12 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color8Bit;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.commands.Autos;
 import frc.robot.commands.RobotStates;
@@ -30,22 +36,37 @@ import frc.robot.subsystems.Misc;
  * The container for the robot. Contains subsystems, OI devices, and commands.
  */
 public class RobotContainer {
+    private Mechanism2d mechanisms = new Mechanism2d(5, 2);
+    private MechanismRoot2d root = mechanisms.getRoot("root", 2.5, 0.1);
+
+    private MechanismLigament2d fromRobot = root
+            .append(new MechanismLigament2d("fromRobot", -0.33, 0, 0, new Color8Bit(Color.kBlue)));
+    private MechanismLigament2d elevatorBaseLigament = fromRobot
+            .append(new MechanismLigament2d("elevatorBase", 0.71, 42, 5, new Color8Bit(Color.kCyan)));
+    private MechanismLigament2d elevatorLigament = elevatorBaseLigament
+            .append(new MechanismLigament2d("elevator", 1.32, 0, 5, new Color8Bit(Color.kOrange)));
+    private MechanismLigament2d elbowLigament = elevatorLigament
+            .append(new MechanismLigament2d("elbow", 0.2, -42, 5, new Color8Bit(Color.kGreen)));
+    private MechanismLigament2d wristLigament = elbowLigament
+            .append(new MechanismLigament2d("wrist", 0.2, 90, 5, new Color8Bit(Color.kRed)));
+
     private final Drivetrain drivetrain = new Drivetrain();
-    private final Elbow elbow = new Elbow();
-    private final Elevator elevator = new Elevator();
+    private final Elbow elbow = new Elbow(elbowLigament);
+    private final Elevator elevator = new Elevator(elevatorLigament);
     private final Intake intake = new Intake();
-    private final Manipulator manipulator = new Manipulator();
+    private final Manipulator manipulator = new Manipulator(wristLigament);
     private final LEDs leds = new LEDs();
     private final GridInterface gridInterface = new GridInterface();
     @SuppressWarnings("unused")
     private final Misc misc = new Misc();
 
-    // private GamePieceMode gamePieceMode = GamePieceMode.CONE;
-
     /**
      * Constructs the robot container.
      */
     public RobotContainer() {
+        SmartDashboard.putData("Mechanisms", mechanisms);
+        // elevatorMech.setLength(-0.5);
+        elbowLigament.setAngle(-42 - 20);
         DataLogManager.logNetworkTables(true);
         DataLogManager.start();
 
@@ -77,8 +98,9 @@ public class RobotContainer {
 
     private void configureButtonBindings() {
         Controls.configureDriverControls(0, drivetrain, intake, manipulator, elevator, elbow, leds);
-        Controls.configureOperatorControls(1, gridInterface, intake, manipulator, elevator, elbow, leds);
-        Controls.configureBackupOperatorControls(2, intake, manipulator, elevator, elbow);
+        Controls.configureOperatorControls(1, 2, gridInterface, intake, manipulator, elevator, elbow, leds);
+        Controls.configureBackupOperatorControls(3, intake, manipulator, elevator, elbow, leds);
+        Controls.configureOverridesControls(5, 6, drivetrain, intake, manipulator, elevator, elbow, leds);
     }
 
     public void configureAuto() {
