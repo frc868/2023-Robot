@@ -70,7 +70,7 @@ public class RobotStates {
             Elbow elbow,
             LEDs leds) {
         return Commands.sequence(
-                intake.setPassoverRetractedCommand(),
+                intake.setPassoverRetractedCommand(elevator, leds),
                 manipulator.setWristDownCommand(),
                 elbow.setDesiredPositionCommand(ElbowPosition.MID),
                 elevator.zeroEncoderCommand());
@@ -104,7 +104,7 @@ public class RobotStates {
             LEDs leds) {
         return Commands.either(
                 Commands.sequence(
-                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, leds),
+                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, leds),
                         elbow.setDesiredPositionCommand(ElbowPosition.MID),
                         manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow())),
                 leds.errorCommand(),
@@ -142,13 +142,13 @@ public class RobotStates {
             LEDs leds) {
         return Commands.either(
                 Commands.sequence(
-                        intake.setIntakeDownCommand(),
-                        intake.setPassoverExtendedCommand(),
+                        intake.setIntakeDownCommand(elevator, leds),
+                        intake.setPassoverExtendedCommand(elevator, leds),
                         intake.runPassoverMotorsCommand().until(intake::isGamePieceDetected),
                         manipulator.setPincersPincingCommand(() -> intakeMode.orElseThrow()),
-                        intake.setPassoverRetractedCommand(),
+                        intake.setPassoverRetractedCommand(elevator, leds),
                         elbow.setDesiredPositionCommand(ElbowPosition.HIGH),
-                        intake.setIntakeUpCommand(),
+                        intake.setIntakeUpCommand(elevator, leds),
                         Commands.runOnce(RobotStates::clearIntakeMode)),
                 leds.errorCommand(),
                 () -> intakeMode.isPresent()).withName("intakeGamePiece");
@@ -201,7 +201,7 @@ public class RobotStates {
                                 elevator.setScoringPositionCommand(
                                         () -> gridInterface.getSetLocation()
                                                 .orElseThrow().gamePiece,
-                                        () -> gridInterface.getSetLocation().orElseThrow().level, leds),
+                                        () -> gridInterface.getSetLocation().orElseThrow().level, intake, leds),
                                 Commands.sequence(
                                         elbow.setDesiredPositionCommand(ElbowPosition.MID),
                                         Commands.select(
@@ -265,7 +265,7 @@ public class RobotStates {
         return Commands.sequence(
                 manipulator.setWristDownCommand(),
                 elbow.setDesiredPositionCommand(ElbowPosition.MID),
-                elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, leds),
+                elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, leds),
                 Commands.waitUntil(elevator::isAtGoal)).withName("stowElevator");
     }
 

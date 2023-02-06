@@ -14,6 +14,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
 import frc.robot.Constants;
@@ -63,10 +64,13 @@ public class Elbow extends ProfiledPIDSubsystem {
     private DigitalInput bottomHallEffect = new DigitalInput(Constants.Elbow.BOTTOM_HALL_EFFECT_PORT);
     private DigitalInput topHallEffect = new DigitalInput(Constants.Elbow.TOP_HALL_EFFECT_PORT);
 
+    /** The ligament of the complete mechanism body that this subsystem controls. */
+    private MechanismLigament2d ligament;
+
     /**
      * Initializes the elbow.
      */
-    public Elbow() {
+    public Elbow(MechanismLigament2d ligament) {
         super(new ProfiledPIDController(
                 Constants.Elbow.Gains.kP.get(),
                 Constants.Elbow.Gains.kP.get(),
@@ -93,9 +97,20 @@ public class Elbow extends ProfiledPIDSubsystem {
                                 Constants.Elbow.MAX_VELOCITY_METERS_PER_SECOND.get(),
                                 d)));
 
+        this.ligament = ligament;
+
         LoggingManager.getInstance().addGroup("Elbow", new LogGroup(
                 new DeviceLogger<CANSparkMax>(motor, "Elbow Motor",
                         LogProfileBuilder.buildCANSparkMaxLogItems(motor))));
+    }
+
+    /**
+     * Runs every 20ms. This updates the ligament sent over NetworkTables.
+     */
+    @Override
+    public void periodic() {
+        super.periodic();
+        ligament.setAngle(-42 + encoder.getPosition());
     }
 
     /**

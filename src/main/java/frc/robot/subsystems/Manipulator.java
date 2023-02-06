@@ -11,6 +11,7 @@ import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -37,15 +38,33 @@ public class Manipulator extends SubsystemBase {
     /** Beam break sensor that detects if the wingdong is hitting the pole. */
     private DigitalInput poleSwitch = new DigitalInput(Constants.Manipulator.POLE_SWITCH_PORT);
 
+    /** The ligament of the complete mechanism body that this subsystem controls. */
+    private MechanismLigament2d wristLigament;
+
     /**
      * Initializes the manipulator.
      */
-    public Manipulator() {
+    public Manipulator(MechanismLigament2d wristLigament) {
+        this.wristLigament = wristLigament;
+
         LoggingManager.getInstance().addGroup("Manipulator", new LogGroup(
                 new DeviceLogger<DoubleSolenoid>(wrist, "Wrist",
                         LogProfileBuilder.buildDoubleSolenoidLogItems(wrist)),
                 new DeviceLogger<DoubleSolenoid>(pincer, "Pincer",
                         LogProfileBuilder.buildDoubleSolenoidLogItems(pincer))));
+    }
+
+    /**
+     * Runs every 20ms. This updates the ligament sent over NetworkTables.
+     */
+    @Override
+    public void periodic() {
+        super.periodic();
+        if (wrist.get() == Value.kForward) {
+            wristLigament.setAngle(90);
+        } else {
+            wristLigament.setAngle(0);
+        }
     }
 
     /**

@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import java.util.Map;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkMax;
@@ -17,6 +18,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
@@ -81,10 +83,13 @@ public class Elevator extends ProfiledPIDSubsystem {
      */
     private boolean isInitialized = false;
 
+    /** The ligament of the complete mechanism body that this subsystem controls. */
+    private MechanismLigament2d ligament;
+
     /**
      * Initializes the elevator.
      */
-    public Elevator() {
+    public Elevator(MechanismLigament2d ligament) {
         super(new ProfiledPIDController(
                 Constants.Elevator.Gains.kP.get(),
                 Constants.Elevator.Gains.kI.get(),
@@ -111,6 +116,8 @@ public class Elevator extends ProfiledPIDSubsystem {
                                 Constants.Elevator.MAX_VELOCITY_METERS_PER_SECOND.get(),
                                 d)));
 
+        this.ligament = ligament;
+
         LoggingManager.getInstance().addGroup("Elevator", new LogGroup(
                 new Logger[] {
                         new DeviceLogger<CANSparkMax>(leftMotor, "Primary Elevator Motor",
@@ -118,6 +125,15 @@ public class Elevator extends ProfiledPIDSubsystem {
                         new DeviceLogger<CANSparkMax>(rightMotor, "Secondary Elevator Motor",
                                 LogProfileBuilder.buildCANSparkMaxLogItems(rightMotor))
                 }));
+    }
+
+    /**
+     * Runs every 20ms. This updates the ligament sent over NetworkTables.
+     */
+    @Override
+    public void periodic() {
+        super.periodic();
+        ligament.setLength(-0.71 + getMeasurement());
     }
 
     /**
@@ -143,7 +159,16 @@ public class Elevator extends ProfiledPIDSubsystem {
      */
     @Override
     public double getMeasurement() {
-        return leftMotor.getEncoder().getPosition();
+        return (leftMotor.getEncoder().getPosition() + rightMotor.getEncoder().getPosition()) / 2.0;
+    }
+
+    /**
+     * Get the goal position of the elevator.
+     * 
+     * @return the goal position of the elevator
+     */
+    public double getGoal() {
+        return getController().getGoal().position;
     }
 
     /**
@@ -153,6 +178,16 @@ public class Elevator extends ProfiledPIDSubsystem {
      */
     public boolean isAtGoal() {
         return getController().atGoal();
+    }
+
+    /**
+     * Check if the elevator is lowered. This is useful for the subsystem safeties.
+     * 
+     * @return true of the elevator is at the bottom state and is within the
+     *         tolerance of the controller.
+     */
+    public boolean isSafeForIntake() {
+        return getMeasurement() - ElevatorPosition.BOTTOM.value < Constants.Elevator.Gains.TOLERANCE.get();
     }
 
     /**
@@ -200,34 +235,39 @@ public class Elevator extends ProfiledPIDSubsystem {
      * @param position an ElevatorPosition to set the elbow to
      * @return the command
      */
-    public CommandBase setDesiredPositionCommand(ElevatorPosition position, LEDs leds) {
-        return Commands.either(runOnce(() -> setGoal(position.value)).andThen(this::enable), leds.errorCommand(),
+    public CommandBase setDesiredPositionCommand(ElevatorPosition position, Intake intake, LEDs leds) {
+        return Commands.either(
+                Commands.sequence(
+                        runOnce(() -> setGoal(position.value)),
+                        runOnce(this::enable),
+                        Commands.waitUntil(this::isAtGoal)).finallyDo((d) -> this.disable()),
+                leds.errorCommand(),
                 () -> isInitialized);
     }
 
     public CommandBase setScoringPositionCommand(Supplier<GamePiece> gamePieceMode,
-            Supplier<Level> scoringMode, LEDs leds) {
+            Supplier<Level> scoringMode, Intake intake, LEDs leds) {
         return Commands.select(
                 Map.of(
                         GamePiece.CONE,
                         Commands.select(
                                 Map.of(
                                         Level.LOW,
-                                        setDesiredPositionCommand(ElevatorPosition.CONE_LOW, leds),
+                                        setDesiredPositionCommand(ElevatorPosition.CONE_LOW, intake, leds),
                                         Level.MIDDLE,
-                                        setDesiredPositionCommand(ElevatorPosition.CONE_MID, leds),
+                                        setDesiredPositionCommand(ElevatorPosition.CONE_MID, intake, leds),
                                         Level.HIGH,
-                                        setDesiredPositionCommand(ElevatorPosition.CONE_HIGH, leds)),
+                                        setDesiredPositionCommand(ElevatorPosition.CONE_HIGH, intake, leds)),
                                 scoringMode::get),
                         GamePiece.CUBE,
                         Commands.select(
                                 Map.of(
                                         Level.LOW,
-                                        setDesiredPositionCommand(ElevatorPosition.CUBE_LOW, leds),
+                                        setDesiredPositionCommand(ElevatorPosition.CUBE_LOW, intake, leds),
                                         Level.MIDDLE,
-                                        setDesiredPositionCommand(ElevatorPosition.CUBE_MID, leds),
+                                        setDesiredPositionCommand(ElevatorPosition.CUBE_MID, intake, leds),
                                         Level.HIGH,
-                                        setDesiredPositionCommand(ElevatorPosition.CUBE_HIGH, leds)),
+                                        setDesiredPositionCommand(ElevatorPosition.CUBE_HIGH, intake, leds)),
                                 scoringMode::get)),
                 gamePieceMode::get);
     }
@@ -241,5 +281,10 @@ public class Elevator extends ProfiledPIDSubsystem {
             this.resetEncoders();
             isInitialized = true;
         }).until(bottomHallEffect::get);
+    }
+
+    public CommandBase setOverridenElevatorSpeedCommand(DoubleSupplier speed, Intake intake, LEDs leds) {
+        return Commands.either(runOnce(() -> setSpeed(speed.getAsDouble())), leds.errorCommand(),
+                intake::isSafeForElevator);
     }
 }

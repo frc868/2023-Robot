@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -72,6 +73,10 @@ public class Intake extends SubsystemBase {
                 }));
     }
 
+    public boolean isSafeForElevator() {
+        return passoverSolenoid.get() == Value.kReverse && intakeSolenoid.get() == Value.kReverse;
+    }
+
     /**
      * Creates an InstantCommand that sets the passovers to the
      * extended position.
@@ -80,8 +85,11 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setPassoverExtendedCommand() {
-        return runOnce(() -> passoverSolenoid.set(Value.kForward)); // untested
+    public CommandBase setPassoverExtendedCommand(Elevator elevator, LEDs leds) {
+        return Commands.either(
+                runOnce(() -> passoverSolenoid.set(Value.kForward)),
+                leds.errorCommand(),
+                () -> elevator.isSafeForIntake());
     }
 
     /**
@@ -93,8 +101,10 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setPassoverRetractedCommand() {
-        return runOnce(() -> passoverSolenoid.set(Value.kReverse)); // untested
+    public CommandBase setPassoverRetractedCommand(Elevator elevator, LEDs leds) {
+        return Commands
+                .either(runOnce(() -> passoverSolenoid.set(Value.kReverse)), leds.errorCommand(),
+                        elevator::isSafeForIntake); // untested
     }
 
     /**
@@ -103,8 +113,10 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setIntakeDownCommand() {
-        return runOnce(() -> intakeSolenoid.set(Value.kForward)); // untested
+    public CommandBase setIntakeDownCommand(Elevator elevator, LEDs leds) {
+        return Commands
+                .either(runOnce(() -> intakeSolenoid.set(Value.kForward)), leds.errorCommand(),
+                        elevator::isSafeForIntake); // untested
     }
 
     /**
@@ -113,22 +125,10 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setIntakeUpCommand() {
-        return runOnce(() -> intakeSolenoid.set(Value.kReverse)); // untested
-    }
-
-    /**
-     * Runs the passover motors.
-     */
-    public CommandBase runPassoverMotors() {
-        return runOnce(() -> passoverMotors.set(.5)); // untested
-    }
-
-    /**
-     * Stops the passover motors.
-     */
-    public void stopPassoverMotors() {
-        passoverMotors.set(0);
+    public CommandBase setIntakeUpCommand(Elevator elevator, LEDs leds) {
+        return Commands
+                .either(runOnce(() -> intakeSolenoid.set(Value.kReverse)), leds.errorCommand(),
+                        elevator::isSafeForIntake); // untested
     }
 
     /**
@@ -139,7 +139,7 @@ public class Intake extends SubsystemBase {
      * @return the command
      */
     public CommandBase runPassoverMotorsCommand() {
-        return startEnd(this::runPassoverMotors, this::stopPassoverMotors);
+        return startEnd(() -> passoverMotors.set(.5), () -> passoverMotors.set(0));
     }
 
     /**
