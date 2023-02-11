@@ -93,9 +93,9 @@ public final class Constants {
 
         public static final class Geometry {
             /** Distance between centers of right and left wheels on robot. */
-            public static final double TRACK_WIDTH_METERS = Units.inchesToMeters(18.9); // untested
+            public static final double TRACK_WIDTH_METERS = Units.inchesToMeters(22.75);
             /** Distance between front and back wheels on robot. */
-            public static final double WHEEL_BASE_METERS = Units.inchesToMeters(18.9); // untested
+            public static final double WHEEL_BASE_METERS = Units.inchesToMeters(22.75);
             public static final double GEARING = 1.0 / 6.75; // untested
             public static final double WHEEL_RADIUS_METERS = 0.048; // untested
             public static final double WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * WHEEL_RADIUS_METERS;
@@ -131,14 +131,14 @@ public final class Constants {
         }
 
         public static final class Gains {
-            public static final TunableNumber kP = new TunableNumber("Elevator", "kP", 0); // untested
+            public static final TunableNumber kP = new TunableNumber("Elevator", "kP", 3); // untested
             public static final TunableNumber kI = new TunableNumber("Elevator", "kI", 0); // untested
             public static final TunableNumber kD = new TunableNumber("Elevator", "kD", 0); // untested
-            public static final TunableNumber TOLERANCE = new TunableNumber("Elevator", "Tolerance", 0); // untested
+            public static final TunableNumber TOLERANCE = new TunableNumber("Elevator", "Tolerance", 0.05); // untested
             public static final double kS = 0.0; // untested
-            public static final double kG = 0.0; // untested
-            public static final double kV = 0.0; // untested
-            public static final double kA = 0.0; // untested
+            public static final double kG = 0.48; // untested
+            public static final double kV = 3.8; // untested
+            public static final double kA = 0.05; // untested
         }
 
         public static final int TOP_HALL_EFFECT_PORT = 0;
@@ -150,6 +150,11 @@ public final class Constants {
         public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elevator",
                 "Max Acceleration", 1.0); // untested
 
+        public static final double GEARING = 1.0 / 12.0; // untested
+        public static final double DRUM_RADIUS_METERS = Units.inchesToMeters(2.4); // untested
+        public static final double WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * DRUM_RADIUS_METERS;
+        public static final double ENCODER_DISTANCE_TO_METERS = WHEEL_CIRCUMFERENCE * GEARING;
+
     }
 
     public static final class Elbow {
@@ -158,14 +163,15 @@ public final class Constants {
         }
 
         public static final class Gains {
-            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 0); // untested
+            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 1); // untested
             public static final TunableNumber kI = new TunableNumber("Elbow", "kI", 0); // untested
             public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0); // untested
-            public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 0); // untested
-            public static final double kS = 0.0; // untested
-            public static final double kG = 0.0; // untested
-            public static final double kV = 0.0; // untested
-            public static final double kA = 0.0; // untested
+            public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 0.03); // untested
+            public static final double kS = 0.22868; // untested
+            public static final double kG = 0.017947; // untested
+            public static final double kV = 1.9709; // untested
+            public static final double kA = 0.024156; // untested
+            // 0.22868, 0.017947, 0.9709, 0.024156
         }
 
         public static final int TOP_HALL_EFFECT_PORT = 2;
@@ -173,10 +179,10 @@ public final class Constants {
 
         public static final double OFFSET_METERS = 0.0; // untested
 
-        public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new TunableNumber("Elevator", "Max Velocity",
-                1.0); // untested
-        public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elevator",
-                "Max Acceleration", 1.0); // untested
+        public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new TunableNumber("Elbow", "Max Velocity",
+                2 * Math.PI); // untested
+        public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elbow",
+                "Max Acceleration", 2 * Math.PI); // untested
 
     }
 

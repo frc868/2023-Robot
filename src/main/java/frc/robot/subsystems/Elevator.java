@@ -10,21 +10,31 @@ import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
+import com.techhounds.houndutil.houndlog.enums.LogLevel;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import com.techhounds.houndutil.houndlog.loggers.Logger;
+import com.techhounds.houndutil.houndlog.logitems.BooleanLogItem;
+import com.techhounds.houndutil.houndlog.logitems.DoubleLogItem;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj.simulation.DIOSim;
+import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
 import frc.robot.Constants;
+import frc.robot.Overrides;
 import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.GamePieceLocation.Level;
+import frc.robot.commands.RobotStates;
 
 /**
  * The elevator subsystem, with two motors and motion profling.
@@ -36,14 +46,14 @@ import frc.robot.GamePieceLocation.Level;
 public class Elevator extends ProfiledPIDSubsystem {
     public static enum ElevatorPosition {
         BOTTOM(0),
-        CONE_LOW(0),
-        CONE_MID(0),
-        CONE_HIGH(0),
-        CUBE_LOW(0),
-        CUBE_MID(0),
-        CUBE_HIGH(0),
+        CONE_LOW(Units.inchesToMeters(10)),
+        CONE_MID(Units.inchesToMeters(30)),
+        CONE_HIGH(Units.inchesToMeters(60)),
+        CUBE_LOW(Units.inchesToMeters(10)),
+        CUBE_MID(Units.inchesToMeters(30)),
+        CUBE_HIGH(Units.inchesToMeters(60)),
         HUMAN_PLAYER(0),
-        TOP(0);
+        TOP(Units.inchesToMeters(80));
 
         public final double value;
 
@@ -77,14 +87,35 @@ public class Elevator extends ProfiledPIDSubsystem {
             Constants.Elevator.Gains.kV,
             Constants.Elevator.Gains.kA);
 
-    /**
-     * Used to make sure that the PID controller does not enable unless the elevator
-     * has been zeroed off of the hall effects.
-     */
-    private boolean isInitialized = false;
-
     /** The ligament of the complete mechanism body that this subsystem controls. */
     private MechanismLigament2d ligament;
+
+    /**
+     * The physics simulator for this mechansim. The elevator sim takes in voltages
+     * from the motor and simulates an elevator under the influence of gravity.
+     */
+    private ElevatorSim elevatorSim = new ElevatorSim(
+            DCMotor.getNEO(2),
+            12,
+            3.63,
+            Units.inchesToMeters(2.4),
+            Units.inchesToMeters(0),
+            Units.inchesToMeters(80),
+            true);
+
+    /**
+     * The wrapper of the bottomHallEffect for simulation. This allows you to set
+     * the values of the sensor in sim without changing the values IRL. This value
+     * is not used when the robot is running IRL.
+     */
+    private DIOSim bottomHallEffectSim;
+
+    /**
+     * The wrapper of the topHallEffect for simulation. This allows you to set
+     * the values of the sensor in sim without changing the values IRL. This value
+     * is not used when the robot is running IRL.
+     */
+    private DIOSim topHallEffectSim;
 
     /**
      * Initializes the elevator.
@@ -118,13 +149,29 @@ public class Elevator extends ProfiledPIDSubsystem {
 
         this.ligament = ligament;
 
+        rightMotor.follow(leftMotor, true);
+
+        leftMotor.getEncoder().setPositionConversionFactor(Constants.Elevator.ENCODER_DISTANCE_TO_METERS);
+        leftMotor.getEncoder().setVelocityConversionFactor(Constants.Elevator.ENCODER_DISTANCE_TO_METERS / 60.0);
+
         LoggingManager.getInstance().addGroup("Elevator", new LogGroup(
                 new Logger[] {
+                        new BooleanLogItem("Bottom Hall Effect", bottomHallEffect::get),
+                        new BooleanLogItem("Top Hall Effect", topHallEffect::get),
+                        new DoubleLogItem("Actual Position", () -> this.getMeasurement(), LogLevel.MAIN),
                         new DeviceLogger<CANSparkMax>(leftMotor, "Primary Elevator Motor",
                                 LogProfileBuilder.buildCANSparkMaxLogItems(leftMotor)),
                         new DeviceLogger<CANSparkMax>(rightMotor, "Secondary Elevator Motor",
-                                LogProfileBuilder.buildCANSparkMaxLogItems(rightMotor))
+                                LogProfileBuilder.buildCANSparkMaxLogItems(rightMotor)),
                 }));
+
+        if (RobotBase.isSimulation()) {
+            bottomHallEffectSim = new DIOSim(bottomHallEffect);
+            bottomHallEffectSim.setValue(false);
+            topHallEffectSim = new DIOSim(topHallEffect);
+            topHallEffectSim.setValue(false);
+            RobotStates.enableInitialized();
+        }
     }
 
     /**
@@ -137,6 +184,20 @@ public class Elevator extends ProfiledPIDSubsystem {
     }
 
     /**
+     * Updates simulation-specific variables.
+     */
+    @Override
+    public void simulationPeriodic() {
+        // set the input (the voltage of the motor)
+        elevatorSim.setInput(leftMotor.getAppliedOutput());
+        // update the sim
+        elevatorSim.update(0.020);
+        leftMotor.getEncoder().setPosition(elevatorSim.getPositionMeters());
+        bottomHallEffectSim.setValue(elevatorSim.getPositionMeters() <= 0);
+        topHallEffectSim.setValue(elevatorSim.getPositionMeters() >= 2.03);
+    }
+
+    /**
      * Uses the output from the ProfiledPIDController. Adds the output to the result
      * of the calculation from the feedforward controller.
      * 
@@ -146,7 +207,7 @@ public class Elevator extends ProfiledPIDSubsystem {
      */
     @Override
     public void useOutput(double output, TrapezoidProfile.State setpoint) {
-        double feedforward = feedforwardController.calculate(setpoint.position, setpoint.velocity);
+        double feedforward = feedforwardController.calculate(setpoint.velocity);
         leftMotor.setVoltage(output + feedforward);
         rightMotor.setVoltage(output + feedforward);
     }
@@ -159,7 +220,7 @@ public class Elevator extends ProfiledPIDSubsystem {
      */
     @Override
     public double getMeasurement() {
-        return (leftMotor.getEncoder().getPosition() + rightMotor.getEncoder().getPosition()) / 2.0;
+        return leftMotor.getEncoder().getPosition();
     }
 
     /**
@@ -183,11 +244,31 @@ public class Elevator extends ProfiledPIDSubsystem {
     /**
      * Check if the elevator is lowered. This is useful for the subsystem safeties.
      * 
-     * @return true of the elevator is at the bottom state and is within the
+     * @return true if the elevator is at the bottom state and is within the
      *         tolerance of the controller.
      */
     public boolean isSafeForIntake() {
-        return getMeasurement() - ElevatorPosition.BOTTOM.value < Constants.Elevator.Gains.TOLERANCE.get();
+        return Math.abs(getMeasurement() - ElevatorPosition.BOTTOM.value) < Constants.Elevator.Gains.TOLERANCE.get();
+    }
+
+    /**
+     * Check if the elevator isn't lowered. This is useful for the subsystem
+     * safeties.
+     * 
+     * @return true if the elevator is NOT at the bottom state and is within the
+     *         tolerance of the controller.
+     */
+    public boolean isSafeForWrist() {
+        return !(Math.abs(getMeasurement() - ElevatorPosition.BOTTOM.value) < Constants.Elevator.Gains.TOLERANCE.get());
+    }
+
+    /**
+     * Check if the elevator is safe to move.
+     * 
+     * @return true if the elevator is safe to move
+     */
+    private boolean isSafeToMove(Intake intake) {
+        return RobotStates.isInitialized() && intake.isSafeForElevator();
     }
 
     /**
@@ -213,8 +294,16 @@ public class Elevator extends ProfiledPIDSubsystem {
      * @param speed the speed, from -1.0 to 1.0
      */
     public void setSpeed(double speed) {
-        if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(), speed))
-            motors.set(speed);
+        if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(), speed)) {
+            if (RobotBase.isReal()) {
+                motors.set(speed);
+            } else {
+                motors.setVoltage(speed * 12.0);
+            }
+        } else {
+            motors.setVoltage(0);
+        }
+
     }
 
     /**
@@ -226,13 +315,16 @@ public class Elevator extends ProfiledPIDSubsystem {
     public void setVoltage(double voltage) {
         if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(), voltage))
             motors.setVoltage(voltage);
+        else {
+            motors.setVoltage(0);
+        }
     }
 
     /**
-     * Creates an InstantCommand that sets the goal position of the elbow, and
+     * Creates an InstantCommand that sets the goal position of the elevator, and
      * enables the controller.
      * 
-     * @param position an ElevatorPosition to set the elbow to
+     * @param position an ElevatorPosition to set the elevator to
      * @return the command
      */
     public CommandBase setDesiredPositionCommand(ElevatorPosition position, Intake intake, LEDs leds) {
@@ -240,9 +332,10 @@ public class Elevator extends ProfiledPIDSubsystem {
                 Commands.sequence(
                         runOnce(() -> setGoal(position.value)),
                         runOnce(this::enable),
-                        Commands.waitUntil(this::isAtGoal)).finallyDo((d) -> this.disable()),
+                        Commands.waitUntil(this::isAtGoal)),
                 leds.errorCommand(),
-                () -> isInitialized);
+                () -> isSafeToMove(intake));
+        // () -> true);
     }
 
     public CommandBase setScoringPositionCommand(Supplier<GamePiece> gamePieceMode,
@@ -279,12 +372,25 @@ public class Elevator extends ProfiledPIDSubsystem {
     public CommandBase zeroEncoderCommand() {
         return runEnd(() -> setSpeed(-0.1), () -> {
             this.resetEncoders();
-            isInitialized = true;
-        }).until(bottomHallEffect::get);
+            RobotStates.enableInitialized();
+        }).until(bottomHallEffect::get).withName("Zero Encoder");
     }
 
+    /**
+     * Sets the speed of the elevator from the operator overrides controller.
+     * 
+     * @param speed  the speed commanded from the joystick
+     * @param intake
+     * @param leds
+     * @return the command
+     */
     public CommandBase setOverridenElevatorSpeedCommand(DoubleSupplier speed, Intake intake, LEDs leds) {
-        return Commands.either(runOnce(() -> setSpeed(speed.getAsDouble())), leds.errorCommand(),
-                intake::isSafeForElevator);
+        return Commands.either(
+                Commands.either(
+                        run(() -> setSpeed(speed.getAsDouble())),
+                        runOnce(this::stop).andThen(leds.errorCommand()),
+                        () -> isSafeToMove(intake)),
+                Commands.none(),
+                Overrides::isOperatorOverridden).withName("Set Overridden Elevator Speed");
     }
 }

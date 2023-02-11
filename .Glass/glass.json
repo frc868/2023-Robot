@@ -1,9 +1,65 @@
 {
   "NetworkTables": {
+    "Retained Values": {
+      "open": false
+    },
+    "transitory": {
+      "HoundLog": {
+        "Elevator": {
+          "open": true
+        },
+        "open": true
+      }
+    },
     "types": {
       "/FMSInfo": "FMSInfo",
       "/HoundLog/Autonomous/Chooser": "String Chooser",
       "/HoundLog/Autonomous/Field": "Field2d",
+      "/HoundLog/Drivetrain/BrakeO": "Command",
+      "/HoundLog/Drivetrain/BrakeX": "Command",
+      "/HoundLog/Drivetrain/Turn CCW": "Command",
+      "/HoundLog/Drivetrain/Turn CW": "Command",
+      "/HoundLog/Elbow/Set High": "Command",
+      "/HoundLog/Elbow/Set Low": "Command",
+      "/HoundLog/Elbow/Set Middle": "Command",
+      "/HoundLog/Elevator/Set Bottom": "Command",
+      "/HoundLog/Elevator/Set Cone High": "Command",
+      "/HoundLog/Elevator/Set Cone Low": "Command",
+      "/HoundLog/Elevator/Set Cone Mid": "Command",
+      "/HoundLog/Elevator/Set Cube High": "Command",
+      "/HoundLog/Elevator/Set Cube Low": "Command",
+      "/HoundLog/Elevator/Set Cube Mid": "Command",
+      "/HoundLog/Elevator/Set Human Player": "Command",
+      "/HoundLog/Elevator/Set Top": "Command",
+      "/HoundLog/Elevator/Zero Encoder": "Command",
+      "/HoundLog/Intake/Intake Down": "Command",
+      "/HoundLog/Intake/Intake Up": "Command",
+      "/HoundLog/Intake/Passover Extended": "Command",
+      "/HoundLog/Intake/Passover Retracted": "Command",
+      "/HoundLog/LEDs/Cone Pickup": "Command",
+      "/HoundLog/LEDs/Cube Pickup": "Command",
+      "/HoundLog/LEDs/Error": "Command",
+      "/HoundLog/LEDs/Go To Previous State": "Command",
+      "/HoundLog/LEDs/Rainbow": "Command",
+      "/HoundLog/LEDs/TechHOUNDS": "Command",
+      "/HoundLog/LEDs/Uninitialized": "Command",
+      "/HoundLog/Main/Drive to Scoring Location": "Command",
+      "/HoundLog/Main/Drivetrain": "Subsystem",
+      "/HoundLog/Main/Elbow": "Subsystem",
+      "/HoundLog/Main/Elevator": "Subsystem",
+      "/HoundLog/Main/Intake": "Subsystem",
+      "/HoundLog/Main/Intake Game Piece": "Command",
+      "/HoundLog/Main/LEDs": "Subsystem",
+      "/HoundLog/Main/Manipulator": "Subsystem",
+      "/HoundLog/Main/Misc": "Subsystem",
+      "/HoundLog/Main/Prepare to Intake Game Piece": "Command",
+      "/HoundLog/Main/Score Game Piece": "Command",
+      "/HoundLog/Main/Stow Elevator": "Command",
+      "/HoundLog/Manipulator/Pincers Closed": "Command",
+      "/HoundLog/Manipulator/Pincers Open": "Command",
+      "/HoundLog/Manipulator/Wrist Down": "Command",
+      "/HoundLog/Manipulator/Wrist Up": "Command",
+      "/SmartDashboard/Mechanisms": "Mechanism2d",
       "/SmartDashboard/PPSwerveControllerCommand_field": "Field2d"
     },
     "windows": {
@@ -21,6 +77,6 @@
   },
   "NetworkTables Settings": {
     "mode": "Client (NT4)",
-    "serverTeam": "868"
+    "serverTeam": "localhost"
   }
 }

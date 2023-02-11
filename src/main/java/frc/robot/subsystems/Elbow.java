@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
@@ -7,17 +9,29 @@ import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
+import com.techhounds.houndutil.houndlog.enums.LogLevel;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
+import com.techhounds.houndutil.houndlog.logitems.BooleanLogItem;
+import com.techhounds.houndutil.houndlog.logitems.DoubleLogItem;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.simulation.BatterySim;
+import edu.wpi.first.wpilibj.simulation.DIOSim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
 import frc.robot.Constants;
+import frc.robot.Overrides;
 
 /**
  * Elbow subsystem, one CAN Motor and encoder, one feedforward object, and two
@@ -27,9 +41,9 @@ import frc.robot.Constants;
  */
 public class Elbow extends ProfiledPIDSubsystem {
     public static enum ElbowPosition {
-        LOW(0),
+        LOW(Units.degreesToRadians(-20)),
         MID(0),
-        HIGH(0);
+        HIGH(Units.degreesToRadians(20));
 
         public final double value;
 
@@ -58,14 +72,39 @@ public class Elbow extends ProfiledPIDSubsystem {
             Constants.Elbow.Gains.kV,
             Constants.Elbow.Gains.kA);
 
-    /**
-     * Hall effect sensors in the motor that will limit freedom of movement.
-     */
+    /** Hall effect sensor that represents the lowest angle of the elbow. */
     private DigitalInput bottomHallEffect = new DigitalInput(Constants.Elbow.BOTTOM_HALL_EFFECT_PORT);
+    /** Hall effect sensor that represents the highest angle of the elbow. */
     private DigitalInput topHallEffect = new DigitalInput(Constants.Elbow.TOP_HALL_EFFECT_PORT);
 
     /** The ligament of the complete mechanism body that this subsystem controls. */
     private MechanismLigament2d ligament;
+
+    /**
+     * The physics simulator for this mechansim. The single jointed arm sim best
+     * matches the elbow.
+     */
+    private SingleJointedArmSim armSim = new SingleJointedArmSim(
+            DCMotor.getNEO(2),
+            100,
+            SingleJointedArmSim.estimateMOI(Units.inchesToMeters(8), 3.6),
+            Units.inchesToMeters(8),
+            Units.degreesToRadians(-30),
+            Units.degreesToRadians(30),
+            true);
+
+    /**
+     * The wrapper of the bottomHallEffect for simulation. This allows you to set
+     * the values of the sensor in sim without changing the values IRL. This value
+     * is not used when the robot is running IRL.
+     */
+    private DIOSim bottomHallEffectSim;
+    /**
+     * The wrapper of the topHallEffect for simulation. This allows you to set
+     * the values of the sensor in sim without changing the values IRL. This value
+     * is not used when the robot is running IRL.
+     */
+    private DIOSim topHallEffectSim;
 
     /**
      * Initializes the elbow.
@@ -100,8 +139,18 @@ public class Elbow extends ProfiledPIDSubsystem {
         this.ligament = ligament;
 
         LoggingManager.getInstance().addGroup("Elbow", new LogGroup(
+                new BooleanLogItem("Bottom Hall Effect", bottomHallEffect::get),
+                new BooleanLogItem("Top Hall Effect", topHallEffect::get),
+                new DoubleLogItem("Actual Position", () -> this.getMeasurement(), LogLevel.MAIN),
                 new DeviceLogger<CANSparkMax>(motor, "Elbow Motor",
                         LogProfileBuilder.buildCANSparkMaxLogItems(motor))));
+
+        if (RobotBase.isSimulation()) {
+            bottomHallEffectSim = new DIOSim(bottomHallEffect);
+            bottomHallEffectSim.setValue(false);
+            topHallEffectSim = new DIOSim(topHallEffect);
+            topHallEffectSim.setValue(false);
+        }
     }
 
     /**
@@ -110,7 +159,26 @@ public class Elbow extends ProfiledPIDSubsystem {
     @Override
     public void periodic() {
         super.periodic();
-        ligament.setAngle(-42 + encoder.getPosition());
+        if (RobotBase.isReal())
+            ligament.setAngle(-42 + Units.radiansToDegrees(encoder.getPosition()));
+        else
+            ligament.setAngle(-42 + Units.radiansToDegrees(motor.getEncoder().getPosition()));
+    }
+
+    /**
+     * Updates simulation-specific variables.
+     */
+    @Override
+    public void simulationPeriodic() {
+        armSim.setInput(motor.getAppliedOutput());
+        armSim.update(0.020);
+        motor.getEncoder().setPosition(armSim.getAngleRads());
+        // update the voltage of the RIO sim
+        RoboRioSim.setVInVoltage(
+                BatterySim.calculateDefaultBatteryLoadedVoltage(armSim.getCurrentDrawAmps()));
+
+        bottomHallEffectSim.setValue(armSim.getAngleRads() <= Units.degreesToRadians(-30));
+        topHallEffectSim.setValue(armSim.getAngleRads() >= Units.degreesToRadians(30));
     }
 
     /**
@@ -135,7 +203,28 @@ public class Elbow extends ProfiledPIDSubsystem {
      */
     @Override
     protected double getMeasurement() {
-        return encoder.getPosition();
+        if (RobotBase.isReal())
+            return encoder.getPosition();
+        else
+            return motor.getEncoder().getPosition();
+    }
+
+    /**
+     * Get the goal position of the elbow.
+     * 
+     * @return the goal position of the elbow
+     */
+    public double getGoal() {
+        return getController().getGoal().position;
+    }
+
+    /**
+     * Checks if the elbow is at its goal position.
+     * 
+     * @return true if the elbow is at its goal position
+     */
+    public boolean isAtGoal() {
+        return getController().atGoal();
     }
 
     /**
@@ -146,9 +235,13 @@ public class Elbow extends ProfiledPIDSubsystem {
      */
     public void setSpeed(double speed) {
         if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(), speed))
-            motor.set(speed);
-        else
-            motor.stopMotor();
+            if (RobotBase.isReal())
+                motor.set(speed);
+            else
+                motor.setVoltage(speed * 12.0);
+        else {
+            motor.setVoltage(0);
+        }
     }
 
     /**
@@ -160,8 +253,9 @@ public class Elbow extends ProfiledPIDSubsystem {
     public void setVoltage(double voltage) {
         if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(), voltage))
             motor.setVoltage(voltage);
-        else
-            motor.stopMotor();
+        else {
+            motor.setVoltage(0);
+        }
     }
 
     /**
@@ -172,6 +266,22 @@ public class Elbow extends ProfiledPIDSubsystem {
      * @return the command
      */
     public CommandBase setDesiredPositionCommand(ElbowPosition position) {
-        return runOnce(() -> setGoal(position.value)).andThen(this::enable);
+        return Commands.sequence(
+                runOnce(() -> setGoal(position.value)),
+                runOnce(this::enable),
+                Commands.waitUntil(this::isAtGoal));
+    }
+
+    /**
+     * Sets the speed of the elbow from the operator overrides controller.
+     * 
+     * @param speed the speed commanded from the joystick
+     * @return the command
+     */
+    public CommandBase setOverridenElbowSpeedCommand(DoubleSupplier speed) {
+        return Commands.either(
+                run(() -> setSpeed(speed.getAsDouble())),
+                Commands.none(),
+                Overrides::isOperatorOverridden);
     }
 }

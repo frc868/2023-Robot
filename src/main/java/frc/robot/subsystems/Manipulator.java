@@ -7,12 +7,15 @@ import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
+import com.techhounds.houndutil.houndlog.logitems.BooleanLogItem;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.simulation.DIOSim;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -37,6 +40,7 @@ public class Manipulator extends SubsystemBase {
 
     /** Beam break sensor that detects if the wingdong is hitting the pole. */
     private DigitalInput poleSwitch = new DigitalInput(Constants.Manipulator.POLE_SWITCH_PORT);
+    private DIOSim poleSwitchSim;
 
     /** The ligament of the complete mechanism body that this subsystem controls. */
     private MechanismLigament2d wristLigament;
@@ -51,7 +55,13 @@ public class Manipulator extends SubsystemBase {
                 new DeviceLogger<DoubleSolenoid>(wrist, "Wrist",
                         LogProfileBuilder.buildDoubleSolenoidLogItems(wrist)),
                 new DeviceLogger<DoubleSolenoid>(pincer, "Pincer",
-                        LogProfileBuilder.buildDoubleSolenoidLogItems(pincer))));
+                        LogProfileBuilder.buildDoubleSolenoidLogItems(pincer)),
+                new BooleanLogItem("Is Pole Detected", this::isPoleDetected)));
+
+        if (RobotBase.isSimulation()) {
+            poleSwitchSim = new DIOSim(poleSwitch);
+            poleSwitchSim.setValue(false);
+        }
     }
 
     /**
@@ -61,10 +71,14 @@ public class Manipulator extends SubsystemBase {
     public void periodic() {
         super.periodic();
         if (wrist.get() == Value.kForward) {
-            wristLigament.setAngle(90);
-        } else {
             wristLigament.setAngle(0);
+        } else {
+            wristLigament.setAngle(90);
         }
+    }
+
+    private boolean isSafeForWristMove(Elevator elevator) {
+        return elevator.isSafeForWrist();
     }
 
     /**
@@ -74,7 +88,7 @@ public class Manipulator extends SubsystemBase {
      * @return the command
      */
     public CommandBase setWristDownCommand() {
-        return runOnce(() -> wrist.set(Value.kForward)); // untested
+        return runOnce(() -> wrist.set(Value.kForward)).withName("Wrist Down"); // untested
     }
 
     /**
@@ -83,8 +97,11 @@ public class Manipulator extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setWristUpCommand() {
-        return runOnce(() -> wrist.set(Value.kReverse)); // untested
+    public CommandBase setWristUpCommand(Elevator elevator, LEDs leds) {
+        return Commands.either(
+                runOnce(() -> wrist.set(Value.kReverse)),
+                leds.errorCommand(),
+                () -> isSafeForWristMove(elevator)).withName("Wrist Up");
     }
 
     /**
@@ -94,7 +111,7 @@ public class Manipulator extends SubsystemBase {
      * @return the command
      */
     public CommandBase setPincersOpenCommand() {
-        return runOnce(() -> pincer.set(Value.kForward)); // untested
+        return runOnce(() -> pincer.set(Value.kForward)).withName("Pincers Open"); // untested
     }
 
     /**
@@ -104,7 +121,7 @@ public class Manipulator extends SubsystemBase {
      * @return the command
      */
     public CommandBase setPincersClosedCommand() {
-        return runOnce(() -> pincer.set(Value.kReverse)); // untested
+        return runOnce(() -> pincer.set(Value.kReverse)).withName("Pincers Closed"); // untested
     }
 
     /**
@@ -113,7 +130,7 @@ public class Manipulator extends SubsystemBase {
      * @return true if IR beam broken by pole
      */
     public boolean isPoleDetected() {
-        return poleSwitch.get(); // untested
+        return poleSwitch.get();
     }
 
     /**
@@ -144,5 +161,19 @@ public class Manipulator extends SubsystemBase {
                         GamePiece.CONE, setPincersOpenCommand(),
                         GamePiece.CUBE, setPincersClosedCommand()),
                 modeSupplier::get);
+    }
+
+    /**
+     * Creates a command that toggles on the pole switch to simulate that the
+     * wingdong has hit the pole. This will only work in sim.
+     * 
+     * @return the command
+     */
+    public CommandBase simPoleSwitchTriggered() {
+        // this is commands so that Manipulator isn't added as a requirement
+        // automatically
+        return Commands.runOnce(() -> poleSwitchSim.setValue(true))
+                .andThen(Commands.waitSeconds(1))
+                .andThen(() -> poleSwitchSim.setValue(false)).withName("Sim Pole Switch Triggered");
     }
 }

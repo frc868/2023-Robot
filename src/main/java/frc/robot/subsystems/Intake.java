@@ -7,12 +7,16 @@ import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import com.techhounds.houndutil.houndlog.loggers.Logger;
+import com.techhounds.houndutil.houndlog.logitems.BooleanLogItem;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
+import edu.wpi.first.wpilibj.simulation.DIOSim;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -52,13 +56,23 @@ public class Intake extends SubsystemBase {
     MotorControllerGroup passoverMotors = new MotorControllerGroup(leftPassoverMotor,
             rightPassoverMotor);
 
+    /** The ligament of the complete mechanism body that this subsystem controls. */
+    private MechanismLigament2d ligament;
+
     /** The beam break that detects if a game piece is in the robot. */
     private DigitalInput gamePieceDetector = new DigitalInput(Constants.Intake.GAME_PIECE_SENSOR_PORT);
 
     /**
+     * The wrapper of the gamePieceDetector for simulation. This allows you to set
+     * the values of the sensor in sim without changing the values IRL. This value
+     * is not used when the robot is running IRL.
+     */
+    private DIOSim gamePieceDetectorSim;
+
+    /**
      * Initializes the intake system.
      */
-    public Intake() {
+    public Intake(MechanismLigament2d ligament) {
         rightPassoverMotor.setInverted(true);
         LoggingManager.getInstance().addGroup("Intake", new LogGroup(
                 new Logger[] {
@@ -70,11 +84,45 @@ public class Intake extends SubsystemBase {
                                 LogProfileBuilder.buildDoubleSolenoidLogItems(intakeSolenoid)),
                         new DeviceLogger<DoubleSolenoid>(passoverSolenoid, "Passover Solenoid",
                                 LogProfileBuilder.buildDoubleSolenoidLogItems(passoverSolenoid)),
+                        new BooleanLogItem("Is Game Piece Detected", this::isGamePieceDetected),
+                        new BooleanLogItem("Is Safe for Elevator", this::isSafeForElevator)
                 }));
+        this.ligament = ligament;
+
+        if (RobotBase.isSimulation()) {
+            gamePieceDetectorSim = new DIOSim(gamePieceDetector);
+            gamePieceDetectorSim.setValue(false);
+        }
     }
 
+    /**
+     * Runs every 20ms. This updates the ligament sent over NetworkTables.
+     */
+    @Override
+    public void periodic() {
+        super.periodic();
+        this.ligament.setAngle(intakeSolenoid.get() == Value.kForward ? 0 : 110);
+    }
+
+    /**
+     * Checks if the it is safe fo the elevator to move based off of the intake:
+     * 1. the passover is retracted
+     * 2. the intake is up
+     * 
+     * @return true if safe to move
+     */
     public boolean isSafeForElevator() {
         return passoverSolenoid.get() == Value.kReverse && intakeSolenoid.get() == Value.kReverse;
+    }
+
+    /**
+     * Checks if the intake is safe to move based on the elevator.
+     * 
+     * @param elevator
+     * @return true if safe to move
+     */
+    private boolean isSafeToMove(Elevator elevator) {
+        return elevator.isSafeForIntake();
     }
 
     /**
@@ -89,7 +137,7 @@ public class Intake extends SubsystemBase {
         return Commands.either(
                 runOnce(() -> passoverSolenoid.set(Value.kForward)),
                 leds.errorCommand(),
-                () -> elevator.isSafeForIntake());
+                () -> isSafeToMove(elevator)).withName("Set Passover Extended");
     }
 
     /**
@@ -102,9 +150,7 @@ public class Intake extends SubsystemBase {
      * @return the command
      */
     public CommandBase setPassoverRetractedCommand(Elevator elevator, LEDs leds) {
-        return Commands
-                .either(runOnce(() -> passoverSolenoid.set(Value.kReverse)), leds.errorCommand(),
-                        elevator::isSafeForIntake); // untested
+        return runOnce(() -> passoverSolenoid.set(Value.kReverse)).withName("Set Passover Retracted");
     }
 
     /**
@@ -116,7 +162,8 @@ public class Intake extends SubsystemBase {
     public CommandBase setIntakeDownCommand(Elevator elevator, LEDs leds) {
         return Commands
                 .either(runOnce(() -> intakeSolenoid.set(Value.kForward)), leds.errorCommand(),
-                        elevator::isSafeForIntake); // untested
+                        () -> isSafeToMove(elevator))
+                .withName("Set Intake Down"); // untested
     }
 
     /**
@@ -128,7 +175,8 @@ public class Intake extends SubsystemBase {
     public CommandBase setIntakeUpCommand(Elevator elevator, LEDs leds) {
         return Commands
                 .either(runOnce(() -> intakeSolenoid.set(Value.kReverse)), leds.errorCommand(),
-                        elevator::isSafeForIntake); // untested
+                        () -> isSafeToMove(elevator))
+                .withName("Set Intake Up"); // untested
     }
 
     /**
@@ -139,7 +187,10 @@ public class Intake extends SubsystemBase {
      * @return the command
      */
     public CommandBase runPassoverMotorsCommand() {
-        return startEnd(() -> passoverMotors.set(.5), () -> passoverMotors.set(0));
+        return startEnd(
+                () -> passoverMotors.setVoltage(6),
+                () -> passoverMotors.setVoltage(0))
+                .withName("Run Passover Motors");
     }
 
     /**
@@ -149,5 +200,17 @@ public class Intake extends SubsystemBase {
      */
     public boolean isGamePieceDetected() {
         return gamePieceDetector.get();
+    }
+
+    /**
+     * Creates a command that toggles on the game piece detector to simulate that a
+     * game piece has entered the robot. This will only work in sim.
+     * 
+     * @return the command
+     */
+    public CommandBase simGamePieceDetectedCommand() {
+        return Commands.runOnce(() -> gamePieceDetectorSim.setValue(true))
+                .andThen(Commands.waitSeconds(1))
+                .andThen(() -> gamePieceDetectorSim.setValue(false)).withName("Sim Game Piece Detected");
     }
 }

@@ -1,0 +1,1095 @@
+{
+  "tabPane": [
+    {
+      "title": "Subsystems",
+      "autoPopulate": false,
+      "autoPopulatePrefix": "",
+      "widgetPane": {
+        "gridSize": 64.0,
+        "showGrid": true,
+        "hgap": 16.0,
+        "vgap": 16.0,
+        "titleType": 0,
+        "tiles": {
+          "5,0": {
+            "size": [
+              6,
+              4
+            ],
+            "content": {
+              "_type": "Grid Layout",
+              "_title": "Elevator",
+              "_glyph": 149,
+              "_showGlyph": false,
+              "Layout/Number of columns": 3,
+              "Layout/Number of rows": 1,
+              "Layout/Label position": "HIDDEN",
+              "_children": {
+                "0,0": {
+                  "_type": "List Layout",
+                  "_title": "",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": [
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Elevator/Set Top",
+                      "_title": "Set Top",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Elevator/Set Human Player",
+                      "_title": "Set Human Player",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Elevator/Set Cone High",
+                      "_title": "Set Cone High",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Elevator/Set Cone Mid",
+                      "_title": "Set Cone Mid",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Elevator/Set Cone Low",
+                      "_title": "Set Cone Low",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Elevator/Set Cube High",
+                      "_title": "Set Cube High",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Elevator/Set Cube Mid",
+                      "_title": "Set Cube Mid",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Elevator/Set Cube Low",
+                      "_title": "Set Cube Low",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Elevator/Set Bottom",
+                      "_title": "Set Bottom",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Elevator/Zero Encoder",
+                      "_title": "Zero Encoder",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    }
+                  ]
+                },
+                "2,0": {
+                  "_type": "List Layout",
+                  "_title": "List Layout",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": [
+                    {
+                      "_type": "Boolean Box",
+                      "_source0": "network_table:///HoundLog/Elevator/Top Hall Effect",
+                      "_title": "Top Hall Effect",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Colors/Color when true": "#7CFC00FF",
+                      "Colors/Color when false": "#8B0000FF"
+                    },
+                    {
+                      "_type": "Boolean Box",
+                      "_source0": "network_table:///HoundLog/Elevator/Bottom Hall Effect",
+                      "_title": "Bottom Hall Effect",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Colors/Color when true": "#7CFC00FF",
+                      "Colors/Color when false": "#8B0000FF"
+                    }
+                  ]
+                },
+                "1,0": {
+                  "_type": "Grid Layout",
+                  "_title": "Grid Layout",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Number of columns": 1,
+                  "Layout/Number of rows": 1,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": {
+                    "0,0": {
+                      "_type": "Number Bar",
+                      "_source0": "network_table:///HoundLog/Elevator/Primary Elevator Motor/Encoder Distance",
+                      "_title": "Position",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Range/Min": 0.0,
+                      "Range/Max": 2.5,
+                      "Range/Center": 0.0,
+                      "Visuals/Num tick marks": 5,
+                      "Visuals/Show text": true,
+                      "Visuals/Orientation": "VERTICAL"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "11,0": {
+            "size": [
+              9,
+              4
+            ],
+            "content": {
+              "_type": "Grid Layout",
+              "_title": "Elbow",
+              "_glyph": 149,
+              "_showGlyph": false,
+              "Layout/Number of columns": 3,
+              "Layout/Number of rows": 1,
+              "Layout/Label position": "HIDDEN",
+              "_children": {
+                "0,0": {
+                  "_type": "List Layout",
+                  "_title": "",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": [
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Elbow/Set High",
+                      "_title": "Set High",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Elbow/Set Middle",
+                      "_title": "Set Middle",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Elbow/Set Low",
+                      "_title": "Set Low",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    }
+                  ]
+                },
+                "2,0": {
+                  "_type": "List Layout",
+                  "_title": "",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": [
+                    {
+                      "_type": "Boolean Box",
+                      "_source0": "network_table:///HoundLog/Elbow/Top Hall Effect",
+                      "_title": "Top Hall Effect",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Colors/Color when true": "#7CFC00FF",
+                      "Colors/Color when false": "#8B0000FF"
+                    },
+                    {
+                      "_type": "Boolean Box",
+                      "_source0": "network_table:///HoundLog/Elbow/Bottom Hall Effect",
+                      "_title": "Bottom Hall Effect",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Colors/Color when true": "#7CFC00FF",
+                      "Colors/Color when false": "#8B0000FF"
+                    }
+                  ]
+                },
+                "1,0": {
+                  "_type": "Grid Layout",
+                  "_title": "Grid Layout",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Number of columns": 1,
+                  "Layout/Number of rows": 1,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": {
+                    "0,0": {
+                      "_type": "Number Bar",
+                      "_source0": "network_table:///HoundLog/Elbow/Elbow Motor/Encoder Distance",
+                      "_title": "Position",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Range/Min": -0.5,
+                      "Range/Max": 0.5,
+                      "Range/Center": 0.0,
+                      "Visuals/Num tick marks": 5,
+                      "Visuals/Show text": true,
+                      "Visuals/Orientation": "VERTICAL"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "11,4": {
+            "size": [
+              9,
+              5
+            ],
+            "content": {
+              "_type": "Grid Layout",
+              "_title": "Intake",
+              "_glyph": 149,
+              "_showGlyph": false,
+              "Layout/Number of columns": 3,
+              "Layout/Number of rows": 1,
+              "Layout/Label position": "BOTTOM",
+              "_children": {
+                "0,0": {
+                  "_type": "Grid Layout",
+                  "_title": "Intake",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Number of columns": 1,
+                  "Layout/Number of rows": 3,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": {
+                    "0,0": {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Intake/Intake Up",
+                      "_title": "Intake Up",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    "0,1": {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Intake/Intake Down",
+                      "_title": "Intake Down",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    "0,2": {
+                      "_type": "Boolean Box",
+                      "_source0": "network_table:///HoundLog/Intake/Intake Solenoid/Position",
+                      "_title": "Position",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Colors/Color when true": "#7CFC00FF",
+                      "Colors/Color when false": "#8B0000FF"
+                    }
+                  }
+                },
+                "1,0": {
+                  "_type": "Grid Layout",
+                  "_title": "Passovers",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Number of columns": 1,
+                  "Layout/Number of rows": 3,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": {
+                    "0,0": {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Intake/Passover Extended",
+                      "_title": "Passover Extended",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    "0,1": {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Intake/Passover Retracted",
+                      "_title": "Passover Retracted",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    "0,2": {
+                      "_type": "Boolean Box",
+                      "_source0": "network_table:///HoundLog/Intake/Passover Solenoid/Position",
+                      "_title": "Position",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Colors/Color when true": "#7CFC00FF",
+                      "Colors/Color when false": "#8B0000FF"
+                    }
+                  }
+                },
+                "2,0": {
+                  "_type": "Grid Layout",
+                  "_title": "Passover Motors",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Number of columns": 1,
+                  "Layout/Number of rows": 3,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": {
+                    "0,1": {
+                      "_type": "Boolean Box",
+                      "_source0": "network_table:///HoundLog/Intake/Is Game Piece Detected",
+                      "_title": "Is Game Piece Detected",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Colors/Color when true": "#7CFC00FF",
+                      "Colors/Color when false": "#8B0000FF"
+                    },
+                    "0,0": {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Intake/Run Passover Motors",
+                      "_title": "Run Passover Motors",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    "0,2": {
+                      "_type": "Number Bar",
+                      "_source0": "network_table:///HoundLog/Intake/Left Passover Motor/Applied Output",
+                      "_title": "Speed",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Range/Min": -12.0,
+                      "Range/Max": 12.0,
+                      "Range/Center": 0.0,
+                      "Visuals/Num tick marks": 5,
+                      "Visuals/Show text": true,
+                      "Visuals/Orientation": "HORIZONTAL"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "0,0": {
+            "size": [
+              5,
+              4
+            ],
+            "content": {
+              "_type": "Grid Layout",
+              "_title": "Manipulator",
+              "_glyph": 149,
+              "_showGlyph": false,
+              "Layout/Number of columns": 1,
+              "Layout/Number of rows": 2,
+              "Layout/Label position": "BOTTOM",
+              "_children": {
+                "0,0": {
+                  "_type": "Grid Layout",
+                  "_title": "Pincers",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Number of columns": 3,
+                  "Layout/Number of rows": 1,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": {
+                    "0,0": {
+                      "_type": "Boolean Box",
+                      "_source0": "network_table:///HoundLog/Manipulator/Pincer/Position",
+                      "_title": "Position",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Colors/Color when true": "#7CFC00FF",
+                      "Colors/Color when false": "#8B0000FF"
+                    },
+                    "1,0": {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Manipulator/Pincers Closed",
+                      "_title": "Pincers Closed",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    "2,0": {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Manipulator/Pincers Open",
+                      "_title": "Pincers Open",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    }
+                  }
+                },
+                "0,1": {
+                  "_type": "Grid Layout",
+                  "_title": "Wrist",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Number of columns": 4,
+                  "Layout/Number of rows": 1,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": {
+                    "1,0": {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Manipulator/Wrist Up",
+                      "_title": "Wrist Up",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    "2,0": {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Manipulator/Wrist Down",
+                      "_title": "Wrist Down",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    "3,0": {
+                      "_type": "Boolean Box",
+                      "_source0": "network_table:///HoundLog/Manipulator/Is Pole Detected",
+                      "_title": "Is Pole Detected",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Colors/Color when true": "#7CFC00FF",
+                      "Colors/Color when false": "#8B0000FF"
+                    },
+                    "0,0": {
+                      "_type": "Boolean Box",
+                      "_source0": "network_table:///HoundLog/Manipulator/Wrist/Position",
+                      "_title": "Position",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Colors/Color when true": "#7CFC00FF",
+                      "Colors/Color when false": "#8B0000FF"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "0,4": {
+            "size": [
+              11,
+              8
+            ],
+            "content": {
+              "_type": "Grid Layout",
+              "_title": "Drivetrain",
+              "_glyph": 149,
+              "_showGlyph": false,
+              "Layout/Number of columns": 3,
+              "Layout/Number of rows": 2,
+              "Layout/Label position": "BOTTOM",
+              "_children": {
+                "0,0": {
+                  "_type": "Grid Layout",
+                  "_title": "Front Left Module",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Number of columns": 2,
+                  "Layout/Number of rows": 1,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": {
+                    "0,0": {
+                      "_type": "Gyro",
+                      "_source0": "network_table:///HoundLog/Drivetrain/Front Left Module/Wheel Angle Degrees",
+                      "_title": "Angle",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Visuals/Major tick spacing": 45.0,
+                      "Visuals/Starting angle": 180.0,
+                      "Visuals/Show tick mark ring": true,
+                      "Visuals/Counter clockwise": true
+                    },
+                    "1,0": {
+                      "_type": "Number Bar",
+                      "_source0": "network_table:///HoundLog/Drivetrain/Front Left Module/Drive Motor/Applied Output",
+                      "_title": "Speed",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Range/Min": -12.0,
+                      "Range/Max": 12.0,
+                      "Range/Center": 0.0,
+                      "Visuals/Num tick marks": 5,
+                      "Visuals/Show text": true,
+                      "Visuals/Orientation": "VERTICAL"
+                    }
+                  }
+                },
+                "0,1": {
+                  "_type": "Grid Layout",
+                  "_title": "Back Left Module",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Number of columns": 2,
+                  "Layout/Number of rows": 1,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": {
+                    "1,0": {
+                      "_type": "Number Bar",
+                      "_source0": "network_table:///HoundLog/Drivetrain/Back Left Module/Drive Motor/Applied Output",
+                      "_title": "Speed",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Range/Min": -12.0,
+                      "Range/Max": 12.0,
+                      "Range/Center": 0.0,
+                      "Visuals/Num tick marks": 5,
+                      "Visuals/Show text": true,
+                      "Visuals/Orientation": "VERTICAL"
+                    },
+                    "0,0": {
+                      "_type": "Gyro",
+                      "_source0": "network_table:///HoundLog/Drivetrain/Back Left Module/Wheel Angle Degrees",
+                      "_title": "Angle",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Visuals/Major tick spacing": 45.0,
+                      "Visuals/Starting angle": 180.0,
+                      "Visuals/Show tick mark ring": true,
+                      "Visuals/Counter clockwise": true
+                    }
+                  }
+                },
+                "1,0": {
+                  "_type": "Grid Layout",
+                  "_title": "Front Right Module",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Number of columns": 2,
+                  "Layout/Number of rows": 1,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": {
+                    "0,0": {
+                      "_type": "Gyro",
+                      "_source0": "network_table:///HoundLog/Drivetrain/Back Left Module/Wheel Angle Degrees",
+                      "_title": "Angle",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Visuals/Major tick spacing": 45.0,
+                      "Visuals/Starting angle": 180.0,
+                      "Visuals/Show tick mark ring": true,
+                      "Visuals/Counter clockwise": true
+                    },
+                    "1,0": {
+                      "_type": "Number Bar",
+                      "_source0": "network_table:///HoundLog/Drivetrain/Front Right Module/Drive Motor/Applied Output",
+                      "_title": "Speed",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Range/Min": -12.0,
+                      "Range/Max": 12.0,
+                      "Range/Center": 0.0,
+                      "Visuals/Num tick marks": 5,
+                      "Visuals/Show text": true,
+                      "Visuals/Orientation": "VERTICAL"
+                    }
+                  }
+                },
+                "2,0": {
+                  "_type": "List Layout",
+                  "_title": "Commands",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": [
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Drivetrain/BrakeO",
+                      "_title": "BrakeO",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Drivetrain/BrakeX",
+                      "_title": "BrakeX",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Drivetrain/Turn CCW",
+                      "_title": "Turn CCW",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Drivetrain/Turn CW",
+                      "_title": "Turn CW",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    }
+                  ]
+                },
+                "2,1": {
+                  "_type": "List Layout",
+                  "_title": "Speed Mode",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": [
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Drivetrain/Slow",
+                      "_title": "Slow",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Drivetrain/Fast",
+                      "_title": "Fast",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Drivetrain/Ultra",
+                      "_title": "Ultra",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    }
+                  ]
+                },
+                "1,1": {
+                  "_type": "Grid Layout",
+                  "_title": "Back Right Module",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Number of columns": 2,
+                  "Layout/Number of rows": 1,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": {
+                    "1,0": {
+                      "_type": "Number Bar",
+                      "_source0": "network_table:///HoundLog/Drivetrain/Back Right Module/Drive Motor/Applied Output",
+                      "_title": "Output",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Range/Min": -12.0,
+                      "Range/Max": 12.0,
+                      "Range/Center": 0.0,
+                      "Visuals/Num tick marks": 5,
+                      "Visuals/Show text": true,
+                      "Visuals/Orientation": "VERTICAL"
+                    },
+                    "0,0": {
+                      "_type": "Gyro",
+                      "_source0": "network_table:///HoundLog/Drivetrain/Back Right Module/Wheel Angle Degrees",
+                      "_title": "Angle",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Visuals/Major tick spacing": 45.0,
+                      "Visuals/Starting angle": 180.0,
+                      "Visuals/Show tick mark ring": true,
+                      "Visuals/Counter clockwise": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "14,9": {
+            "size": [
+              3,
+              3
+            ],
+            "content": {
+              "_type": "List Layout",
+              "_title": "Command Groups",
+              "_glyph": 149,
+              "_showGlyph": false,
+              "Layout/Label position": "BOTTOM",
+              "_children": [
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Main/Prepare to Intake Game Piece",
+                  "_title": "Prepare to Intake Game Piece",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Main/Intake Game Piece",
+                  "_title": "Intake Game Piece",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Main/Drive to Scoring Location",
+                  "_title": "Drive to Scoring Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Main/Score Game Piece",
+                  "_title": "Score Game Piece",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Main/Stow Elevator",
+                  "_title": "Stow Elevator",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                }
+              ]
+            }
+          },
+          "11,9": {
+            "size": [
+              3,
+              3
+            ],
+            "content": {
+              "_type": "List Layout",
+              "_title": "List Layout",
+              "_glyph": 149,
+              "_showGlyph": false,
+              "Layout/Label position": "BOTTOM",
+              "_children": [
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/LEDs/Rainbow",
+                  "_title": "HoundLog/LEDs/Rainbow",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/LEDs/TechHOUNDS",
+                  "_title": "HoundLog/LEDs/TechHOUNDS",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/LEDs/Cone Pickup",
+                  "_title": "HoundLog/LEDs/Cone Pickup",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/LEDs/Cube Pickup",
+                  "_title": "HoundLog/LEDs/Cube Pickup",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/LEDs/Error",
+                  "_title": "HoundLog/LEDs/Error",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/LEDs/Uninitialized",
+                  "_title": "HoundLog/LEDs/Uninitialized",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/LEDs/Go To Previous State",
+                  "_title": "HoundLog/LEDs/Go To Previous State",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                }
+              ]
+            }
+          },
+          "17,9": {
+            "size": [
+              3,
+              2
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///HoundLog/LEDs/Is Failure",
+              "_title": "HoundLog/LEDs/Is Failure",
+              "_glyph": 148,
+              "_showGlyph": false,
+              "Colors/Color when true": "#7CFC00FF",
+              "Colors/Color when false": "#8B0000FF"
+            }
+          },
+          "17,11": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Command",
+              "_source0": "network_table:///HoundLog/Intake/Sim Game Piece Detected",
+              "_title": "HoundLog/Intake/Sim Game Piece Detected",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "title": "Operator Console",
+      "autoPopulate": false,
+      "autoPopulatePrefix": "",
+      "widgetPane": {
+        "gridSize": 64.0,
+        "showGrid": true,
+        "hgap": 16.0,
+        "vgap": 16.0,
+        "titleType": 0,
+        "tiles": {
+          "5,4": {
+            "size": [
+              11,
+              7
+            ],
+            "content": {
+              "_type": "Grid Layout",
+              "_title": "Grid Layout",
+              "_glyph": 149,
+              "_showGlyph": false,
+              "Layout/Number of columns": 5,
+              "Layout/Number of rows": 5,
+              "Layout/Label position": "BOTTOM",
+              "_children": {
+                "3,0": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Right Grid",
+                  "_title": "HoundLog/Operator Panel/Select Right Grid",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "2,0": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Middle Grid",
+                  "_title": "HoundLog/Operator Panel/Select Middle Grid",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "1,0": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Left Grid",
+                  "_title": "HoundLog/Operator Panel/Select Left Grid",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "0,3": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Reset",
+                  "_title": "HoundLog/Operator Panel/Reset",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "4,3": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Score",
+                  "_title": "HoundLog/Operator Panel/Score",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "1,2": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Left High Location",
+                  "_title": "HoundLog/Operator Panel/Select Left High Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "1,4": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Left Low Location",
+                  "_title": "HoundLog/Operator Panel/Select Left Low Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "1,3": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Left Middle Location",
+                  "_title": "HoundLog/Operator Panel/Select Left Middle Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "2,2": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Middle High Location",
+                  "_title": "HoundLog/Operator Panel/Select Middle High Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "2,4": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Middle Low Location",
+                  "_title": "HoundLog/Operator Panel/Select Middle Low Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "2,3": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Middle Middle Location",
+                  "_title": "HoundLog/Operator Panel/Select Middle Middle Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "3,2": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Right High Location",
+                  "_title": "HoundLog/Operator Panel/Select Right High Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "3,4": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Right Low Location",
+                  "_title": "HoundLog/Operator Panel/Select Right Low Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "3,3": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Right Middle Location",
+                  "_title": "HoundLog/Operator Panel/Select Right Middle Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                }
+              }
+            }
+          },
+          "5,0": {
+            "size": [
+              11,
+              4
+            ],
+            "content": {
+              "_type": "Grid Layout",
+              "_title": "Grid Layout",
+              "_glyph": 149,
+              "_showGlyph": false,
+              "Layout/Number of columns": 2,
+              "Layout/Number of rows": 1,
+              "Layout/Label position": "BOTTOM",
+              "_children": {
+                "0,0": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Intake Mode Cone",
+                  "_title": "HoundLog/Operator Panel/Select Intake Mode Cone",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "1,0": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Intake Mode Cube",
+                  "_title": "HoundLog/Operator Panel/Select Intake Mode Cube",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                }
+              }
+            }
+          },
+          "17,3": {
+            "size": [
+              2,
+              3
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///HoundLog/Main/Intake Mode",
+              "_title": "HoundLog/Main/Intake Mode",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "17,6": {
+            "size": [
+              2,
+              2
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///HoundLog/Main/Intake Mode Bool",
+              "_title": "HoundLog/Main/Intake Mode Bool",
+              "_glyph": 148,
+              "_showGlyph": false,
+              "Colors/Color when true": "#FFFF00FF",
+              "Colors/Color when false": "#664DB3FF"
+            }
+          },
+          "1,6": {
+            "size": [
+              3,
+              2
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///HoundLog/GridInterface/setGrid",
+              "_title": "HoundLog/GridInterface/setGrid",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "1,8": {
+            "size": [
+              3,
+              2
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///HoundLog/GridInterface/setLocation",
+              "_title": "HoundLog/GridInterface/setLocation",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "title": "Overrides",
+      "autoPopulate": false,
+      "autoPopulatePrefix": "",
+      "widgetPane": {
+        "gridSize": 64.0,
+        "showGrid": true,
+        "hgap": 16.0,
+        "vgap": 16.0,
+        "titleType": 0,
+        "tiles": {
+          "9,4": {
+            "size": [
+              5,
+              3
+            ],
+            "content": {
+              "_type": "Command",
+              "_source0": "network_table:///HoundLog/Overrides/Operator Override",
+              "_title": "HoundLog/Overrides/Operator Override",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          }
+        }
+      }
+    }
+  ],
+  "windowGeometry": {
+    "x": 0.0,
+    "y": 0.0,
+    "width": 1680.0,
+    "height": 1050.0
+  }
+}
