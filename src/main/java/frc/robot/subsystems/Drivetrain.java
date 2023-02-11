@@ -6,6 +6,7 @@ import java.util.function.DoubleSupplier;
 import org.photonvision.EstimatedRobotPose;
 
 import com.ctre.phoenix.sensors.Pigeon2;
+import com.ctre.phoenix.unmanaged.Unmanaged;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.techhounds.houndutil.houndauto.AutoManager;
@@ -32,9 +33,9 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -115,14 +116,20 @@ public class Drivetrain extends SubsystemBase {
     private boolean isTurningEnabled = false;
 
     /**
+     * The yaw of the gyro in simulations. This value is not used when the robot is
+     * running IRL.
+     */
+    private double simYaw;
+
+    /**
      * The motion profiled controller that provides an angular velocity to complete
      * an automatic 90° turn.
      */
     private ProfiledPIDController turnController = new ProfiledPIDController(Constants.Drivetrain.Gains.TurnToAngle.kP,
             Constants.Drivetrain.Gains.TurnToAngle.kI,
             Constants.Drivetrain.Gains.TurnToAngle.kD,
-            new TrapezoidProfile.Constraints(Constants.Auton.MAX_ANGULAR_VELOCITY,
-                    Constants.Auton.MAX_ANGULAR_ACCELERATION));
+            new TrapezoidProfile.Constraints(2 * Math.PI,
+                    2 * Math.PI));
 
     /** An enum describing the two types of drive modes. */
     public enum DriveMode {
@@ -152,7 +159,7 @@ public class Drivetrain extends SubsystemBase {
          * The ultra-fast mode, where the robot is not limited (be careful) and the
          * controller is lit up blue.
          */
-        ULTRA_FAST(1.0);
+        ULTRA(1.0);
 
         /** The percent limit for this speedMode */
         private double limit;
@@ -203,11 +210,14 @@ public class Drivetrain extends SubsystemBase {
                         LogLevel.MAIN),
                 new DoubleLogItem("Fast Speed Limit", () -> SpeedMode.FAST.getLimit(),
                         LogLevel.MAIN),
-                new DoubleLogItem("Ultra Fast Speed Limit", () -> SpeedMode.ULTRA_FAST.getLimit(),
+                new DoubleLogItem("Ultra Fast Speed Limit", () -> SpeedMode.ULTRA.getLimit(),
                         LogLevel.MAIN)));
 
         AutoManager.getInstance().setResetOdometryConsumer(this::resetPoseEstimator);
 
+        if (RobotBase.isSimulation()) {
+            simYaw = 0;
+        }
     }
 
     /**
@@ -217,6 +227,18 @@ public class Drivetrain extends SubsystemBase {
     @Override
     public void periodic() {
         updatePoseEstimator();
+    }
+
+    /**
+     * Updates simulation-specific variables.
+     */
+    @Override
+    public void simulationPeriodic() {
+        ChassisSpeeds chassisSpeed = Constants.Drivetrain.Geometry.KINEMATICS.toChassisSpeeds(getSwerveModuleStates());
+        simYaw += chassisSpeed.omegaRadiansPerSecond * 0.02;
+
+        Unmanaged.feedEnable(20);
+        pigeon.getSimCollection().setRawHeading(Units.radiansToDegrees(simYaw));
     }
 
     /**
@@ -370,6 +392,17 @@ public class Drivetrain extends SubsystemBase {
      */
     public void zeroGyro() {
         pigeon.setYaw(0);
+    }
+
+    /**
+     * Creates a command that zeros the gyro in whichever direction the bot is
+     * pointing. Only use this if
+     * the bot is straight, otherwise it will throw off field-oriented control.
+     * 
+     * @return the command
+     */
+    public CommandBase zeroGyroCommand() {
+        return runOnce(() -> pigeon.setYaw(0));
     }
 
     /**
@@ -572,7 +605,7 @@ public class Drivetrain extends SubsystemBase {
             turnRegister += counterClockwise ? Math.PI / 2.0 : -Math.PI / 2.0;
 
             turnController.setGoal(startingGyroAngle + turnRegister);
-        });
+        }).withName("Turn While Moving");
     }
 
     /**
@@ -581,7 +614,7 @@ public class Drivetrain extends SubsystemBase {
      * 
      * @return the command
      */
-    public Command brakeCommand() {
+    public CommandBase brakeCommand() {
         return new InstantCommand(() -> {
             setModuleStates(new SwerveModuleState[] {
                     new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
@@ -589,7 +622,7 @@ public class Drivetrain extends SubsystemBase {
                     new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
                     new SwerveModuleState(0, Rotation2d.fromDegrees(-45))
             });
-        });
+        }).withName("Brake");
     }
 
     /**
@@ -598,7 +631,7 @@ public class Drivetrain extends SubsystemBase {
      * 
      * @return the command
      */
-    public Command brakeXCommand() {
+    public CommandBase brakeXCommand() {
         return new InstantCommand(() -> {
             setModuleStates(new SwerveModuleState[] {
                     new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
@@ -606,7 +639,7 @@ public class Drivetrain extends SubsystemBase {
                     new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
                     new SwerveModuleState(0, Rotation2d.fromDegrees(45))
             });
-        });
+        }).withName("Brake X");
     }
 
     /**
@@ -614,7 +647,7 @@ public class Drivetrain extends SubsystemBase {
      * 
      * @return the command
      */
-    public Command turnWheelsToAngleCommand(double angle) {
+    public CommandBase turnWheelsToAngleCommand(double angle) {
         return new InstantCommand(() -> {
             setModuleStates(new SwerveModuleState[] {
                     new SwerveModuleState(0, new Rotation2d(angle)),
@@ -623,7 +656,7 @@ public class Drivetrain extends SubsystemBase {
                     new SwerveModuleState(0, new Rotation2d(angle))
 
             });
-        });
+        }).withName("Turn Wheels To Angle");
     }
 
     /**

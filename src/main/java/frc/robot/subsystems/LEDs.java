@@ -3,11 +3,11 @@ package frc.robot.subsystems;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.enums.LogLevel;
+import com.techhounds.houndutil.houndlog.logitems.BooleanLogItem;
 import com.techhounds.houndutil.houndlog.logitems.StringLogItem;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,30 +24,37 @@ public class LEDs extends SubsystemBase {
     private AddressableLED led = new AddressableLED(0);
 
     /** The last state of the LEDs before it was in {@code state}. */
-    private LEDState previousState = LEDState.Disabled;
+    private LEDState previousState = LEDState.TechHOUNDS;
     /** The current state of the LEDs. */
-    private LEDState state = LEDState.Disabled;
+    private LEDState state = LEDState.TechHOUNDS;
 
     /**
      * Describes the states that the LEDs can be in.
      */
     public enum LEDState {
         /** Rainbow pattern that moves across the strip. */
-        Disabled(LEDState::rainbow),
+        Rainbow(LEDState::rainbow),
+        /** TechHOUNDS pattern, which uses the official colors and . */
+        TechHOUNDS(LEDState::techHounds),
         /** Illuminated yellow to signify the cone pickup mode. */
         ConePickup(LEDState::conePickup),
         /** Illuminated purple to signify the cube pickup mode. */
         CubePickup(LEDState::cubePickup),
         /** Blinking red to signify an error state. */
         Error(LEDState::error),
+        /**
+         * Solid red, will only be turned on while an input is commanding the bot to do
+         * a disallowed action.
+         */
+        TemporaryError(LEDState::temporaryError),
         /** Blinking red to signify an error state. */
         Uninitialized(LEDState::uninitialized);
 
         /**
-         * The hue of the first pixel in the strand, used to "move" the rainbow down the
-         * strip.
+         * The hue of the first pixel in the strand, used to "move" patterns down the
+         * strand.
          */
-        private static int rainbowFirstPixelHue = 0;
+        private static int firstPixelHue = 0;
         /** The common buffer object used between each buffer supplier. */
         private static AddressableLEDBuffer buffer = new AddressableLEDBuffer(Constants.LEDs.LENGTH);
         /** The current time in 20ms ticks, used for the error state. */
@@ -78,15 +85,29 @@ public class LEDs extends SubsystemBase {
             for (int i = 0; i < buffer.getLength(); i++) {
                 // Calculate the hue - hue is easier for rainbows because the color
                 // shape is a circle so only one value needs to precess
-                final var hue = (rainbowFirstPixelHue + (i * 180 / buffer.getLength())) % 180;
+                final var hue = (firstPixelHue + (i * 180 / buffer.getLength())) % 180;
                 // Set the value
                 buffer.setHSV(i, hue, 255, 128);
 
             }
             // Increase by 3 to make the rainbow "move"
-            rainbowFirstPixelHue += 3;
+            firstPixelHue += 3;
             // Check bounds
-            rainbowFirstPixelHue %= 180;
+            firstPixelHue %= 180;
+        }
+
+        /**
+         * Changes the contents of the AddressableLEDBuffer to the TechHOUNDS state.
+         */
+        private static void techHounds() {
+            for (int i = 0; i < buffer.getLength(); i++) {
+                if (((i + timeStep) / 8) % 2 == 0) { // shifts back and forth every 8 pixels
+                    buffer.setHSV(i, 24, 250, 128); // gold
+                } else {
+                    buffer.setHSV(i, 109, 240, 128); // blue
+                }
+            }
+            timeStep++;
         }
 
         /**
@@ -124,6 +145,16 @@ public class LEDs extends SubsystemBase {
         }
 
         /**
+         * Changes the contents of the AddressableLEDBuffer to the temporary error
+         * state.
+         */
+        private static void temporaryError() {
+            for (int i = 0; i < buffer.getLength(); i++) {
+                buffer.setHSV(i, 0, 255, 128);
+            }
+        }
+
+        /**
          * Changes the contents of the AddressableLEDBuffer to the uninitialized state.
          */
         private static void uninitialized() {
@@ -150,7 +181,8 @@ public class LEDs extends SubsystemBase {
 
         LoggingManager.getInstance().addGroup("LEDs",
                 new LogGroup(
-                        new StringLogItem("State", () -> this.state.toString(), LogLevel.MAIN)));
+                        new StringLogItem("State", () -> this.state.toString(), LogLevel.MAIN),
+                        new BooleanLogItem("Is Failure", () -> this.state == LEDState.Error, LogLevel.MAIN)));
     }
 
     /**
@@ -179,8 +211,8 @@ public class LEDs extends SubsystemBase {
      * @param state the new LEDState.
      * @return the command
      */
-    public Command setLEDStateCommand(LEDState state) {
-        return runOnce(() -> this.setLEDState(state));
+    public CommandBase setLEDStateCommand(LEDState state) {
+        return Commands.runOnce(() -> this.setLEDState(state));
     }
 
     /**
@@ -188,8 +220,8 @@ public class LEDs extends SubsystemBase {
      * 
      * @return
      */
-    public Command setPreviousLEDStateCommand() {
-        return runOnce(() -> this.setLEDState(previousState));
+    public CommandBase setPreviousLEDStateCommand() {
+        return Commands.runOnce(() -> this.setLEDState(previousState));
     }
 
     /**
