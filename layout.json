@@ -160,8 +160,8 @@
           },
           "11,0": {
             "size": [
-              6,
-              3
+              9,
+              4
             ],
             "content": {
               "_type": "Grid Layout",
@@ -256,10 +256,10 @@
               }
             }
           },
-          "11,3": {
+          "11,4": {
             "size": [
-              6,
-              4
+              9,
+              5
             ],
             "content": {
               "_type": "Grid Layout",
@@ -304,33 +304,6 @@
                     }
                   }
                 },
-                "2,0": {
-                  "_type": "Grid Layout",
-                  "_title": "Passover Motors",
-                  "_glyph": 149,
-                  "_showGlyph": false,
-                  "Layout/Number of columns": 1,
-                  "Layout/Number of rows": 2,
-                  "Layout/Label position": "BOTTOM",
-                  "_children": {
-                    "0,1": {
-                      "_type": "Boolean Box",
-                      "_source0": "network_table:///HoundLog/Intake/Is Game Piece Detected",
-                      "_title": "Is Game Piece Detected",
-                      "_glyph": 148,
-                      "_showGlyph": false,
-                      "Colors/Color when true": "#7CFC00FF",
-                      "Colors/Color when false": "#8B0000FF"
-                    },
-                    "0,0": {
-                      "_type": "Command",
-                      "_source0": "network_table:///HoundLog/Intake/Run Passover Motors",
-                      "_title": "Run Passover Motors",
-                      "_glyph": 148,
-                      "_showGlyph": false
-                    }
-                  }
-                },
                 "1,0": {
                   "_type": "Grid Layout",
                   "_title": "Passovers",
@@ -362,6 +335,46 @@
                       "_showGlyph": false,
                       "Colors/Color when true": "#7CFC00FF",
                       "Colors/Color when false": "#8B0000FF"
+                    }
+                  }
+                },
+                "2,0": {
+                  "_type": "Grid Layout",
+                  "_title": "Passover Motors",
+                  "_glyph": 149,
+                  "_showGlyph": false,
+                  "Layout/Number of columns": 1,
+                  "Layout/Number of rows": 3,
+                  "Layout/Label position": "BOTTOM",
+                  "_children": {
+                    "0,1": {
+                      "_type": "Boolean Box",
+                      "_source0": "network_table:///HoundLog/Intake/Is Game Piece Detected",
+                      "_title": "Is Game Piece Detected",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Colors/Color when true": "#7CFC00FF",
+                      "Colors/Color when false": "#8B0000FF"
+                    },
+                    "0,0": {
+                      "_type": "Command",
+                      "_source0": "network_table:///HoundLog/Intake/Run Passover Motors",
+                      "_title": "Run Passover Motors",
+                      "_glyph": 148,
+                      "_showGlyph": false
+                    },
+                    "0,2": {
+                      "_type": "Number Bar",
+                      "_source0": "network_table:///HoundLog/Intake/Left Passover Motor/Applied Output",
+                      "_title": "Speed",
+                      "_glyph": 148,
+                      "_showGlyph": false,
+                      "Range/Min": -12.0,
+                      "Range/Max": 12.0,
+                      "Range/Center": 0.0,
+                      "Visuals/Num tick marks": 5,
+                      "Visuals/Show text": true,
+                      "Visuals/Orientation": "HORIZONTAL"
                     }
                   }
                 }
@@ -494,7 +507,7 @@
                       "Visuals/Major tick spacing": 45.0,
                       "Visuals/Starting angle": 180.0,
                       "Visuals/Show tick mark ring": true,
-                      "Visuals/Counter clockwise": false
+                      "Visuals/Counter clockwise": true
                     },
                     "1,0": {
                       "_type": "Number Bar",
@@ -542,7 +555,7 @@
                       "Visuals/Major tick spacing": 45.0,
                       "Visuals/Starting angle": 180.0,
                       "Visuals/Show tick mark ring": true,
-                      "Visuals/Counter clockwise": false
+                      "Visuals/Counter clockwise": true
                     }
                   }
                 },
@@ -564,7 +577,7 @@
                       "Visuals/Major tick spacing": 45.0,
                       "Visuals/Starting angle": 180.0,
                       "Visuals/Show tick mark ring": true,
-                      "Visuals/Counter clockwise": false
+                      "Visuals/Counter clockwise": true
                     },
                     "1,0": {
                       "_type": "Number Bar",
@@ -679,14 +692,14 @@
                       "Visuals/Major tick spacing": 45.0,
                       "Visuals/Starting angle": 180.0,
                       "Visuals/Show tick mark ring": true,
-                      "Visuals/Counter clockwise": false
+                      "Visuals/Counter clockwise": true
                     }
                   }
                 }
               }
             }
           },
-          "17,0": {
+          "14,9": {
             "size": [
               3,
               3
@@ -736,10 +749,10 @@
               ]
             }
           },
-          "17,3": {
+          "11,9": {
             "size": [
               3,
-              4
+              3
             ],
             "content": {
               "_type": "List Layout",
@@ -751,156 +764,88 @@
                 {
                   "_type": "Command",
                   "_source0": "network_table:///HoundLog/LEDs/Rainbow",
-                  "_title": "Rainbow",
+                  "_title": "HoundLog/LEDs/Rainbow",
                   "_glyph": 148,
                   "_showGlyph": false
                 },
                 {
                   "_type": "Command",
                   "_source0": "network_table:///HoundLog/LEDs/TechHOUNDS",
-                  "_title": "TechHOUNDS",
+                  "_title": "HoundLog/LEDs/TechHOUNDS",
                   "_glyph": 148,
                   "_showGlyph": false
                 },
                 {
                   "_type": "Command",
                   "_source0": "network_table:///HoundLog/LEDs/Cone Pickup",
-                  "_title": "Cone Pickup",
+                  "_title": "HoundLog/LEDs/Cone Pickup",
                   "_glyph": 148,
                   "_showGlyph": false
                 },
                 {
                   "_type": "Command",
                   "_source0": "network_table:///HoundLog/LEDs/Cube Pickup",
-                  "_title": "Cube Pickup",
+                  "_title": "HoundLog/LEDs/Cube Pickup",
                   "_glyph": 148,
                   "_showGlyph": false
                 },
                 {
                   "_type": "Command",
                   "_source0": "network_table:///HoundLog/LEDs/Error",
-                  "_title": "Error",
+                  "_title": "HoundLog/LEDs/Error",
                   "_glyph": 148,
                   "_showGlyph": false
                 },
                 {
                   "_type": "Command",
                   "_source0": "network_table:///HoundLog/LEDs/Uninitialized",
-                  "_title": "Uninitialized",
+                  "_title": "HoundLog/LEDs/Uninitialized",
                   "_glyph": 148,
                   "_showGlyph": false
                 },
                 {
                   "_type": "Command",
                   "_source0": "network_table:///HoundLog/LEDs/Go To Previous State",
-                  "_title": "Go To Previous State",
+                  "_title": "HoundLog/LEDs/Go To Previous State",
                   "_glyph": 148,
                   "_showGlyph": false
                 }
               ]
             }
           },
-          "11,7": {
-            "size": [
-              3,
-              3
-            ],
-            "content": {
-              "_type": "Gyro",
-              "_source0": "network_table:///HoundLog/Drivetrain/Pigeon 2/Yaw",
-              "_title": "Gyro Angle",
-              "_glyph": 148,
-              "_showGlyph": false,
-              "Visuals/Major tick spacing": 45.0,
-              "Visuals/Starting angle": 180.0,
-              "Visuals/Show tick mark ring": true,
-              "Visuals/Counter clockwise": false
-            }
-          },
-          "11,10": {
+          "17,9": {
             "size": [
               3,
               2
             ],
             "content": {
-              "_type": "ComboBox Chooser",
-              "_source0": "network_table:///HoundLog/Autonomous/Chooser",
-              "_title": "Auton Chooser",
-              "_glyph": 148,
-              "_showGlyph": false
-            }
-          },
-          "14,7": {
-            "size": [
-              6,
-              5
-            ],
-            "content": {
-              "_type": "Field",
-              "_source0": "network_table:///HoundLog/Autonomous/Field",
-              "_title": "HoundLog/Autonomous/Field",
+              "_type": "Boolean Box",
+              "_source0": "network_table:///HoundLog/LEDs/Is Failure",
+              "_title": "HoundLog/LEDs/Is Failure",
               "_glyph": 148,
               "_showGlyph": false,
-              "Game/Game": "A2023_Charged_Up",
-              "Visuals/Robot Icon Size": 50.0,
-              "Visuals/Show Outside Circles": false,
-              "Colors/frontRight": "#FFFFFFFF",
-              "Colors/Blue_Cone_9": "#FFFFFFFF",
-              "Colors/apriltag_cam1_est_pose": "#FFFFFFFF",
-              "Colors/Blue_Cone_7": "#FFFFFFFF",
-              "Colors/Red_Cube_8": "#FFFFFFFF",
-              "Colors/Red_Cube_5": "#FFFFFFFF",
-              "Colors/Red_Cube_2": "#FFFFFFFF",
-              "Colors/Blue_DoubleSubstation_S": "#FFFFFFFF",
-              "Colors/Red_ChargeStation_LowerLeft": "#FFFFFFFF",
-              "Colors/Blue_DoubleSubstation_N": "#FFFFFFFF",
-              "Colors/Blue_ChargeStation_Center": "#FFFFFFFF",
-              "Colors/backRight": "#FFFFFFFF",
-              "Colors/apriltag_cam0_est_pose": "#FFFFFFFF",
-              "Colors/Red_Set_Item_3": "#FFFFFFFF",
-              "Colors/Blue_Cone_1": "#FFFFFFFF",
-              "Colors/Red_Set_Item_4": "#FFFFFFFF",
-              "Colors/Blue_ChargeStation_UpperRight": "#FFFFFFFF",
-              "Colors/Red_Set_Item_1": "#FFFFFFFF",
-              "Colors/Red_Set_Item_2": "#FFFFFFFF",
-              "Colors/Blue_Cone_6": "#FFFFFFFF",
-              "Colors/Blue_Cone_4": "#FFFFFFFF",
-              "Colors/Blue_Cone_3": "#FFFFFFFF",
-              "Colors/Red_ChargeStation_LowerRight": "#FFFFFFFF",
-              "Colors/Blue_Cube_8": "#FFFFFFFF",
-              "Colors/Blue_Cube_5": "#FFFFFFFF",
-              "Colors/Blue_Set_Item_1": "#FFFFFFFF",
-              "Colors/Red_Cone_9": "#FFFFFFFF",
-              "Colors/Red_Cone_7": "#FFFFFFFF",
-              "Colors/Red_Cone_6": "#FFFFFFFF",
-              "Colors/Red_Cone_4": "#FFFFFFFF",
-              "Colors/frontLeft": "#FFFFFFFF",
-              "Colors/Red_Cone_3": "#FFFFFFFF",
-              "Colors/Red_Cone_1": "#FFFFFFFF",
-              "Colors/Blue_Set_Item_2": "#FFFFFFFF",
-              "Colors/Blue_Set_Item_3": "#FFFFFFFF",
-              "Colors/Blue_Set_Item_4": "#FFFFFFFF",
-              "Colors/Red_SingleSubstation": "#FFFFFFFF",
-              "Colors/Blue_ChargeStation_LowerLeft": "#FFFFFFFF",
-              "Colors/apriltag_cam2_est_pose": "#FFFFFFFF",
-              "Colors/Blue_Cube_2": "#FFFFFFFF",
-              "Colors/backLeft": "#FFFFFFFF",
-              "Colors/Blue_ChargeStation_LowerRight": "#FFFFFFFF",
-              "Colors/apriltag_cam3_est_pose": "#FFFFFFFF",
-              "Colors/Red_ChargeStation_UpperRight": "#FFFFFFFF",
-              "Colors/Blue_ChargeStation_UpperLeft": "#FFFFFFFF",
-              "Colors/Red_ChargeStation_UpperLeft": "#FFFFFFFF",
-              "Colors/Red_DoubleSubstation_S": "#FFFFFFFF",
-              "Colors/Blue_SingleSubstation": "#FFFFFFFF",
-              "Colors/Red_DoubleSubstation_N": "#FFFFFFFF",
-              "Colors/Red_ChargeStation_Center": "#FFFFFFFF"
+              "Colors/Color when true": "#7CFC00FF",
+              "Colors/Color when false": "#8B0000FF"
+            }
+          },
+          "17,11": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Command",
+              "_source0": "network_table:///HoundLog/Intake/Sim Game Piece Detected",
+              "_title": "HoundLog/Intake/Sim Game Piece Detected",
+              "_glyph": 148,
+              "_showGlyph": false
             }
           }
         }
       }
     },
     {
-      "title": "Tab 2",
+      "title": "Operator Console",
       "autoPopulate": false,
       "autoPopulatePrefix": "",
       "widgetPane": {
@@ -909,7 +854,235 @@
         "hgap": 16.0,
         "vgap": 16.0,
         "titleType": 0,
-        "tiles": {}
+        "tiles": {
+          "5,4": {
+            "size": [
+              11,
+              7
+            ],
+            "content": {
+              "_type": "Grid Layout",
+              "_title": "Grid Layout",
+              "_glyph": 149,
+              "_showGlyph": false,
+              "Layout/Number of columns": 5,
+              "Layout/Number of rows": 5,
+              "Layout/Label position": "BOTTOM",
+              "_children": {
+                "3,0": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Right Grid",
+                  "_title": "HoundLog/Operator Panel/Select Right Grid",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "2,0": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Middle Grid",
+                  "_title": "HoundLog/Operator Panel/Select Middle Grid",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "1,0": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Left Grid",
+                  "_title": "HoundLog/Operator Panel/Select Left Grid",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "0,3": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Reset",
+                  "_title": "HoundLog/Operator Panel/Reset",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "4,3": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Score",
+                  "_title": "HoundLog/Operator Panel/Score",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "1,2": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Left High Location",
+                  "_title": "HoundLog/Operator Panel/Select Left High Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "1,4": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Left Low Location",
+                  "_title": "HoundLog/Operator Panel/Select Left Low Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "1,3": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Left Middle Location",
+                  "_title": "HoundLog/Operator Panel/Select Left Middle Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "2,2": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Middle High Location",
+                  "_title": "HoundLog/Operator Panel/Select Middle High Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "2,4": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Middle Low Location",
+                  "_title": "HoundLog/Operator Panel/Select Middle Low Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "2,3": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Middle Middle Location",
+                  "_title": "HoundLog/Operator Panel/Select Middle Middle Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "3,2": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Right High Location",
+                  "_title": "HoundLog/Operator Panel/Select Right High Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "3,4": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Right Low Location",
+                  "_title": "HoundLog/Operator Panel/Select Right Low Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "3,3": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Right Middle Location",
+                  "_title": "HoundLog/Operator Panel/Select Right Middle Location",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                }
+              }
+            }
+          },
+          "5,0": {
+            "size": [
+              11,
+              4
+            ],
+            "content": {
+              "_type": "Grid Layout",
+              "_title": "Grid Layout",
+              "_glyph": 149,
+              "_showGlyph": false,
+              "Layout/Number of columns": 2,
+              "Layout/Number of rows": 1,
+              "Layout/Label position": "BOTTOM",
+              "_children": {
+                "0,0": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Intake Mode Cone",
+                  "_title": "HoundLog/Operator Panel/Select Intake Mode Cone",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                "1,0": {
+                  "_type": "Command",
+                  "_source0": "network_table:///HoundLog/Operator Panel/Select Intake Mode Cube",
+                  "_title": "HoundLog/Operator Panel/Select Intake Mode Cube",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                }
+              }
+            }
+          },
+          "17,3": {
+            "size": [
+              2,
+              3
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///HoundLog/Main/Intake Mode",
+              "_title": "HoundLog/Main/Intake Mode",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "17,6": {
+            "size": [
+              2,
+              2
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///HoundLog/Main/Intake Mode Bool",
+              "_title": "HoundLog/Main/Intake Mode Bool",
+              "_glyph": 148,
+              "_showGlyph": false,
+              "Colors/Color when true": "#FFFF00FF",
+              "Colors/Color when false": "#664DB3FF"
+            }
+          },
+          "1,6": {
+            "size": [
+              3,
+              2
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///HoundLog/GridInterface/setGrid",
+              "_title": "HoundLog/GridInterface/setGrid",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "1,8": {
+            "size": [
+              3,
+              2
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///HoundLog/GridInterface/setLocation",
+              "_title": "HoundLog/GridInterface/setLocation",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "title": "Overrides",
+      "autoPopulate": false,
+      "autoPopulatePrefix": "",
+      "widgetPane": {
+        "gridSize": 64.0,
+        "showGrid": true,
+        "hgap": 16.0,
+        "vgap": 16.0,
+        "titleType": 0,
+        "tiles": {
+          "9,4": {
+            "size": [
+              5,
+              3
+            ],
+            "content": {
+              "_type": "Command",
+              "_source0": "network_table:///HoundLog/Overrides/Operator Override",
+              "_title": "HoundLog/Overrides/Operator Override",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          }
+        }
       }
     }
   ],
