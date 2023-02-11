@@ -56,11 +56,46 @@ public class RobotStates {
     }
 
     /**
+     * Creates a command to set the current mode of the intake.
+     * 
+     * @param intakeMode the new mode to set the intake mechanism to
+     * @return the command
+     */
+    public static CommandBase setIntakeModeCommand(GamePiece intakeMode) {
+        return Commands.runOnce(() -> {
+            setIntakeMode(intakeMode);
+        });
+    }
+
+    /**
      * Clears the intake mode to a null state. Trying to set the pincers to released
      * or pincing will result in an error state.
      */
     public static void clearIntakeMode() {
         RobotStates.intakeMode = Optional.empty();
+    }
+
+    /**
+     * Creates a command to clear the intake mode.
+     * 
+     * @return the command
+     */
+    public static CommandBase clearIntakeModeCommand() {
+        return Commands.runOnce(RobotStates::clearIntakeMode);
+    }
+
+    /**
+     * Used to make sure that no mechanisms move until the elevator has been
+     * zeroed.
+     */
+    private static boolean isInitialized = false;
+
+    public static void enableInitialized() {
+        isInitialized = true;
+    }
+
+    public static boolean isInitialized() {
+        return isInitialized;
     }
 
     public static CommandBase initializeMechanisms(
@@ -104,11 +139,12 @@ public class RobotStates {
             LEDs leds) {
         return Commands.either(
                 Commands.sequence(
-                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, leds),
                         elbow.setDesiredPositionCommand(ElbowPosition.MID),
-                        manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow())),
+                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, leds),
+                        manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow()),
+                        manipulator.setWristDownCommand()),
                 leds.errorCommand(),
-                () -> intakeMode.isPresent()).withName("prepareToIntakeGamePiece");
+                () -> intakeMode.isPresent()).withName("Prepare To Intake Game Piece");
     }
 
     /**
@@ -142,16 +178,22 @@ public class RobotStates {
             LEDs leds) {
         return Commands.either(
                 Commands.sequence(
+                        elbow.setDesiredPositionCommand(ElbowPosition.MID),
+                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, leds),
+                        manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow()),
+                        manipulator.setWristDownCommand(),
                         intake.setIntakeDownCommand(elevator, leds),
                         intake.setPassoverExtendedCommand(elevator, leds),
-                        intake.runPassoverMotorsCommand().until(intake::isGamePieceDetected),
+                        Commands.race(
+                                intake.runPassoverMotorsCommand(),
+                                Commands.waitUntil(intake::isGamePieceDetected)),
                         manipulator.setPincersPincingCommand(() -> intakeMode.orElseThrow()),
                         intake.setPassoverRetractedCommand(elevator, leds),
                         elbow.setDesiredPositionCommand(ElbowPosition.HIGH),
                         intake.setIntakeUpCommand(elevator, leds),
-                        Commands.runOnce(RobotStates::clearIntakeMode)),
+                        RobotStates.clearIntakeModeCommand()),
                 leds.errorCommand(),
-                () -> intakeMode.isPresent()).withName("intakeGamePiece");
+                () -> intakeMode.isPresent()).withName("Intake Game Piece");
     }
 
     /**
@@ -210,7 +252,8 @@ public class RobotStates {
                                                         Commands.waitSeconds(0.5)
                                                                 .andThen(elbow
                                                                         .setDesiredPositionCommand(ElbowPosition.HIGH))
-                                                                .alongWith(manipulator.setWristUpCommand()),
+                                                                .alongWith(
+                                                                        manipulator.setWristUpCommand(elevator, leds)),
 
                                                         GamePiece.CUBE,
                                                         Commands.none()),
@@ -235,7 +278,7 @@ public class RobotStates {
                                 () -> gridInterface.getSetLocation()
                                         .orElseThrow().gamePiece)),
                 leds.errorCommand(),
-                () -> gridInterface.getSetLocation().isPresent()).withName("scoreGamePiece");
+                () -> gridInterface.getSetLocation().isPresent()).withName("Score Game Piece");
     }
 
     /**
@@ -266,7 +309,7 @@ public class RobotStates {
                 manipulator.setWristDownCommand(),
                 elbow.setDesiredPositionCommand(ElbowPosition.MID),
                 elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, leds),
-                Commands.waitUntil(elevator::isAtGoal)).withName("stowElevator");
+                Commands.waitUntil(elevator::isAtGoal)).withName("Stow Elevator");
     }
 
     /**
@@ -288,7 +331,7 @@ public class RobotStates {
                 .get(gamePieceLocation);
 
         PathPlannerTrajectory traj = PathPlanner.generatePath(
-                new PathConstraints(4, 3),
+                new PathConstraints(6, 8),
                 new PathPoint(drivetrain.getPose().getTranslation(),
                         new Rotation2d(targetPose.getX() - drivetrain.getPose().getX(), // in order to
                                                                                         // angle towards
@@ -320,9 +363,8 @@ public class RobotStates {
         // every time before passing it into the `drivetrain.pathFollowingCommand`
         // method.
         return Commands.either(
-                new ProxyCommand(pathFollowingCommandSupplier)
-                        .finallyDo((d) -> drivetrain.stop()),
+                new ProxyCommand(pathFollowingCommandSupplier),
                 leds.errorCommand(),
-                () -> gridInterface.getSetLocation().isPresent()).withName("driveToScoringLocation");
+                () -> gridInterface.getSetLocation().isPresent()).withName("Drive To Scoring Location");
     }
 }
