@@ -12,10 +12,10 @@ import frc.robot.subsystems.Drivetrain.DriveMode;
  * shamelessly stolen from the 2022 B3 repo
  */
 
-public class TurnToAngle extends PIDCommand{
+public class TurnToAngle extends PIDCommand {
     private Drivetrain drivetrain;
     
-    public TurnToAngle(double setpoint, Drivetrain drivetrain){
+    public TurnToAngle(double setpoint, Drivetrain drivetrain) {
         super(new PIDController(Constants.Drivetrain.Gains.DriveMotors.kP.get(), 
             Constants.Drivetrain.Gains.DriveMotors.kI.get(), 
             Constants.Drivetrain.Gains.DriveMotors.kD.get()), 
