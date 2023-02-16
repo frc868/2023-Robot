@@ -40,8 +40,11 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PIDCommand;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.utils.SwerveModule;
@@ -710,5 +713,26 @@ public class Drivetrain extends SubsystemBase {
                             true);
                 },
                 this);
+    }
+
+    public CommandBase turnToAngle(double setpoint){
+        return new ParallelRaceGroup(
+            new PIDCommand(
+            new PIDController(Constants.Gains.DriveMotors.kP.get(),
+                Constants.Gains.DriveMotors.kI.get(),
+                Constants.Gains.DriveMotors.kD.get()),
+                () -> this.getPose().getRotation().getRadians(), // degrees or radians?
+                setpoint,
+                d -> this.drive(0, 0, d, DriveMode.FIELD_ORIENTED),
+                this
+            ),
+            new WaitCommand(3.0) // how do i actually end a pidcommand?
+            );
+    }
+    // this seems too obvious, does it work?
+    public CommandBase TurnToAngle(double angle) {
+        return new InstantCommand(() -> {
+            turnController.setGoal(angle);
+        }).withName("Turn To Angle");
     }
 }
