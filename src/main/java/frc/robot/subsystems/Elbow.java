@@ -5,6 +5,8 @@ import java.util.function.DoubleSupplier;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
+import com.revrobotics.CANSparkMax.IdleMode;
+import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
 import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
@@ -14,6 +16,7 @@ import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import com.techhounds.houndutil.houndlog.logitems.BooleanLogItem;
 import com.techhounds.houndutil.houndlog.logitems.DoubleLogItem;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -30,8 +33,10 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Overrides;
+import frc.robot.commands.RobotStates;
 
 /**
  * Elbow subsystem, one CAN Motor and encoder, one feedforward object, and two
@@ -41,9 +46,9 @@ import frc.robot.Overrides;
  */
 public class Elbow extends ProfiledPIDSubsystem {
     public static enum ElbowPosition {
-        LOW(Units.degreesToRadians(-20)),
-        MID(0),
-        HIGH(Units.degreesToRadians(20));
+        LOW(0.502),
+        MID(1.005),
+        HIGH(1.507);
 
         public final double value;
 
@@ -89,8 +94,8 @@ public class Elbow extends ProfiledPIDSubsystem {
             100,
             SingleJointedArmSim.estimateMOI(Units.inchesToMeters(8), 3.6),
             Units.inchesToMeters(8),
-            Units.degreesToRadians(-30),
-            Units.degreesToRadians(30),
+            ElbowPosition.LOW.value - 0.25,
+            ElbowPosition.HIGH.value + 0.25,
             true);
 
     /**
@@ -106,14 +111,23 @@ public class Elbow extends ProfiledPIDSubsystem {
      */
     private DIOSim topHallEffectSim;
 
+    /** Used to graph on NT. */
+    private double setpointPosition = 0;
+    /** Used to graph on NT. */
+    private double setpointVelocity = 0;
+    /** Used to graph on NT. */
+    private double pidOutput = 0;
+    /** Used to graph on NT. */
+    private double feedforward = 0;
+
     /**
      * Initializes the elbow.
      */
     public Elbow(MechanismLigament2d ligament) {
         super(new ProfiledPIDController(
                 Constants.Elbow.Gains.kP.get(),
-                Constants.Elbow.Gains.kP.get(),
-                Constants.Elbow.Gains.kP.get(),
+                Constants.Elbow.Gains.kI.get(),
+                Constants.Elbow.Gains.kD.get(),
                 new TrapezoidProfile.Constraints(
                         Constants.Elbow.MAX_VELOCITY_METERS_PER_SECOND.get(),
                         Constants.Elbow.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
@@ -138,12 +152,33 @@ public class Elbow extends ProfiledPIDSubsystem {
 
         this.ligament = ligament;
 
+        SparkMaxConfigurator.configure(motor, false)
+                .withIdleMode(IdleMode.kBrake)
+                .withCurrentLimit(20)
+                .withInverted(true)
+                .withPositionConversionFactor(2 * Math.PI / 100.0, true)
+                .burnFlash();
+
+        encoder.setPositionConversionFactor(2 * Math.PI);
+        encoder.setInverted(true);
+        motor.getEncoder().setPosition(encoder.getPosition());
+
         LoggingManager.getInstance().addGroup("Elbow", new LogGroup(
-                new BooleanLogItem("Bottom Hall Effect", bottomHallEffect::get),
-                new BooleanLogItem("Top Hall Effect", topHallEffect::get),
-                new DoubleLogItem("Actual Position", () -> this.getMeasurement(), LogLevel.MAIN),
+                new BooleanLogItem("Bottom Hall Effect", bottomHallEffect::get, LogLevel.MAIN),
+                new BooleanLogItem("Top Hall Effect", topHallEffect::get, LogLevel.MAIN),
+                new DoubleLogItem("Actual Position", () -> encoder.getPosition(), LogLevel.MAIN),
+                new DoubleLogItem("Actual Velocity", () -> encoder.getVelocity(), LogLevel.MAIN),
+                new DoubleLogItem("Setpoint Position", () -> setpointPosition, LogLevel.MAIN),
+                new DoubleLogItem("Setpoint Velocity", () -> setpointVelocity, LogLevel.MAIN),
+                new DoubleLogItem("Feedforward", () -> feedforward, LogLevel.MAIN),
+                new DoubleLogItem("PID Output", () -> pidOutput, LogLevel.MAIN),
                 new DeviceLogger<CANSparkMax>(motor, "Elbow Motor",
                         LogProfileBuilder.buildCANSparkMaxLogItems(motor))));
+
+        new Trigger(bottomHallEffect::get)
+                .whileTrue(RobotStates.continuousErrorCommand(() -> "Bottom elbow limit triggered"));
+        new Trigger(topHallEffect::get)
+                .whileTrue(RobotStates.continuousErrorCommand(() -> "Top elbow limit triggered"));
 
         if (RobotBase.isSimulation()) {
             bottomHallEffectSim = new DIOSim(bottomHallEffect);
@@ -159,10 +194,7 @@ public class Elbow extends ProfiledPIDSubsystem {
     @Override
     public void periodic() {
         super.periodic();
-        if (RobotBase.isReal())
-            ligament.setAngle(-42 + Units.radiansToDegrees(encoder.getPosition()));
-        else
-            ligament.setAngle(-42 + Units.radiansToDegrees(motor.getEncoder().getPosition()));
+        ligament.setAngle(-42 + Units.radiansToDegrees(motor.getEncoder().getPosition() - 1.04));
     }
 
     /**
@@ -177,8 +209,8 @@ public class Elbow extends ProfiledPIDSubsystem {
         RoboRioSim.setVInVoltage(
                 BatterySim.calculateDefaultBatteryLoadedVoltage(armSim.getCurrentDrawAmps()));
 
-        bottomHallEffectSim.setValue(armSim.getAngleRads() <= Units.degreesToRadians(-30));
-        topHallEffectSim.setValue(armSim.getAngleRads() >= Units.degreesToRadians(30));
+        bottomHallEffectSim.setValue(armSim.getAngleRads() <= ElbowPosition.LOW.value - 0.25);
+        topHallEffectSim.setValue(armSim.getAngleRads() >= ElbowPosition.HIGH.value + 0.25);
     }
 
     /**
@@ -192,7 +224,11 @@ public class Elbow extends ProfiledPIDSubsystem {
 
     @Override
     protected void useOutput(double output, State setpoint) {
-        motor.setVoltage(output + feedforwardController.calculate(setpoint.position, setpoint.velocity));
+        setpointPosition = setpoint.position;
+        setpointVelocity = setpoint.velocity;
+        feedforward = feedforwardController.calculate(setpoint.position, setpoint.velocity);
+        pidOutput = output;
+        setVoltage(output + feedforwardController.calculate(setpoint.position, setpoint.velocity));
     }
 
     /**
@@ -203,10 +239,7 @@ public class Elbow extends ProfiledPIDSubsystem {
      */
     @Override
     protected double getMeasurement() {
-        if (RobotBase.isReal())
-            return encoder.getPosition();
-        else
-            return motor.getEncoder().getPosition();
+        return motor.getEncoder().getPosition();
     }
 
     /**
@@ -228,18 +261,53 @@ public class Elbow extends ProfiledPIDSubsystem {
     }
 
     /**
+     * Check if the elbow is safe to move to a specific position.
+     * 
+     * @return true if the elbow is safe to move
+     */
+    private Pair<Boolean, String> getIfSafeToMove(ElbowPosition targetPosition, Elevator elevator) {
+        boolean safe = true;
+        String str = "none";
+
+        if (Constants.IS_SAFETIES_ENABLED) {
+            if (!RobotStates.isInitialized()) {
+                safe = false;
+                str = "Robot not initialized: cannot move elbow";
+            }
+
+            switch (targetPosition) {
+                case HIGH:
+                    if (elevator.getMeasurement() < 0.2) {
+                        safe = false;
+                        str = "Elbow not clear of intake: cannot move elbow to high position";
+                    }
+                    break;
+                case MID:
+                    break;
+                case LOW:
+                    if (elevator.getMeasurement() < 0.1) {
+                        safe = false;
+                        str = "Elevator too low: cannot move elbow to low position";
+                    }
+            }
+        }
+        return new Pair<Boolean, String>(safe, str);
+    }
+
+    /**
      * Sets the speed of the motor. Will refuse to go past the bottom or top points
      * of the elbow.
      * 
      * @param speed the speed, from -1.0 to 1.0
      */
-    public void setSpeed(double speed) {
-        if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(), speed))
+    private void setSpeed(double speed) {
+        if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(),
+                speed) || !Constants.IS_MECHANISM_LIMITS_ENABLED) {
             if (RobotBase.isReal())
                 motor.set(speed);
             else
                 motor.setVoltage(speed * 12.0);
-        else {
+        } else {
             motor.setVoltage(0);
         }
     }
@@ -250,10 +318,11 @@ public class Elbow extends ProfiledPIDSubsystem {
      * 
      * @param voltage the voltage, from -12.0v to 12.0v
      */
-    public void setVoltage(double voltage) {
-        if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(), voltage))
+    private void setVoltage(double voltage) {
+        if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(),
+                voltage) || !Constants.IS_MECHANISM_LIMITS_ENABLED) {
             motor.setVoltage(voltage);
-        else {
+        } else {
             motor.setVoltage(0);
         }
     }
@@ -265,11 +334,14 @@ public class Elbow extends ProfiledPIDSubsystem {
      * @param position an ElbowPosition to set the elbow to
      * @return the command
      */
-    public CommandBase setDesiredPositionCommand(ElbowPosition position) {
-        return Commands.sequence(
-                runOnce(() -> setGoal(position.value)),
-                runOnce(this::enable),
-                Commands.waitUntil(this::isAtGoal));
+    public CommandBase setDesiredPositionCommand(ElbowPosition position, Elevator elevator) {
+        return Commands.either(
+                Commands.sequence(
+                        runOnce(() -> setGoal(position.value)),
+                        runOnce(this::enable),
+                        Commands.waitUntil(this::isAtGoal)),
+                RobotStates.singularErrorCommand(() -> getIfSafeToMove(position, elevator).getSecond()),
+                () -> getIfSafeToMove(position, elevator).getFirst());
     }
 
     /**

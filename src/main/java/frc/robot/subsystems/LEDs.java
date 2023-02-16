@@ -11,7 +11,9 @@ import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
+import frc.robot.commands.RobotStates;
 
 /**
  * The LEDs subsystem, which controls the state of the LEDs through an internal
@@ -21,12 +23,12 @@ import frc.robot.Constants;
  */
 public class LEDs extends SubsystemBase {
     /** The LEDs. */
-    private AddressableLED led = new AddressableLED(0);
+    private AddressableLED led = new AddressableLED(9);
 
     /** The last state of the LEDs before it was in {@code state}. */
     private LEDState previousState = LEDState.TechHOUNDS;
     /** The current state of the LEDs. */
-    private LEDState state = LEDState.TechHOUNDS;
+    private LEDState state = LEDState.Uninitialized;
 
     /**
      * Describes the states that the LEDs can be in.
@@ -155,7 +157,8 @@ public class LEDs extends SubsystemBase {
         }
 
         /**
-         * Changes the contents of the AddressableLEDBuffer to the uninitialized state.
+         * Changes the contents of the AddressableLEDBuffer to the uninitialized state
+         * (orange).
          */
         private static void uninitialized() {
             timeStep++; // 50 timesteps is one second
@@ -163,7 +166,7 @@ public class LEDs extends SubsystemBase {
             for (int i = 0; i < buffer.getLength(); i++) {
                 // every 0.2 seconds it will switch from off to on
                 if (timeStep / 10 == 1) {
-                    buffer.setHSV(i, 0, 255, 128);
+                    buffer.setHSV(i, 15, 255, 128);
                 } else {
                     buffer.setHSV(i, 0, 0, 0);
                 }
@@ -178,6 +181,14 @@ public class LEDs extends SubsystemBase {
         led.setLength(50);
         led.setData(state.getBuffer());
         led.start();
+
+        new Trigger(() -> RobotStates.getCurrentDiscreteError().isPresent())
+                .onTrue(setLEDStateCommand(LEDState.Error))
+                .onFalse(setPreviousLEDStateCommand());
+
+        new Trigger(() -> RobotStates.getCurrentContinuousError().isPresent())
+                .onTrue(setLEDStateCommand(LEDState.TemporaryError))
+                .onFalse(setPreviousLEDStateCommand());
 
         LoggingManager.getInstance().addGroup("LEDs",
                 new LogGroup(
@@ -200,9 +211,19 @@ public class LEDs extends SubsystemBase {
      * 
      * @param state the new LEDState.
      */
-    private void setLEDState(LEDState state) {
+    public void setLEDState(LEDState state) {
         this.previousState = this.state;
         this.state = state;
+    }
+
+    /**
+     * Sets the state of the LEDs, and sets the previousState to the old current
+     * state.
+     * 
+     * @param state the new LEDState.
+     */
+    public void setPreviousLEDState() {
+        setLEDState(previousState);
     }
 
     /**
@@ -222,21 +243,6 @@ public class LEDs extends SubsystemBase {
      */
     public CommandBase setPreviousLEDStateCommand() {
         return Commands.runOnce(() -> this.setLEDState(previousState));
-    }
-
-    /**
-     * Creates a command that will run the LEDs in an "error" mode for 2 seconds,
-     * then switch back to their original setting (useful for indicating an error
-     * after a button press, like if a certain value isn't set properly or a safety
-     * has been triggered).
-     * 
-     * @return the command
-     */
-    public CommandBase errorCommand() {
-        return Commands.sequence(
-                setLEDStateCommand(LEDState.Error),
-                Commands.waitSeconds(2),
-                this.setPreviousLEDStateCommand());
     }
 
     /**

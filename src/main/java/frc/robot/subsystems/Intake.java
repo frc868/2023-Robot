@@ -2,13 +2,16 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
+import com.techhounds.houndutil.houndlog.enums.LogLevel;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import com.techhounds.houndutil.houndlog.loggers.Logger;
 import com.techhounds.houndutil.houndlog.logitems.BooleanLogItem;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -21,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.commands.RobotStates;
 
 /**
  * Intake subsystem, contains the motors that run the passovers, and the
@@ -53,8 +57,7 @@ public class Intake extends SubsystemBase {
     /**
      * The object that controlls both passover motors.
      */
-    MotorControllerGroup passoverMotors = new MotorControllerGroup(leftPassoverMotor,
-            rightPassoverMotor);
+    MotorControllerGroup passoverMotors = new MotorControllerGroup(leftPassoverMotor, rightPassoverMotor);
 
     /** The ligament of the complete mechanism body that this subsystem controls. */
     private MechanismLigament2d ligament;
@@ -73,7 +76,15 @@ public class Intake extends SubsystemBase {
      * Initializes the intake system.
      */
     public Intake(MechanismLigament2d ligament) {
-        rightPassoverMotor.setInverted(true);
+        SparkMaxConfigurator.configure(leftPassoverMotor)
+                .withCurrentLimit(25)
+                .withInverted(true)
+                .burnFlash();
+
+        SparkMaxConfigurator.configure(rightPassoverMotor)
+                .withCurrentLimit(25)
+                .burnFlash();
+
         LoggingManager.getInstance().addGroup("Intake", new LogGroup(
                 new Logger[] {
                         new DeviceLogger<CANSparkMax>(leftPassoverMotor, "Left Passover Motor",
@@ -84,8 +95,9 @@ public class Intake extends SubsystemBase {
                                 LogProfileBuilder.buildDoubleSolenoidLogItems(intakeSolenoid)),
                         new DeviceLogger<DoubleSolenoid>(passoverSolenoid, "Passover Solenoid",
                                 LogProfileBuilder.buildDoubleSolenoidLogItems(passoverSolenoid)),
-                        new BooleanLogItem("Is Game Piece Detected", this::isGamePieceDetected),
-                        new BooleanLogItem("Is Safe for Elevator", this::isSafeForElevator)
+                        new BooleanLogItem("Is Game Piece Detected", this::isGamePieceDetected, LogLevel.MAIN),
+                        new BooleanLogItem("Is Safe for Elevator", () -> this.isSafeForElevator().getFirst(),
+                                LogLevel.MAIN)
                 }));
         this.ligament = ligament;
 
@@ -105,14 +117,27 @@ public class Intake extends SubsystemBase {
     }
 
     /**
-     * Checks if the it is safe fo the elevator to move based off of the intake:
+     * Checks if the it is safe for the elevator to move based off of the intake:
      * 1. the passover is retracted
      * 2. the intake is up
      * 
      * @return true if safe to move
      */
-    public boolean isSafeForElevator() {
-        return passoverSolenoid.get() == Value.kReverse && intakeSolenoid.get() == Value.kReverse;
+    public Pair<Boolean, String> isSafeForElevator() {
+        boolean safe = true;
+        String str = "none";
+
+        // if (passoverSolenoid.get() == Value.kReverse) {
+        // safe = false;
+        // str = "Passovers not retracted: cannot move elevator";
+        // }
+
+        // if (intakeSolenoid.get() != Value.kReverse) {
+        // safe = false;
+        // str = "Intake not up: cannot move elevator";
+        // }
+
+        return new Pair<Boolean, String>(safe, str);
     }
 
     /**
@@ -121,8 +146,17 @@ public class Intake extends SubsystemBase {
      * @param elevator
      * @return true if safe to move
      */
-    private boolean isSafeToMove(Elevator elevator) {
-        return elevator.isSafeForIntake();
+    private Pair<Boolean, String> getIfIntakeSafeToMove(Elevator elevator) {
+        boolean safe = true;
+        String str = "none";
+
+        if (Constants.IS_SAFETIES_ENABLED) {
+            if (!elevator.isSafeForIntake().getFirst()) {
+                safe = false;
+                str = elevator.isSafeForIntake().getSecond();
+            }
+        }
+        return new Pair<Boolean, String>(safe, str);
     }
 
     /**
@@ -133,11 +167,12 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setPassoverExtendedCommand(Elevator elevator, LEDs leds) {
-        return Commands.either(
-                runOnce(() -> passoverSolenoid.set(Value.kForward)),
-                leds.errorCommand(),
-                () -> isSafeToMove(elevator)).withName("Set Passover Extended");
+    public CommandBase setPassoversExtendedCommand(Elevator elevator, LEDs leds) {
+        // return Commands.either(
+        // runOnce(() -> passoverSolenoid.set(Value.kForward)),
+        // leds.errorCommand(),
+        // () -> isSafeToMove(elevator)).withName("Set Passover Extended");
+        return runOnce(() -> passoverSolenoid.set(Value.kForward)).withName("Set Passover Extended");
     }
 
     /**
@@ -149,7 +184,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setPassoverRetractedCommand(Elevator elevator, LEDs leds) {
+    public CommandBase setPassoversRetractedCommand(Elevator elevator, LEDs leds) {
         return runOnce(() -> passoverSolenoid.set(Value.kReverse)).withName("Set Passover Retracted");
     }
 
@@ -161,8 +196,10 @@ public class Intake extends SubsystemBase {
      */
     public CommandBase setIntakeDownCommand(Elevator elevator, LEDs leds) {
         return Commands
-                .either(runOnce(() -> intakeSolenoid.set(Value.kForward)), leds.errorCommand(),
-                        () -> isSafeToMove(elevator))
+                .either(
+                        runOnce(() -> intakeSolenoid.set(Value.kForward)),
+                        RobotStates.singularErrorCommand(() -> getIfIntakeSafeToMove(elevator).getSecond()),
+                        () -> getIfIntakeSafeToMove(elevator).getFirst())
                 .withName("Set Intake Down"); // untested
     }
 
@@ -174,8 +211,9 @@ public class Intake extends SubsystemBase {
      */
     public CommandBase setIntakeUpCommand(Elevator elevator, LEDs leds) {
         return Commands
-                .either(runOnce(() -> intakeSolenoid.set(Value.kReverse)), leds.errorCommand(),
-                        () -> isSafeToMove(elevator))
+                .either(runOnce(() -> intakeSolenoid.set(Value.kReverse)),
+                        RobotStates.singularErrorCommand(() -> getIfIntakeSafeToMove(elevator).getSecond()),
+                        () -> getIfIntakeSafeToMove(elevator).getFirst())
                 .withName("Set Intake Up"); // untested
     }
 
@@ -189,6 +227,20 @@ public class Intake extends SubsystemBase {
     public CommandBase runPassoverMotorsCommand() {
         return startEnd(
                 () -> passoverMotors.setVoltage(6),
+                () -> passoverMotors.setVoltage(0))
+                .withName("Run Passover Motors");
+    }
+
+    /**
+     * Creates a StartEndCommand (requiring this subsystem) to run the passover
+     * motors in reverse.
+     * This will run the motors until the command is interrupted/cancelled.
+     * 
+     * @return the command
+     */
+    public CommandBase reversePassoverMotorsCommand() {
+        return startEnd(
+                () -> passoverMotors.setVoltage(-6),
                 () -> passoverMotors.setVoltage(0))
                 .withName("Run Passover Motors");
     }

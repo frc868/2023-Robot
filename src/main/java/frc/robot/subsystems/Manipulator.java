@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
+import com.techhounds.houndutil.houndlog.enums.LogLevel;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import com.techhounds.houndutil.houndlog.logitems.BooleanLogItem;
 
@@ -21,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.GamePieceLocation.GamePiece;
+import frc.robot.commands.RobotStates;
 
 /**
  * The manipulator class, containing the wrist, pincer, and pole detector.
@@ -56,7 +58,7 @@ public class Manipulator extends SubsystemBase {
                         LogProfileBuilder.buildDoubleSolenoidLogItems(wrist)),
                 new DeviceLogger<DoubleSolenoid>(pincer, "Pincer",
                         LogProfileBuilder.buildDoubleSolenoidLogItems(pincer)),
-                new BooleanLogItem("Is Pole Detected", this::isPoleDetected)));
+                new BooleanLogItem("Is Pole Detected", this::isPoleDetected, LogLevel.MAIN)));
 
         if (RobotBase.isSimulation()) {
             poleSwitchSim = new DIOSim(poleSwitch);
@@ -77,9 +79,9 @@ public class Manipulator extends SubsystemBase {
         }
     }
 
-    private boolean isSafeForWristMove(Elevator elevator) {
-        return elevator.isSafeForWrist();
-    }
+    // private boolean isSafeForWristMove(Elevator elevator) {
+    // return elevator.isSafeForWrist();
+    // }
 
     /**
      * Creates an InstantCommand that sets the wrist to the
@@ -100,8 +102,8 @@ public class Manipulator extends SubsystemBase {
     public CommandBase setWristUpCommand(Elevator elevator, LEDs leds) {
         return Commands.either(
                 runOnce(() -> wrist.set(Value.kReverse)),
-                leds.errorCommand(),
-                () -> isSafeForWristMove(elevator)).withName("Wrist Up");
+                RobotStates.singularErrorCommand(() -> "Error"),
+                () -> true).withName("Wrist Up"); // TODO
     }
 
     /**
