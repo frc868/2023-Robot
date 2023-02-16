@@ -108,18 +108,20 @@ public class RobotContainer {
     private void configureButtonBindings() {
         Controls.configureDriverControls(0, drivetrain, intake, manipulator,
                 elevator, elbow, leds);
-        Controls.configureOperatorControls(1, 2, gridInterface, intake, manipulator,
-                elevator, elbow, leds);
-        Controls.configureBackupOperatorControls(3, intake, manipulator, elevator,
+        // Controls.configureOperatorControls(1, 2, gridInterface, intake, manipulator,
+        // elevator, elbow, leds);
+        Controls.configureBackupOperatorControls(3, gridInterface, intake, manipulator, elevator,
                 elbow, leds);
-        Controls.configureOverridesControls(4, 5, drivetrain, intake, manipulator,
-                elevator, elbow, leds);
+        // Controls.configureOverridesControls(4, 5, drivetrain, intake, manipulator,
+        // elevator, elbow, leds);
     }
 
     private void configureAuto() {
         TrajectoryLoader.addSettings(
                 new TrajectorySettings("Circle").withMaxVelocity(0.5).withMaxAcceleration(1),
-                new TrajectorySettings("Figure8").withMaxVelocity(1).withMaxAcceleration(3));
+                new TrajectorySettings("Figure8").withMaxVelocity(1).withMaxAcceleration(3),
+                new TrajectorySettings("1 Piece Hold N").withMaxVelocity(3).withMaxAcceleration(4),
+                new TrajectorySettings("3 Piece N").withMaxVelocity(4.2).withMaxAcceleration(8));
         TrajectoryLoader.loadAutoPaths();
 
         AutoManager.getInstance().addEvent("event1", Commands.print("1"));
@@ -131,8 +133,21 @@ public class RobotContainer {
                 new AutoRoutine("Circle", Autos.circle(TrajectoryLoader.getAutoPath("Circle"), drivetrain)));
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("Figure 8", Autos.figure8(TrajectoryLoader.getAutoPath("Figure8"), drivetrain)));
+        AutoManager.getInstance().addRoutine(
+                new AutoRoutine("1 Piece Hold N",
+                        Autos.pathPlannerTrajectory(TrajectoryLoader.getAutoPath("1 Piece Hold N"), drivetrain)));
+        AutoManager.getInstance().addRoutine(
+                new AutoRoutine("3 Piece N",
+                        Autos.pathPlannerTrajectory(TrajectoryLoader.getAutoPath("3 Piece N"), drivetrain)));
 
-        // FieldConstants.displayOnField();
+        FieldConstants.AutoDrive.TOP_LEFT_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.TOP_LEFT_CENTER_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.TOP_CENTER_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.TOP_RIGHT_CENTER_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.TOP_RIGHT_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.BOTTOM_LEFT_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.BOTTOM_CENTER_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.BOTTOM_RIGHT_ZONE.drawOnField(AutoManager.getInstance().getField());
     }
 
     private void configureNTCommands() {
@@ -144,10 +159,12 @@ public class RobotContainer {
                 new SendableLogger("Prepare to Intake Game Piece",
                         RobotStates.prepareToIntakeGamePiece(intake, manipulator, elevator, elbow,
                                 leds)),
+                new SendableLogger("Initialize Mechanisms",
+                        RobotStates.initializeMechanisms(intake, manipulator, elevator, elbow, leds)),
                 new SendableLogger("Intake Game Piece",
-                        RobotStates.intakeGamePiece(intake, manipulator, elevator, elbow, leds)),
+                        RobotStates.intakeGamePiece(() -> true, intake, manipulator, elevator, elbow, leds)),
                 new SendableLogger("Score Game Piece",
-                        RobotStates.scoreGamePiece(gridInterface, intake, manipulator, elevator,
+                        RobotStates.scoreGamePiece(() -> true, gridInterface, intake, manipulator, elevator,
                                 elbow, leds)),
                 new SendableLogger("Stow Elevator",
                         RobotStates.stowElevator(intake, manipulator, elevator, elbow, leds)),
@@ -160,6 +177,11 @@ public class RobotContainer {
                 new SendableLogger("Manipulator", manipulator),
                 new SendableLogger("LEDs", leds),
                 new SendableLogger("Misc", misc),
+                new StringLogItem("Current Discrete Error", () -> RobotStates.getCurrentDiscreteError().orElse("none"),
+                        LogLevel.MAIN),
+                new StringLogItem("Current Continuous Error",
+                        () -> RobotStates.getCurrentContinuousError().orElse("none"), LogLevel.MAIN),
+                new BooleanLogItem("Is Initialized", () -> RobotStates.isInitialized(), LogLevel.MAIN),
                 new BooleanLogItem("Intake Mode Bool",
                         () -> RobotStates.getIntakeMode().orElse(GamePiece.HYBRID) == GamePiece.CONE, LogLevel.MAIN)));
 
@@ -169,45 +191,48 @@ public class RobotContainer {
                 new SendableLogger("Manipulator", "Pincers Open", manipulator.setPincersOpenCommand()),
                 new SendableLogger("Manipulator", "Pincers Closed", manipulator.setPincersClosedCommand()),
                 new SendableLogger("Manipulator", "Sim Pole Switch Triggered", manipulator.simPoleSwitchTriggered()),
-                new SendableLogger("Intake", "Passover Extended", intake.setPassoverExtendedCommand(elevator, leds)),
-                new SendableLogger("Intake", "Passover Retracted", intake.setPassoverRetractedCommand(elevator, leds)),
+                new SendableLogger("Intake", "Passover Extended", intake.setPassoversExtendedCommand(elevator, leds)),
+                new SendableLogger("Intake", "Passover Retracted", intake.setPassoversRetractedCommand(elevator, leds)),
                 new SendableLogger("Intake", "Intake Up", intake.setIntakeUpCommand(elevator, leds)),
                 new SendableLogger("Intake", "Intake Down", intake.setIntakeDownCommand(elevator, leds)),
                 new SendableLogger("Intake", "Run Passover Motors", intake.runPassoverMotorsCommand()),
                 new SendableLogger("Intake", "Sim Game Piece Detected", intake.simGamePieceDetectedCommand()),
                 new SendableLogger("Elbow", "Set Low",
-                        elbow.setDesiredPositionCommand(ElbowPosition.LOW).withName("Set Low")),
+                        elbow.setDesiredPositionCommand(ElbowPosition.LOW, elevator).withName("Set Low")),
                 new SendableLogger("Elbow", "Set Middle",
-                        elbow.setDesiredPositionCommand(ElbowPosition.MID).withName("Set Middle")),
+                        elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator).withName("Set Middle")),
                 new SendableLogger("Elbow", "Set High",
-                        elbow.setDesiredPositionCommand(ElbowPosition.HIGH).withName("Set High")),
+                        elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator).withName("Set High")),
                 new SendableLogger("Elevator", "Set Bottom",
-                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, leds)
+                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow, leds)
                                 .withName("Set Bottom")),
                 new SendableLogger("Elevator", "Set Cone Low",
-                        elevator.setDesiredPositionCommand(ElevatorPosition.CONE_LOW, intake, leds)
+                        elevator.setDesiredPositionCommand(ElevatorPosition.CONE_LOW, intake, elbow, leds)
                                 .withName("Set Cone Low")),
                 new SendableLogger("Elevator", "Set Cone Mid",
-                        elevator.setDesiredPositionCommand(ElevatorPosition.CONE_MID, intake, leds)
+                        elevator.setDesiredPositionCommand(ElevatorPosition.CONE_MID, intake, elbow, leds)
                                 .withName("Set Cone Mid")),
                 new SendableLogger("Elevator", "Set Cone High",
-                        elevator.setDesiredPositionCommand(ElevatorPosition.CONE_HIGH, intake, leds)
+                        elevator.setDesiredPositionCommand(ElevatorPosition.CONE_HIGH, intake, elbow, leds)
                                 .withName("Set Cone High")),
                 new SendableLogger("Elevator", "Set Cube Low",
-                        elevator.setDesiredPositionCommand(ElevatorPosition.CUBE_LOW, intake, leds)
+                        elevator.setDesiredPositionCommand(ElevatorPosition.CUBE_LOW, intake, elbow, leds)
                                 .withName("Set Cube Low")),
                 new SendableLogger("Elevator", "Set Cube Mid",
-                        elevator.setDesiredPositionCommand(ElevatorPosition.CUBE_MID, intake, leds)
+                        elevator.setDesiredPositionCommand(ElevatorPosition.CUBE_MID, intake, elbow, leds)
                                 .withName("Set Cube Mid")),
                 new SendableLogger("Elevator", "Set Cube High",
-                        elevator.setDesiredPositionCommand(ElevatorPosition.CUBE_HIGH, intake, leds)
+                        elevator.setDesiredPositionCommand(ElevatorPosition.CUBE_HIGH, intake, elbow, leds)
                                 .withName("Set Cube High")),
                 new SendableLogger("Elevator", "Set Human Player",
-                        elevator.setDesiredPositionCommand(ElevatorPosition.HUMAN_PLAYER, intake, leds)
+                        elevator.setDesiredPositionCommand(ElevatorPosition.HUMAN_PLAYER, intake, elbow, leds)
                                 .withName("Set Human Player")),
                 new SendableLogger("Elevator", "Set Top",
-                        elevator.setDesiredPositionCommand(ElevatorPosition.TOP, intake, leds).withName("Set Top")),
-                new SendableLogger("Elevator", "Zero Encoder", elevator.zeroEncoderCommand()),
+                        elevator.setDesiredPositionCommand(ElevatorPosition.TOP, intake, elbow, leds)
+                                .withName("Set Top")),
+                new SendableLogger("Elevator", "Zero Encoder Manual", elevator.manualZeroEncoderCommand()),
+                new SendableLogger("Elevator", "Zero Encoder",
+                        elevator.zeroEncoderCommand()),
                 new SendableLogger("Drivetrain", "Turn CCW", drivetrain.turnWhileMovingCommand(true)),
                 new SendableLogger("Drivetrain", "Turn CW", drivetrain.turnWhileMovingCommand(false)),
                 new SendableLogger("Drivetrain", "BrakeO", drivetrain.brakeCommand()),
@@ -247,22 +272,24 @@ public class RobotContainer {
                 new SendableLogger("Drivetrain", "Path Follow Auto",
                         new ProxyCommand(() -> drivetrain
                                 .pathFollowingCommand(
-                                        RobotStates.getDriveToScoringLocationTraj(drivetrain, gridInterface)))
+                                        RobotStates.getAutoDriveTraj(drivetrain, gridInterface, true)))
                                 .andThen(() -> drivetrain.stop())
                                 .withName("Auto Path")),
                 new SendableLogger("LEDs", "Rainbow",
-                        leds.setLEDStateCommand(LEDState.Rainbow).withName("LED Rainbow")),
+                        leds.setLEDStateCommand(LEDState.Rainbow).withName("LED Rainbow").ignoringDisable(true)),
                 new SendableLogger("LEDs", "TechHOUNDS",
-                        leds.setLEDStateCommand(LEDState.TechHOUNDS).withName("LED TechHOUNDS")),
+                        leds.setLEDStateCommand(LEDState.TechHOUNDS).withName("LED TechHOUNDS").ignoringDisable(true)),
                 new SendableLogger("LEDs", "Cone Pickup",
-                        leds.setLEDStateCommand(LEDState.ConePickup).withName("LED Cone Pickup")),
+                        leds.setLEDStateCommand(LEDState.ConePickup).withName("LED Cone Pickup").ignoringDisable(true)),
                 new SendableLogger("LEDs", "Cube Pickup",
-                        leds.setLEDStateCommand(LEDState.CubePickup).withName("LED Cube Pickup")),
-                new SendableLogger("LEDs", "Error", leds.setLEDStateCommand(LEDState.Error).withName("LED Error")),
+                        leds.setLEDStateCommand(LEDState.CubePickup).withName("LED Cube Pickup").ignoringDisable(true)),
+                new SendableLogger("LEDs", "Error",
+                        leds.setLEDStateCommand(LEDState.Error).withName("LED Error").ignoringDisable(true)),
                 new SendableLogger("LEDs", "Uninitialized",
-                        leds.setLEDStateCommand(LEDState.Uninitialized).withName("LED Uninitialized")),
+                        leds.setLEDStateCommand(LEDState.Uninitialized).withName("LED Uninitialized")
+                                .ignoringDisable(true)),
                 new SendableLogger("LEDs", "Go To Previous State",
-                        leds.setPreviousLEDStateCommand().withName("LED Previous State")),
+                        leds.setPreviousLEDStateCommand().withName("LED Previous State").ignoringDisable(true)),
                 new SendableLogger("Overrides", "Operator Override",
                         Overrides.operatorOverrideCommand())));
 
@@ -317,7 +344,8 @@ public class RobotContainer {
                 new SendableLogger("Reset",
                         Commands.runOnce(() -> gridInterface.reset()).withName("Reset")),
                 new SendableLogger("Score",
-                        RobotStates.scoreGamePiece(gridInterface, intake, manipulator, elevator, elbow, leds)
+                        RobotStates
+                                .scoreGamePiece(() -> true, gridInterface, intake, manipulator, elevator, elbow, leds)
                                 .andThen(RobotStates.stowElevator(intake, manipulator, elevator, elbow, leds))
                                 .withName("Score"))));
     }
