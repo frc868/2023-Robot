@@ -10,20 +10,20 @@ import frc.robot.subsystems.Drivetrain.DriveMode;
 /**
  * Turns the robot to an angle based on gyro
  * shamelessly stolen from the 2022 B3 repo
+ * 
+ * @author jt
  */
-
 public class TurnToAngle extends PIDCommand {
     private Drivetrain drivetrain;
-    
+
     public TurnToAngle(double setpoint, Drivetrain drivetrain) {
-        super(new PIDController(Constants.Drivetrain.Gains.DriveMotors.kP.get(), 
-            Constants.Drivetrain.Gains.DriveMotors.kI.get(), 
-            Constants.Drivetrain.Gains.DriveMotors.kD.get()), 
-            () -> drivetrain.getGyroAngle(), 
-            () -> setpoint, 
-            d -> drivetrain.drive(0, 0, d, DriveMode.FIELD_ORIENTED), 
-            drivetrain
-            );
+        super(new PIDController(Constants.Gains.DriveMotors.kP.get(),
+                Constants.Gains.DriveMotors.kI.get(),
+                Constants.Gains.DriveMotors.kD.get()),
+                () -> drivetrain.getGyroAngle(),
+                () -> setpoint,
+                d -> drivetrain.drive(0, 0, d, DriveMode.FIELD_ORIENTED),
+                drivetrain);
         this.drivetrain = drivetrain;
         addRequirements(drivetrain);
     }
@@ -38,5 +38,4 @@ public class TurnToAngle extends PIDCommand {
         return getController().atSetpoint();
     }
 
-    
 }
