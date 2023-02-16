@@ -5,6 +5,7 @@ import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import java.util.Arrays;
 import java.util.List;
 
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -18,6 +19,8 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Manipulator;
+import frc.robot.subsystems.Elbow.ElbowPosition;
+import frc.robot.subsystems.Elevator.ElevatorPosition;
 
 public class Controls {
     public static void configureDriverControls(int port, Drivetrain drivetrain, Intake intake,
@@ -28,41 +31,35 @@ public class Controls {
                 drivetrain.teleopDriveCommand(
                         () -> -joystick.getY(),
                         () -> -joystick.getX(),
-                        () -> -joystick.getTwist()));
+                        () -> -joystick.getTwist(),
+                        () -> 1 - joystick.getRawAxis(5)));
 
-        joystick.button(10).onTrue(drivetrain.zeroGyroCommand());
+        joystick.button(6).onTrue(drivetrain.zeroGyroCommand());
 
         joystick.button(11).onTrue(drivetrain.turnWhileMovingCommand(true));
         joystick.button(9).onTrue(drivetrain.turnWhileMovingCommand(false));
 
         joystick.povLeft().onTrue(RobotStates.setIntakeModeCommand(GamePiece.CONE));
         joystick.povRight().onTrue(RobotStates.setIntakeModeCommand(GamePiece.CUBE));
-        // joystick.button(8).onTrue(
-        // runOnce(
-        // () -> drivetrain.getSpeedMode().setLimit(drivetrain.getSpeedMode().getLimit()
-        // + 0.05),
-        // drivetrain));
-        // joystick.button(10).onTrue(
-        // runOnce(
-        // () -> drivetrain.getSpeedMode().setLimit(drivetrain.getSpeedMode().getLimit()
-        // - 0.05),
-        // drivetrain));
 
-        joystick.button(1).onTrue(drivetrain.setSpeedModeCommand(Drivetrain.SpeedMode.SLOW));
         joystick.button(2).onTrue(drivetrain.setSpeedModeCommand(Drivetrain.SpeedMode.ULTRA));
-        joystick.button(1).onFalse(drivetrain.setSpeedModeCommand(Drivetrain.SpeedMode.FAST));
-        joystick.button(2).onFalse(drivetrain.setSpeedModeCommand(Drivetrain.SpeedMode.FAST));
+        joystick.button(3).and(joystick.button(5)).onTrue(drivetrain.setSpeedModeCommand(Drivetrain.SpeedMode.FAST));
 
-        joystick.button(3).onTrue(RobotStates.initializeMechanisms(intake, manipulator, elevator, elbow, leds));
+        joystick.povUp().onTrue(elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator));
+        joystick.povLeft().onTrue(elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator));
+        joystick.povDown().onTrue(elbow.setDesiredPositionCommand(ElbowPosition.LOW, elevator));
+        joystick.button(14).onTrue(Commands.runOnce(elbow::disable));
+
+        // joystick.button(3).onTrue(RobotStates.initializeMechanisms(intake,
+        // manipulator, elevator, elbow, leds));
 
         // joystick.button(1)
         // .onTrue());
 
-        // joystick.button(7).onTrue(
-        // RobotStates.prepareToIntakeGamePiece(intake, manipulator, elevator, elbow,
-        // leds)
-        // .andThen(RobotStates.intakeGamePiece(intake, manipulator, elevator, elbow,
-        // leds)));
+        joystick.button(7)
+                .onTrue(RobotStates.intakeGamePiece(() -> joystick.getHID().getRawButton(14), intake, manipulator,
+                        elevator, elbow,
+                        leds));
     }
 
     public enum OperatorControls {
@@ -150,26 +147,53 @@ public class Controls {
         hids[OperatorControls.RESET.hid].button(OperatorControls.RESET.button)
                 .onTrue(runOnce(() -> gridInterface.reset()));
         hids[OperatorControls.SCORE.hid].button(OperatorControls.SCORE.button)
-                .whileTrue(RobotStates.scoreGamePiece(gridInterface, intake, manipulator, elevator, elbow, leds)
+                .whileTrue(RobotStates
+                        .scoreGamePiece(() -> hids[0].getHID().getRawButton(1), gridInterface, intake, manipulator,
+                                elevator, elbow, leds)
                         .andThen(RobotStates.stowElevator(intake, manipulator, elevator, elbow, leds)));
     }
 
-    public static void configureBackupOperatorControls(int port, Intake intake, Manipulator manipulator,
+    public static void configureBackupOperatorControls(int port, GridInterface gridInterface, Intake intake,
+            Manipulator manipulator,
             Elevator elevator, Elbow elbow, LEDs leds) {
         CommandXboxController xbox = new CommandXboxController(port);
 
-        elevator.setDefaultCommand(elevator.setOverridenElevatorSpeedCommand(() -> -xbox.getLeftY(), intake, leds));
-        elbow.setDefaultCommand(elbow.setOverridenElbowSpeedCommand(() -> -xbox.getRightY()));
+        // elevator.setDefaultCommand(
+        // elevator.setOverridenElevatorSpeedCommand(() -> -xbox.getLeftY(), intake,
+        // elbow, leds));
+        // elevator.setDefaultCommand(Commands.run(() ->
+        // elevator.setSpeed(-xbox.getLeftY()), elevator));
+        // elbow.setDefaultCommand(elbow.setOverridenElbowSpeedCommand(() ->
+        // -xbox.getRightY()));
+        // elbow.setDefaultCommand(Commands.run(() -> elbow.setSpeed(-0.25 *
+        // xbox.getRightY()), elbow));
+        // elbow.setDefaultCommand(elbow.setOverridenElbowSpeedCommand(() ->
+        // -xbox.getRightY()));
 
-        xbox.x().onTrue(manipulator.setPincersOpenCommand());
-        xbox.b().onTrue(manipulator.setPincersClosedCommand());
-        xbox.y().onTrue(manipulator.setWristUpCommand(elevator, leds));
-        xbox.a().onTrue(manipulator.setWristDownCommand());
-        xbox.povLeft().onTrue(intake.setPassoverRetractedCommand(elevator, leds));
-        xbox.povRight().onTrue(intake.setPassoverExtendedCommand(elevator, leds));
-        xbox.povUp().onTrue(intake.setIntakeUpCommand(elevator, leds));
-        xbox.povDown().onTrue(intake.setIntakeDownCommand(elevator, leds));
+        xbox.x().onTrue(intake.setPassoversExtendedCommand(elevator, leds));
+        xbox.b().onTrue(intake.setPassoversRetractedCommand(elevator, leds));
+        xbox.y().onTrue(intake.setIntakeUpCommand(elevator, leds));
+        xbox.a().onTrue(intake.setIntakeDownCommand(elevator, leds));
+
+        xbox.povLeft().onTrue(manipulator.setPincersOpenCommand());
+        xbox.povRight().onTrue(manipulator.setPincersClosedCommand());
+        xbox.povUp().onTrue(manipulator.setWristUpCommand(elevator, leds));
+        xbox.povDown().onTrue(manipulator.setWristDownCommand());
         xbox.rightBumper().whileTrue(intake.runPassoverMotorsCommand());
+        xbox.leftBumper().whileTrue(intake.reversePassoverMotorsCommand());
+
+        CommandXboxController xbox2 = new CommandXboxController(4);
+        xbox2.a().onTrue(elevator.setDesiredPositionCommand(ElevatorPosition.CONE_MID, intake, elbow, leds));
+        xbox2.y().onTrue(elevator.setDesiredPositionCommand(ElevatorPosition.CONE_HIGH, intake, elbow, leds));
+        xbox2.b().onTrue(elevator.setDesiredPositionCommand(ElevatorPosition.CONE_LOW, intake, elbow, leds));
+        xbox2.leftBumper().onTrue(
+                RobotStates.scoreGamePiece(() -> true, gridInterface, intake, manipulator, elevator, elbow, leds));
+
+        xbox2.povUp().onTrue(elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator));
+        xbox2.povLeft().onTrue(elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator));
+        xbox2.povDown().onTrue(elbow.setDesiredPositionCommand(ElbowPosition.LOW, elevator));
+
+        xbox2.x().onTrue(Commands.runOnce(elevator::disable));
     }
 
     public static void configureOverridesControls(int port1, int port2, Drivetrain drivetrain, Intake intake,
