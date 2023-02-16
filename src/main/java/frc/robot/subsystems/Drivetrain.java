@@ -33,7 +33,9 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -189,7 +191,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /** The speed that the robot is set to go at. */
-    private SpeedMode speedMode = SpeedMode.SLOW;
+    private SpeedMode speedMode = SpeedMode.ULTRA;
 
     /** Initializes the drivetrain. */
     public Drivetrain() {
@@ -284,6 +286,11 @@ public class Drivetrain extends SubsystemBase {
      *                      the front of the bot
      */
     public void drive(double xSpeed, double ySpeed, double thetaSpeed, DriveMode driveMode) {
+        if (DriverStation.getAlliance() == Alliance.Red) {
+            xSpeed *= -1;
+            ySpeed *= -1;
+        }
+
         ChassisSpeeds chassisSpeeds = null;
         switch (driveMode) {
             case ROBOT_RELATIVE:
@@ -427,25 +434,27 @@ public class Drivetrain extends SubsystemBase {
      */
     private void updatePoseEstimator() {
         poseEstimator.update(getGyroRotation2d(), getSwerveModulePositions());
+        Pose2d estimatedPosition = poseEstimator.getEstimatedPosition();
+        Field2d field = AutoManager.getInstance().getField();
+        if (Constants.Drivetrain.IS_USING_CAMERAS) {
+            for (int i = 0; i < photonCameras.length; i++) {
+                Optional<EstimatedRobotPose> result = photonCameras[i]
+                        .getEstimatedGlobalPose(estimatedPosition);
 
-        for (int i = 0; i < photonCameras.length; i++) {
-            Optional<EstimatedRobotPose> result = photonCameras[i]
-                    .getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());
-            Field2d field = AutoManager.getInstance().getField();
-
-            FieldObject2d fieldObject = field.getObject("apriltag_cam" + i + "_est_pose");
-            if (result.isPresent()) {
-                EstimatedRobotPose camPose = result.get();
-                poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(),
-                        camPose.timestampSeconds);
-                fieldObject.setPose(camPose.estimatedPose.toPose2d());
-            } else {
-                // move it way off the screen to make it disappear
-                fieldObject.setPose(new Pose2d(-100, -100, new Rotation2d()));
+                FieldObject2d fieldObject = field.getObject("apriltag_cam" + i +
+                        "_est_pose");
+                if (result.isPresent()) {
+                    EstimatedRobotPose camPose = result.get();
+                    poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(),
+                            camPose.timestampSeconds);
+                    fieldObject.setPose(camPose.estimatedPose.toPose2d());
+                } else {
+                    // move it way off the screen to make it disappear
+                    fieldObject.setPose(new Pose2d(-100, -100, new Rotation2d()));
+                }
             }
-
-            drawRobotOnField(AutoManager.getInstance().getField());
         }
+        drawRobotOnField(AutoManager.getInstance().getField());
     }
 
     /**
@@ -546,7 +555,7 @@ public class Drivetrain extends SubsystemBase {
      * @return the command
      */
     public CommandBase teleopDriveCommand(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
-            DoubleSupplier thetaSpeedSupplier) {
+            DoubleSupplier thetaSpeedSupplier, DoubleSupplier brakeSupplier) {
         SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
         SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
         SlewRateLimiter thetaSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
@@ -566,9 +575,9 @@ public class Drivetrain extends SubsystemBase {
                 thetaSpeed = thetaSpeedLimiter.calculate(thetaSpeed);
             }
 
-            xSpeed *= speedMode.limit;
-            ySpeed *= speedMode.limit;
-            thetaSpeed *= speedMode.limit;
+            xSpeed *= speedMode.limit * brakeSupplier.getAsDouble();
+            ySpeed *= speedMode.limit * brakeSupplier.getAsDouble();
+            thetaSpeed *= speedMode.limit * brakeSupplier.getAsDouble();
 
             if (getTurnControllerEnabled()) {
                 thetaSpeed = getTurnControllerOutput();
