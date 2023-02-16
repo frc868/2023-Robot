@@ -244,8 +244,8 @@
                       "_title": "Position",
                       "_glyph": 148,
                       "_showGlyph": false,
-                      "Range/Min": -0.5,
-                      "Range/Max": 0.5,
+                      "Range/Min": 0.0,
+                      "Range/Max": 1.75,
                       "Range/Center": 0.0,
                       "Visuals/Num tick marks": 5,
                       "Visuals/Show text": true,
@@ -815,28 +815,26 @@
           },
           "17,9": {
             "size": [
-              3,
-              2
+              4,
+              1
             ],
             "content": {
-              "_type": "Boolean Box",
-              "_source0": "network_table:///HoundLog/LEDs/Is Failure",
-              "_title": "HoundLog/LEDs/Is Failure",
+              "_type": "Text View",
+              "_source0": "network_table:///HoundLog/Main/Current Discrete Error",
+              "_title": "HoundLog/Main/Current Discrete Error",
               "_glyph": 148,
-              "_showGlyph": false,
-              "Colors/Color when true": "#7CFC00FF",
-              "Colors/Color when false": "#8B0000FF"
+              "_showGlyph": false
             }
           },
-          "17,11": {
+          "17,10": {
             "size": [
               3,
               1
             ],
             "content": {
-              "_type": "Command",
-              "_source0": "network_table:///HoundLog/Intake/Sim Game Piece Detected",
-              "_title": "HoundLog/Intake/Sim Game Piece Detected",
+              "_type": "Text View",
+              "_source0": "network_table:///HoundLog/Main/Current Continuous Error",
+              "_title": "HoundLog/Main/Current Continuous Error",
               "_glyph": 148,
               "_showGlyph": false
             }
