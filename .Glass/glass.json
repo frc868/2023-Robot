@@ -1,9 +1,97 @@
 {
   "NetworkTables": {
+    "Retained Values": {
+      "open": false
+    },
+    "transitory": {
+      "HoundLog": {
+        "Elbow": {
+          "Elbow Motor": {
+            "open": true
+          }
+        },
+        "Elevator": {
+          "open": true
+        },
+        "open": true
+      }
+    },
     "types": {
       "/FMSInfo": "FMSInfo",
       "/HoundLog/Autonomous/Chooser": "String Chooser",
       "/HoundLog/Autonomous/Field": "Field2d",
+      "/HoundLog/Drivetrain/BrakeO": "Command",
+      "/HoundLog/Drivetrain/BrakeX": "Command",
+      "/HoundLog/Drivetrain/Fast": "Command",
+      "/HoundLog/Drivetrain/Path Follow": "Command",
+      "/HoundLog/Drivetrain/Path Follow Auto": "Command",
+      "/HoundLog/Drivetrain/Slow": "Command",
+      "/HoundLog/Drivetrain/Turn CCW": "Command",
+      "/HoundLog/Drivetrain/Turn CW": "Command",
+      "/HoundLog/Drivetrain/Ultra": "Command",
+      "/HoundLog/Elbow/Set High": "Command",
+      "/HoundLog/Elbow/Set Low": "Command",
+      "/HoundLog/Elbow/Set Middle": "Command",
+      "/HoundLog/Elevator/Set Bottom": "Command",
+      "/HoundLog/Elevator/Set Cone High": "Command",
+      "/HoundLog/Elevator/Set Cone Low": "Command",
+      "/HoundLog/Elevator/Set Cone Mid": "Command",
+      "/HoundLog/Elevator/Set Cube High": "Command",
+      "/HoundLog/Elevator/Set Cube Low": "Command",
+      "/HoundLog/Elevator/Set Cube Mid": "Command",
+      "/HoundLog/Elevator/Set Human Player": "Command",
+      "/HoundLog/Elevator/Set Top": "Command",
+      "/HoundLog/Elevator/Zero Encoder": "Command",
+      "/HoundLog/Elevator/Zero Encoder 2": "Command",
+      "/HoundLog/Elevator/Zero Encoder Real": "Command",
+      "/HoundLog/Intake/Intake Down": "Command",
+      "/HoundLog/Intake/Intake Up": "Command",
+      "/HoundLog/Intake/Passover Extended": "Command",
+      "/HoundLog/Intake/Passover Retracted": "Command",
+      "/HoundLog/Intake/Run Passover Motors": "Command",
+      "/HoundLog/Intake/Sim Game Piece Detected": "Command",
+      "/HoundLog/LEDs/Cone Pickup": "Command",
+      "/HoundLog/LEDs/Cube Pickup": "Command",
+      "/HoundLog/LEDs/Error": "Command",
+      "/HoundLog/LEDs/Go To Previous State": "Command",
+      "/HoundLog/LEDs/Rainbow": "Command",
+      "/HoundLog/LEDs/TechHOUNDS": "Command",
+      "/HoundLog/LEDs/Uninitialized": "Command",
+      "/HoundLog/Main/Drive to Scoring Location": "Command",
+      "/HoundLog/Main/Drivetrain": "Subsystem",
+      "/HoundLog/Main/Elbow": "Subsystem",
+      "/HoundLog/Main/Elevator": "Subsystem",
+      "/HoundLog/Main/Intake": "Subsystem",
+      "/HoundLog/Main/Intake Game Piece": "Command",
+      "/HoundLog/Main/LEDs": "Subsystem",
+      "/HoundLog/Main/Manipulator": "Subsystem",
+      "/HoundLog/Main/Misc": "Subsystem",
+      "/HoundLog/Main/Prepare to Intake Game Piece": "Command",
+      "/HoundLog/Main/Score Game Piece": "Command",
+      "/HoundLog/Main/Stow Elevator": "Command",
+      "/HoundLog/Manipulator/Pincers Closed": "Command",
+      "/HoundLog/Manipulator/Pincers Open": "Command",
+      "/HoundLog/Manipulator/Sim Pole Switch Triggered": "Command",
+      "/HoundLog/Manipulator/Wrist Down": "Command",
+      "/HoundLog/Manipulator/Wrist Up": "Command",
+      "/HoundLog/Operator Panel/Reset": "Command",
+      "/HoundLog/Operator Panel/Score": "Command",
+      "/HoundLog/Operator Panel/Select Intake Mode Cone": "Command",
+      "/HoundLog/Operator Panel/Select Intake Mode Cube": "Command",
+      "/HoundLog/Operator Panel/Select Left Grid": "Command",
+      "/HoundLog/Operator Panel/Select Left High Location": "Command",
+      "/HoundLog/Operator Panel/Select Left Low Location": "Command",
+      "/HoundLog/Operator Panel/Select Left Middle Location": "Command",
+      "/HoundLog/Operator Panel/Select Middle Grid": "Command",
+      "/HoundLog/Operator Panel/Select Middle High Location": "Command",
+      "/HoundLog/Operator Panel/Select Middle Low Location": "Command",
+      "/HoundLog/Operator Panel/Select Middle Middle Location": "Command",
+      "/HoundLog/Operator Panel/Select Right Grid": "Command",
+      "/HoundLog/Operator Panel/Select Right High Location": "Command",
+      "/HoundLog/Operator Panel/Select Right Low Location": "Command",
+      "/HoundLog/Operator Panel/Select Right Middle Location": "Command",
+      "/HoundLog/Overrides/Operator Override": "Command",
+      "/SmartDashboard/Mechanisms": "Mechanism2d",
       "/SmartDashboard/PPSwerveControllerCommand_field": "Field2d"
     },
     "windows": {
@@ -11,16 +99,59 @@
         "window": {
           "visible": true
         }
-      },
-      "/HoundLog/Autonomous/Field": {
-        "window": {
-          "visible": true
-        }
       }
     }
   },
   "NetworkTables Settings": {
+    "dsClient": false,
     "mode": "Client (NT4)",
     "serverTeam": "868"
+  },
+  "Plots": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "height": 558,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/HoundLog/Elbow/Elbow Motor/Encoder Distance"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/HoundLog/Elbow/Feedforward"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/HoundLog/Elbow/PID Output"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/HoundLog/Elbow/Setpoint Position"
+            }
+          ]
+        }
+      ]
+    }
   }
 }

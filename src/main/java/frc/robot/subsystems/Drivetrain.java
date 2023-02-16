@@ -6,6 +6,7 @@ import java.util.function.DoubleSupplier;
 import org.photonvision.EstimatedRobotPose;
 
 import com.ctre.phoenix.sensors.Pigeon2;
+import com.ctre.phoenix.unmanaged.Unmanaged;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.techhounds.houndutil.houndauto.AutoManager;
@@ -32,9 +33,11 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -52,35 +55,35 @@ import frc.robot.utils.SwerveModule;
 public class Drivetrain extends SubsystemBase {
     /** The front left swerve module when looking at the bot from behind. */
     private SwerveModule frontLeft = new SwerveModule("Drivetrain/Front Left Module",
-            Constants.Drivetrain.CANIDs.FrontLeft.DRIVE_MOTOR,
-            Constants.Drivetrain.CANIDs.FrontLeft.TURN_MOTOR,
-            Constants.Drivetrain.CANIDs.FrontLeft.TURN_ENCODER,
+            Constants.CAN.FRONT_LEFT_DRIVE_MOTOR,
+            Constants.CAN.FRONT_LEFT_TURN_MOTOR,
+            Constants.CAN.FRONT_LEFT_TURN_ENCODER,
             false, true, false,
-            Constants.Drivetrain.Offsets.FRONT_LEFT);
+            Constants.Geometries.Drivetrain.Offsets.FRONT_LEFT);
 
     /** The front right swerve module when looking at the bot from behind. */
     private SwerveModule frontRight = new SwerveModule("Drivetrain/Front Right Module",
-            Constants.Drivetrain.CANIDs.FrontRight.DRIVE_MOTOR,
-            Constants.Drivetrain.CANIDs.FrontRight.TURN_MOTOR,
-            Constants.Drivetrain.CANIDs.FrontRight.TURN_ENCODER,
+            Constants.CAN.FRONT_RIGHT_DRIVE_MOTOR,
+            Constants.CAN.FRONT_RIGHT_TURN_MOTOR,
+            Constants.CAN.FRONT_RIGHT_TURN_ENCODER,
             false, true, false,
-            Constants.Drivetrain.Offsets.FRONT_RIGHT);
+            Constants.Geometries.Drivetrain.Offsets.FRONT_RIGHT);
 
     /** The back left swerve module when looking at the bot from behind. */
     private SwerveModule backLeft = new SwerveModule("Drivetrain/Back Left Module",
-            Constants.Drivetrain.CANIDs.BackLeft.DRIVE_MOTOR,
-            Constants.Drivetrain.CANIDs.BackLeft.TURN_MOTOR,
-            Constants.Drivetrain.CANIDs.BackLeft.TURN_ENCODER,
+            Constants.CAN.BACK_LEFT_DRIVE_MOTOR,
+            Constants.CAN.BACK_LEFT_TURN_MOTOR,
+            Constants.CAN.BACK_LEFT_TURN_ENCODER,
             false, true, false,
-            Constants.Drivetrain.Offsets.BACK_LEFT);
+            Constants.Geometries.Drivetrain.Offsets.BACK_LEFT);
 
     /** The back right swerve module when looking at the bot from behind. */
     private SwerveModule backRight = new SwerveModule("Drivetrain/Back Right Module",
-            Constants.Drivetrain.CANIDs.BackRight.DRIVE_MOTOR,
-            Constants.Drivetrain.CANIDs.BackRight.TURN_MOTOR,
-            Constants.Drivetrain.CANIDs.BackRight.TURN_ENCODER,
+            Constants.CAN.BACK_RIGHT_DRIVE_MOTOR,
+            Constants.CAN.BACK_RIGHT_TURN_MOTOR,
+            Constants.CAN.BACK_RIGHT_TURN_ENCODER,
             false, true, false,
-            Constants.Drivetrain.Offsets.BACK_RIGHT);
+            Constants.Geometries.Drivetrain.Offsets.BACK_RIGHT);
 
     /** The Pigeon 2, the overpriced but really good gyro that we use. */
     private Pigeon2 pigeon = new Pigeon2(0);
@@ -115,14 +118,20 @@ public class Drivetrain extends SubsystemBase {
     private boolean isTurningEnabled = false;
 
     /**
+     * The yaw of the gyro in simulations. This value is not used when the robot is
+     * running IRL.
+     */
+    private double simYaw;
+
+    /**
      * The motion profiled controller that provides an angular velocity to complete
      * an automatic 90° turn.
      */
-    private ProfiledPIDController turnController = new ProfiledPIDController(Constants.Drivetrain.Gains.TurnToAngle.kP,
-            Constants.Drivetrain.Gains.TurnToAngle.kI,
-            Constants.Drivetrain.Gains.TurnToAngle.kD,
-            new TrapezoidProfile.Constraints(Constants.Auton.MAX_ANGULAR_VELOCITY,
-                    Constants.Auton.MAX_ANGULAR_ACCELERATION));
+    private ProfiledPIDController turnController = new ProfiledPIDController(Constants.Gains.TurnToAngle.kP,
+            Constants.Gains.TurnToAngle.kI,
+            Constants.Gains.TurnToAngle.kD,
+            new TrapezoidProfile.Constraints(2 * Math.PI,
+                    2 * Math.PI));
 
     /** An enum describing the two types of drive modes. */
     public enum DriveMode {
@@ -152,7 +161,7 @@ public class Drivetrain extends SubsystemBase {
          * The ultra-fast mode, where the robot is not limited (be careful) and the
          * controller is lit up blue.
          */
-        ULTRA_FAST(1.0);
+        ULTRA(1.0);
 
         /** The percent limit for this speedMode */
         private double limit;
@@ -182,13 +191,13 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /** The speed that the robot is set to go at. */
-    private SpeedMode speedMode = SpeedMode.SLOW;
+    private SpeedMode speedMode = SpeedMode.ULTRA;
 
     /** Initializes the drivetrain. */
     public Drivetrain() {
         zeroGyro();
         poseEstimator = new SwerveDrivePoseEstimator(
-                Constants.Drivetrain.Geometry.KINEMATICS,
+                Constants.Geometries.Drivetrain.KINEMATICS,
                 getGyroRotation2d(),
                 getSwerveModulePositions(),
                 new Pose2d(new Translation2d(FieldConstants.LENGTH_METERS / 2.0, FieldConstants.WIDTH_METERS / 2.0),
@@ -203,11 +212,14 @@ public class Drivetrain extends SubsystemBase {
                         LogLevel.MAIN),
                 new DoubleLogItem("Fast Speed Limit", () -> SpeedMode.FAST.getLimit(),
                         LogLevel.MAIN),
-                new DoubleLogItem("Ultra Fast Speed Limit", () -> SpeedMode.ULTRA_FAST.getLimit(),
+                new DoubleLogItem("Ultra Fast Speed Limit", () -> SpeedMode.ULTRA.getLimit(),
                         LogLevel.MAIN)));
 
         AutoManager.getInstance().setResetOdometryConsumer(this::resetPoseEstimator);
 
+        if (RobotBase.isSimulation()) {
+            simYaw = 0;
+        }
     }
 
     /**
@@ -217,6 +229,19 @@ public class Drivetrain extends SubsystemBase {
     @Override
     public void periodic() {
         updatePoseEstimator();
+    }
+
+    /**
+     * Updates simulation-specific variables.
+     */
+    @Override
+    public void simulationPeriodic() {
+        ChassisSpeeds chassisSpeed = Constants.Geometries.Drivetrain.KINEMATICS
+                .toChassisSpeeds(getSwerveModuleStates());
+        simYaw += chassisSpeed.omegaRadiansPerSecond * 0.02;
+
+        Unmanaged.feedEnable(20);
+        pigeon.getSimCollection().setRawHeading(Units.radiansToDegrees(simYaw));
     }
 
     /**
@@ -262,6 +287,11 @@ public class Drivetrain extends SubsystemBase {
      *                      the front of the bot
      */
     public void drive(double xSpeed, double ySpeed, double thetaSpeed, DriveMode driveMode) {
+        if (DriverStation.getAlliance() == Alliance.Red) {
+            xSpeed *= -1;
+            ySpeed *= -1;
+        }
+
         ChassisSpeeds chassisSpeeds = null;
         switch (driveMode) {
             case ROBOT_RELATIVE:
@@ -273,9 +303,9 @@ public class Drivetrain extends SubsystemBase {
 
                 break;
         }
-        SwerveModuleState[] states = Constants.Drivetrain.Geometry.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
+        SwerveModuleState[] states = Constants.Geometries.Drivetrain.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states,
-                Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
+                Constants.Geometries.Drivetrain.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
         setModuleStates(states, true, true);
     }
 
@@ -373,6 +403,17 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
+     * Creates a command that zeros the gyro in whichever direction the bot is
+     * pointing. Only use this if
+     * the bot is straight, otherwise it will throw off field-oriented control.
+     * 
+     * @return the command
+     */
+    public CommandBase zeroGyroCommand() {
+        return runOnce(() -> pigeon.setYaw(0));
+    }
+
+    /**
      * Stops the drivetrain.
      */
     public void stop() {
@@ -394,25 +435,27 @@ public class Drivetrain extends SubsystemBase {
      */
     private void updatePoseEstimator() {
         poseEstimator.update(getGyroRotation2d(), getSwerveModulePositions());
+        Pose2d estimatedPosition = poseEstimator.getEstimatedPosition();
+        Field2d field = AutoManager.getInstance().getField();
+        if (Constants.IS_USING_CAMERAS) {
+            for (int i = 0; i < photonCameras.length; i++) {
+                Optional<EstimatedRobotPose> result = photonCameras[i]
+                        .getEstimatedGlobalPose(estimatedPosition);
 
-        for (int i = 0; i < photonCameras.length; i++) {
-            Optional<EstimatedRobotPose> result = photonCameras[i]
-                    .getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());
-            Field2d field = AutoManager.getInstance().getField();
-
-            FieldObject2d fieldObject = field.getObject("apriltag_cam" + i + "_est_pose");
-            if (result.isPresent()) {
-                EstimatedRobotPose camPose = result.get();
-                poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(),
-                        camPose.timestampSeconds);
-                fieldObject.setPose(camPose.estimatedPose.toPose2d());
-            } else {
-                // move it way off the screen to make it disappear
-                fieldObject.setPose(new Pose2d(-100, -100, new Rotation2d()));
+                FieldObject2d fieldObject = field.getObject("apriltag_cam" + i +
+                        "_est_pose");
+                if (result.isPresent()) {
+                    EstimatedRobotPose camPose = result.get();
+                    poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(),
+                            camPose.timestampSeconds);
+                    fieldObject.setPose(camPose.estimatedPose.toPose2d());
+                } else {
+                    // move it way off the screen to make it disappear
+                    fieldObject.setPose(new Pose2d(-100, -100, new Rotation2d()));
+                }
             }
-
-            drawRobotOnField(AutoManager.getInstance().getField());
         }
+        drawRobotOnField(AutoManager.getInstance().getField());
     }
 
     /**
@@ -439,19 +482,19 @@ public class Drivetrain extends SubsystemBase {
         // then rotated around its own center by the angle of the module.
         field.getObject("frontLeft").setPose(
                 getPose().transformBy(
-                        new Transform2d(Constants.Drivetrain.Geometry.SWERVE_MODULE_LOCATIONS[0],
+                        new Transform2d(Constants.Geometries.Drivetrain.SWERVE_MODULE_LOCATIONS[0],
                                 getSwerveModuleStates()[0].angle)));
         field.getObject("frontRight").setPose(
                 getPose().transformBy(
-                        new Transform2d(Constants.Drivetrain.Geometry.SWERVE_MODULE_LOCATIONS[1],
+                        new Transform2d(Constants.Geometries.Drivetrain.SWERVE_MODULE_LOCATIONS[1],
                                 getSwerveModuleStates()[1].angle)));
         field.getObject("backLeft").setPose(
                 getPose().transformBy(
-                        new Transform2d(Constants.Drivetrain.Geometry.SWERVE_MODULE_LOCATIONS[2],
+                        new Transform2d(Constants.Geometries.Drivetrain.SWERVE_MODULE_LOCATIONS[2],
                                 getSwerveModuleStates()[2].angle)));
         field.getObject("backRight").setPose(
                 getPose().transformBy(
-                        new Transform2d(Constants.Drivetrain.Geometry.SWERVE_MODULE_LOCATIONS[3],
+                        new Transform2d(Constants.Geometries.Drivetrain.SWERVE_MODULE_LOCATIONS[3],
                                 getSwerveModuleStates()[3].angle)));
     }
 
@@ -513,7 +556,7 @@ public class Drivetrain extends SubsystemBase {
      * @return the command
      */
     public CommandBase teleopDriveCommand(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
-            DoubleSupplier thetaSpeedSupplier) {
+            DoubleSupplier thetaSpeedSupplier, DoubleSupplier brakeSupplier) {
         SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
         SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
         SlewRateLimiter thetaSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
@@ -533,9 +576,9 @@ public class Drivetrain extends SubsystemBase {
                 thetaSpeed = thetaSpeedLimiter.calculate(thetaSpeed);
             }
 
-            xSpeed *= speedMode.limit;
-            ySpeed *= speedMode.limit;
-            thetaSpeed *= speedMode.limit;
+            xSpeed *= speedMode.limit * brakeSupplier.getAsDouble();
+            ySpeed *= speedMode.limit * brakeSupplier.getAsDouble();
+            thetaSpeed *= speedMode.limit * brakeSupplier.getAsDouble();
 
             if (getTurnControllerEnabled()) {
                 thetaSpeed = getTurnControllerOutput();
@@ -543,9 +586,9 @@ public class Drivetrain extends SubsystemBase {
 
             // the speeds are initially values from -1.0 to 1.0, so we multiply by the max
             // physical velocity to output in m/s.
-            xSpeed *= Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
-            ySpeed *= Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
-            thetaSpeed *= Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
+            xSpeed *= Constants.Geometries.Drivetrain.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
+            ySpeed *= Constants.Geometries.Drivetrain.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
+            thetaSpeed *= Constants.Geometries.Drivetrain.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
 
             drive(
                     xSpeed, ySpeed, thetaSpeed,
@@ -572,7 +615,7 @@ public class Drivetrain extends SubsystemBase {
             turnRegister += counterClockwise ? Math.PI / 2.0 : -Math.PI / 2.0;
 
             turnController.setGoal(startingGyroAngle + turnRegister);
-        });
+        }).withName("Turn While Moving");
     }
 
     /**
@@ -581,7 +624,7 @@ public class Drivetrain extends SubsystemBase {
      * 
      * @return the command
      */
-    public Command brakeCommand() {
+    public CommandBase brakeCommand() {
         return new InstantCommand(() -> {
             setModuleStates(new SwerveModuleState[] {
                     new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
@@ -589,7 +632,7 @@ public class Drivetrain extends SubsystemBase {
                     new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
                     new SwerveModuleState(0, Rotation2d.fromDegrees(-45))
             });
-        });
+        }).withName("Brake");
     }
 
     /**
@@ -598,7 +641,7 @@ public class Drivetrain extends SubsystemBase {
      * 
      * @return the command
      */
-    public Command brakeXCommand() {
+    public CommandBase brakeXCommand() {
         return new InstantCommand(() -> {
             setModuleStates(new SwerveModuleState[] {
                     new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
@@ -606,7 +649,7 @@ public class Drivetrain extends SubsystemBase {
                     new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
                     new SwerveModuleState(0, Rotation2d.fromDegrees(45))
             });
-        });
+        }).withName("Brake X");
     }
 
     /**
@@ -614,7 +657,7 @@ public class Drivetrain extends SubsystemBase {
      * 
      * @return the command
      */
-    public Command turnWheelsToAngleCommand(double angle) {
+    public CommandBase turnWheelsToAngleCommand(double angle) {
         return new InstantCommand(() -> {
             setModuleStates(new SwerveModuleState[] {
                     new SwerveModuleState(0, new Rotation2d(angle)),
@@ -623,7 +666,7 @@ public class Drivetrain extends SubsystemBase {
                     new SwerveModuleState(0, new Rotation2d(angle))
 
             });
-        });
+        }).withName("Turn Wheels To Angle");
     }
 
     /**
@@ -636,10 +679,10 @@ public class Drivetrain extends SubsystemBase {
         return new PPSwerveControllerCommand(
                 path,
                 this::getPose,
-                Constants.Drivetrain.Geometry.KINEMATICS,
-                new PIDController(Constants.Drivetrain.Gains.Trajectories.xkP, 0, 0),
-                new PIDController(Constants.Drivetrain.Gains.Trajectories.ykP, 0, 0),
-                new PIDController(Constants.Drivetrain.Gains.Trajectories.thetakP, 0, 0),
+                Constants.Geometries.Drivetrain.KINEMATICS,
+                new PIDController(Constants.Gains.Trajectories.xkP, 0, 0),
+                new PIDController(Constants.Gains.Trajectories.ykP, 0, 0),
+                new PIDController(Constants.Gains.Trajectories.thetakP, 0, 0),
                 (s) -> this.setModuleStates(s, true, true),
                 this);
     }
@@ -655,15 +698,15 @@ public class Drivetrain extends SubsystemBase {
         return new PPSwerveControllerCommand(
                 path,
                 this::getPose,
-                Constants.Drivetrain.Geometry.KINEMATICS,
-                new PIDController(Constants.Drivetrain.Gains.Trajectories.xkP, 0, 0),
-                new PIDController(Constants.Drivetrain.Gains.Trajectories.ykP, 0, 0),
+                Constants.Geometries.Drivetrain.KINEMATICS,
+                new PIDController(Constants.Gains.Trajectories.xkP, 0, 0),
+                new PIDController(Constants.Gains.Trajectories.ykP, 0, 0),
                 new PIDController(0, 0, 0),
                 (s) -> {
-                    ChassisSpeeds c = Constants.Drivetrain.Geometry.KINEMATICS.toChassisSpeeds(s);
+                    ChassisSpeeds c = Constants.Geometries.Drivetrain.KINEMATICS.toChassisSpeeds(s);
                     c.omegaRadiansPerSecond = Math.PI;
 
-                    this.setModuleStates(Constants.Drivetrain.Geometry.KINEMATICS.toSwerveModuleStates(c), true,
+                    this.setModuleStates(Constants.Geometries.Drivetrain.KINEMATICS.toSwerveModuleStates(c), true,
                             true);
                 },
                 this);

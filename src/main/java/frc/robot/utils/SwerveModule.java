@@ -6,6 +6,8 @@ import com.ctre.phoenix.sensors.SensorTimeBase;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.CANSparkMax.IdleMode;
+import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
@@ -21,6 +23,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.Constants;
 
 public class SwerveModule {
@@ -35,30 +39,34 @@ public class SwerveModule {
     private CANCoder turnCanCoder;
 
     /** The PID controller that corrects the drive motor's velocity. */
-    private PIDController drivePIDController = new PIDController(Constants.Drivetrain.Gains.DriveMotors.kP.get(),
-            Constants.Drivetrain.Gains.DriveMotors.kI.get(), Constants.Drivetrain.Gains.DriveMotors.kD.get());
+    private PIDController drivePIDController = new PIDController(Constants.Gains.DriveMotors.kP.get(),
+            Constants.Gains.DriveMotors.kI.get(), Constants.Gains.DriveMotors.kD.get());
 
     /** The PID controller that controls the turning motor's position. */
     private ProfiledPIDController turnPIDController = new ProfiledPIDController(
-            Constants.Drivetrain.Gains.TurnMotors.kP.get(),
-            Constants.Drivetrain.Gains.TurnMotors.kI.get(), Constants.Drivetrain.Gains.TurnMotors.kD.get(),
+            Constants.Gains.TurnMotors.kP.get(),
+            Constants.Gains.TurnMotors.kI.get(), Constants.Gains.TurnMotors.kD.get(),
             new TrapezoidProfile.Constraints(
-                    Constants.Drivetrain.Geometry.Turning.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-                    Constants.Drivetrain.Geometry.Turning.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED));
+                    Constants.Geometries.Drivetrain.Turning.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
+                    Constants.Geometries.Drivetrain.Turning.MAX_ANGULAR_ACCELERATION_RADIANS_PER_SECOND_SQUARED));
 
-    private PIDController turnPIDControllerSimple = new PIDController(Constants.Drivetrain.Gains.TurnMotors.kP.get(),
-            Constants.Drivetrain.Gains.TurnMotors.kI.get(), Constants.Drivetrain.Gains.TurnMotors.kD.get());
+    private PIDController turnPIDControllerSimple = new PIDController(Constants.Gains.TurnMotors.kP.get(),
+            Constants.Gains.TurnMotors.kI.get(), Constants.Gains.TurnMotors.kD.get());
 
     /** The feedforward controller that controls the drive motor's velocity. */
     private SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(
-            Constants.Drivetrain.Gains.DriveMotors.kS,
-            Constants.Drivetrain.Gains.DriveMotors.kV,
-            Constants.Drivetrain.Gains.DriveMotors.kA);
+            Constants.Gains.DriveMotors.kS,
+            Constants.Gains.DriveMotors.kV,
+            Constants.Gains.DriveMotors.kA);
 
     private double drivePIDControllerOutput = 0.0;
     private double driveFFControllerOutput = 0.0;
     private double driveMotorVel = 0.0;
     private double driveMotorVelCF = 0.0;
+
+    private double simDriveEncoderPosition;
+    private double simDriveEncoderVelocity;
+    private double simCurrentAngle;
 
     /**
      * The offset of the CANCoder from the zero point, in radians. This will be
@@ -90,23 +98,21 @@ public class SwerveModule {
             double turnCanCoderOffset) {
 
         driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
-        driveMotor.restoreFactoryDefaults();
-        driveMotor.setInverted(driveMotorInverted);
-        driveMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
-        driveMotor.setSmartCurrentLimit(40);
+        SparkMaxConfigurator.configure(driveMotor)
+                .withIdleMode(IdleMode.kBrake)
+                .withInverted(driveMotorInverted)
+                .withCurrentLimit(40)
+                .withPositionConversionFactor(Constants.Geometries.Drivetrain.ENCODER_DISTANCE_TO_METERS,
+                        true)
+                .burnFlash();
 
         driveEncoder = driveMotor.getEncoder();
-        driveEncoder.setPositionConversionFactor(Constants.Drivetrain.Geometry.ENCODER_DISTANCE_TO_METERS);
-        driveEncoder.setVelocityConversionFactor(Constants.Drivetrain.Geometry.ENCODER_DISTANCE_TO_METERS / 60.0);
-
-        driveMotor.burnFlash();
 
         turnMotor = new CANSparkMax(turnMotorChannel, MotorType.kBrushless);
-        turnMotor.restoreFactoryDefaults();
-        turnMotor.setIdleMode(CANSparkMax.IdleMode.kBrake);
-        turnMotor.setInverted(turnMotorInverted);
-        turnMotor.setSmartCurrentLimit(15);
-        turnMotor.burnFlash();
+        SparkMaxConfigurator.configure(turnMotor)
+                .withIdleMode(IdleMode.kBrake)
+                .withInverted(turnMotorInverted)
+                .withCurrentLimit(15).burnFlash();
 
         turnCanCoder = new CANCoder(canCoderChannel);
 
@@ -125,12 +131,12 @@ public class SwerveModule {
 
         this.turnCanCoderOffset = turnCanCoderOffset;
 
-        Constants.Drivetrain.Gains.DriveMotors.kP.setConsumer((d) -> drivePIDController.setP(d));
-        Constants.Drivetrain.Gains.DriveMotors.kI.setConsumer((d) -> drivePIDController.setI(d));
-        Constants.Drivetrain.Gains.DriveMotors.kD.setConsumer((d) -> drivePIDController.setD(d));
-        Constants.Drivetrain.Gains.TurnMotors.kP.setConsumer((d) -> turnPIDController.setP(d));
-        Constants.Drivetrain.Gains.TurnMotors.kI.setConsumer((d) -> turnPIDController.setI(d));
-        Constants.Drivetrain.Gains.TurnMotors.kD.setConsumer((d) -> turnPIDController.setD(d));
+        Constants.Gains.DriveMotors.kP.setConsumer((d) -> drivePIDController.setP(d));
+        Constants.Gains.DriveMotors.kI.setConsumer((d) -> drivePIDController.setI(d));
+        Constants.Gains.DriveMotors.kD.setConsumer((d) -> drivePIDController.setD(d));
+        Constants.Gains.TurnMotors.kP.setConsumer((d) -> turnPIDController.setP(d));
+        Constants.Gains.TurnMotors.kI.setConsumer((d) -> turnPIDController.setI(d));
+        Constants.Gains.TurnMotors.kD.setConsumer((d) -> turnPIDController.setD(d));
 
         LoggingManager.getInstance().addGroup(name, new LogGroup(
                 new Logger[] {
@@ -140,16 +146,56 @@ public class SwerveModule {
                                 LogProfileBuilder.buildCANSparkMaxLogItems(turnMotor)),
                         new DeviceLogger<CANCoder>(turnCanCoder, "CANCoder",
                                 LogProfileBuilder.buildCANCoderLogItems(turnCanCoder)),
-                        new DoubleLogItem("Wheel Angle", this::getAngle, LogLevel.MAIN),
-                        new DoubleLogItem("CANCoder Position", turnCanCoder::getPosition, LogLevel.MAIN),
-                        new DoubleLogItem("Wheel Angle", this::getAngle, LogLevel.MAIN),
-                        new DoubleLogItem("CANCoder Position", turnCanCoder::getPosition, LogLevel.MAIN),
+                        new DoubleLogItem("Wheel Angle Degrees", () -> Units.radiansToDegrees(getWheelAngle()),
+                                LogLevel.MAIN),
                         new DoubleLogItem("Drive PID", () -> this.drivePIDControllerOutput, LogLevel.MAIN),
                         new DoubleLogItem("Drive FF", () -> this.driveFFControllerOutput, LogLevel.MAIN),
                         new DoubleLogItem("Drive Motor Vel", () -> this.driveMotorVel, LogLevel.MAIN),
                         new DoubleLogItem("Drive Motor Vel CF", () -> this.driveMotorVelCF, LogLevel.MAIN)
 
                 }));
+
+        if (RobotBase.isSimulation()) {
+            this.simDriveEncoderPosition = 0.0;
+            this.simDriveEncoderVelocity = 0.0;
+            this.simCurrentAngle = 0.0;
+        }
+    }
+
+    /**
+     * Gets the CANCoder position, adjusted with the offset.
+     * 
+     * @return the position of the CANCoder
+     */
+    public double getWheelAngle() {
+        if (RobotBase.isReal())
+            return turnCanCoder.getPosition() + turnCanCoderOffset;
+        else
+            return simCurrentAngle;
+    }
+
+    /**
+     * Gets the position of the drive encoder.
+     * 
+     * @return the position of the drive encoder.
+     */
+    public double getDriveEncoderPosition() {
+        if (RobotBase.isReal())
+            return driveEncoder.getPosition();
+        else
+            return simDriveEncoderPosition;
+    }
+
+    /**
+     * Gets the velocity of the drive encoder.
+     * 
+     * @return the velocity of the drive encoder.
+     */
+    public double getDriveEncoderVelocity() {
+        if (RobotBase.isReal())
+            return driveEncoder.getVelocity();
+        else
+            return simDriveEncoderVelocity;
     }
 
     /**
@@ -158,7 +204,7 @@ public class SwerveModule {
      * @return the state of the swerve module
      */
     public SwerveModulePosition getPosition() {
-        return new SwerveModulePosition(driveEncoder.getPosition(), new Rotation2d(getWheelAngle()));
+        return new SwerveModulePosition(getDriveEncoderPosition(), new Rotation2d(getWheelAngle()));
     }
 
     /**
@@ -167,7 +213,7 @@ public class SwerveModule {
      * @return the state of the swerve module
      */
     public SwerveModuleState getState() {
-        return new SwerveModuleState(driveEncoder.getVelocity(), new Rotation2d(getWheelAngle()));
+        return new SwerveModuleState(getDriveEncoderVelocity(), new Rotation2d(getWheelAngle()));
     }
 
     /**
@@ -178,24 +224,29 @@ public class SwerveModule {
      * @param optimize whether to optimize the state of the modules
      */
     public void setState(SwerveModuleState state, boolean openLoop, boolean optimize) {
-        if (state.speedMetersPerSecond < 0.01) {
-            stop();
-            return;
-        }
-
         if (optimize)
             state = SwerveModuleState.optimize(state, new Rotation2d(getWheelAngle()));
 
         if (openLoop) {
             driveMotor.setVoltage(state.speedMetersPerSecond
-                    / Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND * 12.0);
+                    / Constants.Geometries.Drivetrain.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND * 12.0);
 
             double v = turnPIDControllerSimple.calculate(getWheelAngle(),
                     state.angle.getRadians()) * 12.0;
             if (v > 8)
-                v = 8.0;
+                v = 8.0; // drops voltage down to 8
 
-            turnMotor.setVoltage(v);
+            if (RobotBase.isReal()) {
+                turnMotor.setVoltage(v);
+            } else {
+                simDriveEncoderVelocity = state.speedMetersPerSecond;
+                double distancePer20Ms = state.speedMetersPerSecond / 50.0;
+                simDriveEncoderPosition += distancePer20Ms;
+
+                simCurrentAngle = state.angle.getRadians();
+                turnCanCoder.setPosition(simCurrentAngle);
+            }
+
         } else {
             this.drivePIDControllerOutput = drivePIDController.calculate(driveEncoder.getVelocity(),
                     state.speedMetersPerSecond);
@@ -232,37 +283,10 @@ public class SwerveModule {
     }
 
     /**
-     * Gets the CANCoder position, adjusted with the offset.
-     * 
-     * @return the position of the CANCoder
-     */
-    public double getWheelAngle() {
-        return turnCanCoder.getPosition() + turnCanCoderOffset;
-    }
-
-    /**
-     * Gets the position of the drive encoder.
-     * 
-     * @return the position of the drive encoder.
-     */
-    public double getDriveEncoderPosition() {
-        return driveEncoder.getPosition();
-    }
-
-    /**
      * Reset the position of the encoder on the drive motor.
      */
     public void resetDriveEncoder() {
         driveEncoder.setPosition(0);
-    }
-
-    /**
-     * Gets the current angle of the wheel.
-     * 
-     * @return the current angle of the wheel, in degrees, [0, 360) CCW.
-     */
-    public double getAngle() {
-        return Math.toDegrees(turnCanCoder.getPosition());
     }
 
     /**
