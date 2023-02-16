@@ -145,9 +145,18 @@ public class RobotContainer {
         FieldConstants.AutoDrive.TOP_CENTER_ZONE.drawOnField(AutoManager.getInstance().getField());
         FieldConstants.AutoDrive.TOP_RIGHT_CENTER_ZONE.drawOnField(AutoManager.getInstance().getField());
         FieldConstants.AutoDrive.TOP_RIGHT_ZONE.drawOnField(AutoManager.getInstance().getField());
-        FieldConstants.AutoDrive.BOTTOM_LEFT_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.BOTTOM_LEFT_CENTER_ZONE.drawOnField(AutoManager.getInstance().getField());
         FieldConstants.AutoDrive.BOTTOM_CENTER_ZONE.drawOnField(AutoManager.getInstance().getField());
-        FieldConstants.AutoDrive.BOTTOM_RIGHT_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.BOTTOM_RIGHT_CENTER_ZONE.drawOnField(AutoManager.getInstance().getField());
+
+        FieldConstants.AutoDrive.CHARGE_STATION_LEFT_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.CHARGE_STATION_RIGHT_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.COMMUNITY_BOTTOM_LEFT_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.COMMUNITY_TOP_LEFT_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.COMMUNITY_TOP_LEFT_RIGHT_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.COMMUNITY_BOTTOM_RIGHT_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.COMMUNITY_TOP_RIGHT_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.COMMUNITY_TOP_RIGHT_LEFT_ZONE.drawOnField(AutoManager.getInstance().getField());
     }
 
     private void configureNTCommands() {

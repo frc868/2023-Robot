@@ -401,7 +401,8 @@ public class RobotStates {
         Pose2d targetPose = FieldConstants.scoringLocationMap.get(DriverStation.getAlliance())
                 .get(gamePieceLocation);
 
-        Map<Rectangle2d, Pose2d[]> map = FieldConstants.AutoDrive.ZONE_TO_INTERMEDIARY.get(DriverStation.getAlliance());
+        Map<Rectangle2d, Pose2d[]> map = FieldConstants.AutoDrive.SCORING_AREA_ZONE_TO_INTERMEDIARY
+                .get(DriverStation.getAlliance());
         Pose2d[] intermediaryPoses = null;
         for (Rectangle2d rect : map.keySet()) {
             if (rect.isInRect(drivetrain.getPose())) {
