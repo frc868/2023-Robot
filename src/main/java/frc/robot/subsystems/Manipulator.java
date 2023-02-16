@@ -32,16 +32,16 @@ import frc.robot.commands.RobotStates;
 public class Manipulator extends SubsystemBase {
     /** The solenoid that controls the wrist of the manipulator. */
     private DoubleSolenoid wrist = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-            Constants.Manipulator.Pneumatics.WRIST[0],
-            Constants.Manipulator.Pneumatics.WRIST[1]);
+            Constants.Pneumatics.WRIST[0],
+            Constants.Pneumatics.WRIST[1]);
 
     /** The solenoid that controls the pincer to hold game pieces. */
     private DoubleSolenoid pincer = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-            Constants.Manipulator.Pneumatics.PINCERS[0],
-            Constants.Manipulator.Pneumatics.PINCERS[1]);
+            Constants.Pneumatics.PINCERS[0],
+            Constants.Pneumatics.PINCERS[1]);
 
     /** Beam break sensor that detects if the wingdong is hitting the pole. */
-    private DigitalInput poleSwitch = new DigitalInput(Constants.Manipulator.POLE_SWITCH_PORT);
+    private DigitalInput poleSwitch = new DigitalInput(Constants.DIO.POLE_SWITCH);
     private DIOSim poleSwitchSim;
 
     /** The ligament of the complete mechanism body that this subsystem controls. */

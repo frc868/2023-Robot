@@ -55,35 +55,35 @@ import frc.robot.utils.SwerveModule;
 public class Drivetrain extends SubsystemBase {
     /** The front left swerve module when looking at the bot from behind. */
     private SwerveModule frontLeft = new SwerveModule("Drivetrain/Front Left Module",
-            Constants.Drivetrain.CANIDs.FrontLeft.DRIVE_MOTOR,
-            Constants.Drivetrain.CANIDs.FrontLeft.TURN_MOTOR,
-            Constants.Drivetrain.CANIDs.FrontLeft.TURN_ENCODER,
+            Constants.CAN.FRONT_LEFT_DRIVE_MOTOR,
+            Constants.CAN.FRONT_LEFT_TURN_MOTOR,
+            Constants.CAN.FRONT_LEFT_TURN_ENCODER,
             false, true, false,
-            Constants.Drivetrain.Offsets.FRONT_LEFT);
+            Constants.Geometries.Drivetrain.Offsets.FRONT_LEFT);
 
     /** The front right swerve module when looking at the bot from behind. */
     private SwerveModule frontRight = new SwerveModule("Drivetrain/Front Right Module",
-            Constants.Drivetrain.CANIDs.FrontRight.DRIVE_MOTOR,
-            Constants.Drivetrain.CANIDs.FrontRight.TURN_MOTOR,
-            Constants.Drivetrain.CANIDs.FrontRight.TURN_ENCODER,
+            Constants.CAN.FRONT_RIGHT_DRIVE_MOTOR,
+            Constants.CAN.FRONT_RIGHT_TURN_MOTOR,
+            Constants.CAN.FRONT_RIGHT_TURN_ENCODER,
             false, true, false,
-            Constants.Drivetrain.Offsets.FRONT_RIGHT);
+            Constants.Geometries.Drivetrain.Offsets.FRONT_RIGHT);
 
     /** The back left swerve module when looking at the bot from behind. */
     private SwerveModule backLeft = new SwerveModule("Drivetrain/Back Left Module",
-            Constants.Drivetrain.CANIDs.BackLeft.DRIVE_MOTOR,
-            Constants.Drivetrain.CANIDs.BackLeft.TURN_MOTOR,
-            Constants.Drivetrain.CANIDs.BackLeft.TURN_ENCODER,
+            Constants.CAN.BACK_LEFT_DRIVE_MOTOR,
+            Constants.CAN.BACK_LEFT_TURN_MOTOR,
+            Constants.CAN.BACK_LEFT_TURN_ENCODER,
             false, true, false,
-            Constants.Drivetrain.Offsets.BACK_LEFT);
+            Constants.Geometries.Drivetrain.Offsets.BACK_LEFT);
 
     /** The back right swerve module when looking at the bot from behind. */
     private SwerveModule backRight = new SwerveModule("Drivetrain/Back Right Module",
-            Constants.Drivetrain.CANIDs.BackRight.DRIVE_MOTOR,
-            Constants.Drivetrain.CANIDs.BackRight.TURN_MOTOR,
-            Constants.Drivetrain.CANIDs.BackRight.TURN_ENCODER,
+            Constants.CAN.BACK_RIGHT_DRIVE_MOTOR,
+            Constants.CAN.BACK_RIGHT_TURN_MOTOR,
+            Constants.CAN.BACK_RIGHT_TURN_ENCODER,
             false, true, false,
-            Constants.Drivetrain.Offsets.BACK_RIGHT);
+            Constants.Geometries.Drivetrain.Offsets.BACK_RIGHT);
 
     /** The Pigeon 2, the overpriced but really good gyro that we use. */
     private Pigeon2 pigeon = new Pigeon2(0);
@@ -127,9 +127,9 @@ public class Drivetrain extends SubsystemBase {
      * The motion profiled controller that provides an angular velocity to complete
      * an automatic 90° turn.
      */
-    private ProfiledPIDController turnController = new ProfiledPIDController(Constants.Drivetrain.Gains.TurnToAngle.kP,
-            Constants.Drivetrain.Gains.TurnToAngle.kI,
-            Constants.Drivetrain.Gains.TurnToAngle.kD,
+    private ProfiledPIDController turnController = new ProfiledPIDController(Constants.Gains.TurnToAngle.kP,
+            Constants.Gains.TurnToAngle.kI,
+            Constants.Gains.TurnToAngle.kD,
             new TrapezoidProfile.Constraints(2 * Math.PI,
                     2 * Math.PI));
 
@@ -197,7 +197,7 @@ public class Drivetrain extends SubsystemBase {
     public Drivetrain() {
         zeroGyro();
         poseEstimator = new SwerveDrivePoseEstimator(
-                Constants.Drivetrain.Geometry.KINEMATICS,
+                Constants.Geometries.Drivetrain.KINEMATICS,
                 getGyroRotation2d(),
                 getSwerveModulePositions(),
                 new Pose2d(new Translation2d(FieldConstants.LENGTH_METERS / 2.0, FieldConstants.WIDTH_METERS / 2.0),
@@ -236,7 +236,8 @@ public class Drivetrain extends SubsystemBase {
      */
     @Override
     public void simulationPeriodic() {
-        ChassisSpeeds chassisSpeed = Constants.Drivetrain.Geometry.KINEMATICS.toChassisSpeeds(getSwerveModuleStates());
+        ChassisSpeeds chassisSpeed = Constants.Geometries.Drivetrain.KINEMATICS
+                .toChassisSpeeds(getSwerveModuleStates());
         simYaw += chassisSpeed.omegaRadiansPerSecond * 0.02;
 
         Unmanaged.feedEnable(20);
@@ -302,9 +303,9 @@ public class Drivetrain extends SubsystemBase {
 
                 break;
         }
-        SwerveModuleState[] states = Constants.Drivetrain.Geometry.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
+        SwerveModuleState[] states = Constants.Geometries.Drivetrain.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states,
-                Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
+                Constants.Geometries.Drivetrain.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
         setModuleStates(states, true, true);
     }
 
@@ -436,7 +437,7 @@ public class Drivetrain extends SubsystemBase {
         poseEstimator.update(getGyroRotation2d(), getSwerveModulePositions());
         Pose2d estimatedPosition = poseEstimator.getEstimatedPosition();
         Field2d field = AutoManager.getInstance().getField();
-        if (Constants.Drivetrain.IS_USING_CAMERAS) {
+        if (Constants.IS_USING_CAMERAS) {
             for (int i = 0; i < photonCameras.length; i++) {
                 Optional<EstimatedRobotPose> result = photonCameras[i]
                         .getEstimatedGlobalPose(estimatedPosition);
@@ -481,19 +482,19 @@ public class Drivetrain extends SubsystemBase {
         // then rotated around its own center by the angle of the module.
         field.getObject("frontLeft").setPose(
                 getPose().transformBy(
-                        new Transform2d(Constants.Drivetrain.Geometry.SWERVE_MODULE_LOCATIONS[0],
+                        new Transform2d(Constants.Geometries.Drivetrain.SWERVE_MODULE_LOCATIONS[0],
                                 getSwerveModuleStates()[0].angle)));
         field.getObject("frontRight").setPose(
                 getPose().transformBy(
-                        new Transform2d(Constants.Drivetrain.Geometry.SWERVE_MODULE_LOCATIONS[1],
+                        new Transform2d(Constants.Geometries.Drivetrain.SWERVE_MODULE_LOCATIONS[1],
                                 getSwerveModuleStates()[1].angle)));
         field.getObject("backLeft").setPose(
                 getPose().transformBy(
-                        new Transform2d(Constants.Drivetrain.Geometry.SWERVE_MODULE_LOCATIONS[2],
+                        new Transform2d(Constants.Geometries.Drivetrain.SWERVE_MODULE_LOCATIONS[2],
                                 getSwerveModuleStates()[2].angle)));
         field.getObject("backRight").setPose(
                 getPose().transformBy(
-                        new Transform2d(Constants.Drivetrain.Geometry.SWERVE_MODULE_LOCATIONS[3],
+                        new Transform2d(Constants.Geometries.Drivetrain.SWERVE_MODULE_LOCATIONS[3],
                                 getSwerveModuleStates()[3].angle)));
     }
 
@@ -585,9 +586,9 @@ public class Drivetrain extends SubsystemBase {
 
             // the speeds are initially values from -1.0 to 1.0, so we multiply by the max
             // physical velocity to output in m/s.
-            xSpeed *= Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
-            ySpeed *= Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
-            thetaSpeed *= Constants.Drivetrain.Geometry.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
+            xSpeed *= Constants.Geometries.Drivetrain.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
+            ySpeed *= Constants.Geometries.Drivetrain.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
+            thetaSpeed *= Constants.Geometries.Drivetrain.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND;
 
             drive(
                     xSpeed, ySpeed, thetaSpeed,
@@ -678,10 +679,10 @@ public class Drivetrain extends SubsystemBase {
         return new PPSwerveControllerCommand(
                 path,
                 this::getPose,
-                Constants.Drivetrain.Geometry.KINEMATICS,
-                new PIDController(Constants.Drivetrain.Gains.Trajectories.xkP, 0, 0),
-                new PIDController(Constants.Drivetrain.Gains.Trajectories.ykP, 0, 0),
-                new PIDController(Constants.Drivetrain.Gains.Trajectories.thetakP, 0, 0),
+                Constants.Geometries.Drivetrain.KINEMATICS,
+                new PIDController(Constants.Gains.Trajectories.xkP, 0, 0),
+                new PIDController(Constants.Gains.Trajectories.ykP, 0, 0),
+                new PIDController(Constants.Gains.Trajectories.thetakP, 0, 0),
                 (s) -> this.setModuleStates(s, true, true),
                 this);
     }
@@ -697,15 +698,15 @@ public class Drivetrain extends SubsystemBase {
         return new PPSwerveControllerCommand(
                 path,
                 this::getPose,
-                Constants.Drivetrain.Geometry.KINEMATICS,
-                new PIDController(Constants.Drivetrain.Gains.Trajectories.xkP, 0, 0),
-                new PIDController(Constants.Drivetrain.Gains.Trajectories.ykP, 0, 0),
+                Constants.Geometries.Drivetrain.KINEMATICS,
+                new PIDController(Constants.Gains.Trajectories.xkP, 0, 0),
+                new PIDController(Constants.Gains.Trajectories.ykP, 0, 0),
                 new PIDController(0, 0, 0),
                 (s) -> {
-                    ChassisSpeeds c = Constants.Drivetrain.Geometry.KINEMATICS.toChassisSpeeds(s);
+                    ChassisSpeeds c = Constants.Geometries.Drivetrain.KINEMATICS.toChassisSpeeds(s);
                     c.omegaRadiansPerSecond = Math.PI;
 
-                    this.setModuleStates(Constants.Drivetrain.Geometry.KINEMATICS.toSwerveModuleStates(c), true,
+                    this.setModuleStates(Constants.Geometries.Drivetrain.KINEMATICS.toSwerveModuleStates(c), true,
                             true);
                 },
                 this);

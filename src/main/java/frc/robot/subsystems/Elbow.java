@@ -60,7 +60,7 @@ public class Elbow extends ProfiledPIDSubsystem {
     /**
      * The motor that controls the elbow.
      */
-    private CANSparkMax motor = new CANSparkMax(Constants.Elbow.CANIDs.MOTOR, MotorType.kBrushless);
+    private CANSparkMax motor = new CANSparkMax(Constants.CAN.ELBOW_MOTOR, MotorType.kBrushless);
 
     /**
      * The encoder (connected to the Spark MAX) that detects the angle of the elbow.
@@ -72,15 +72,15 @@ public class Elbow extends ProfiledPIDSubsystem {
      * velocity and acceleration).
      */
     private ArmFeedforward feedforwardController = new ArmFeedforward(
-            Constants.Elbow.Gains.kS,
-            Constants.Elbow.Gains.kG,
-            Constants.Elbow.Gains.kV,
-            Constants.Elbow.Gains.kA);
+            Constants.Gains.Elbow.kS,
+            Constants.Gains.Elbow.kG,
+            Constants.Gains.Elbow.kV,
+            Constants.Gains.Elbow.kA);
 
     /** Hall effect sensor that represents the lowest angle of the elbow. */
-    private DigitalInput bottomHallEffect = new DigitalInput(Constants.Elbow.BOTTOM_HALL_EFFECT_PORT);
+    private DigitalInput bottomHallEffect = new DigitalInput(Constants.DIO.ELBOW_BOTTOM_LIMIT);
     /** Hall effect sensor that represents the highest angle of the elbow. */
-    private DigitalInput topHallEffect = new DigitalInput(Constants.Elbow.TOP_HALL_EFFECT_PORT);
+    private DigitalInput topHallEffect = new DigitalInput(Constants.DIO.ELBOW_TOP_LIMIT);
 
     /** The ligament of the complete mechanism body that this subsystem controls. */
     private MechanismLigament2d ligament;
@@ -125,29 +125,29 @@ public class Elbow extends ProfiledPIDSubsystem {
      */
     public Elbow(MechanismLigament2d ligament) {
         super(new ProfiledPIDController(
-                Constants.Elbow.Gains.kP.get(),
-                Constants.Elbow.Gains.kI.get(),
-                Constants.Elbow.Gains.kD.get(),
+                Constants.Gains.Elbow.kP.get(),
+                Constants.Gains.Elbow.kI.get(),
+                Constants.Gains.Elbow.kD.get(),
                 new TrapezoidProfile.Constraints(
-                        Constants.Elbow.MAX_VELOCITY_METERS_PER_SECOND.get(),
-                        Constants.Elbow.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
+                        Constants.Geometries.Elbow.MAX_VELOCITY_METERS_PER_SECOND.get(),
+                        Constants.Geometries.Elbow.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
 
-        getController().setTolerance(Constants.Elbow.Gains.TOLERANCE.get());
+        getController().setTolerance(Constants.Gains.Elbow.TOLERANCE.get());
 
-        Constants.Elbow.Gains.kP.setConsumer((d) -> getController().setP(d));
-        Constants.Elbow.Gains.kI.setConsumer((d) -> getController().setI(d));
-        Constants.Elbow.Gains.kD.setConsumer((d) -> getController().setD(d));
-        Constants.Elbow.Gains.TOLERANCE.setConsumer((d) -> getController().setTolerance(d));
-        Constants.Elbow.MAX_VELOCITY_METERS_PER_SECOND.setConsumer((d) -> getController()
+        Constants.Gains.Elbow.kP.setConsumer((d) -> getController().setP(d));
+        Constants.Gains.Elbow.kI.setConsumer((d) -> getController().setI(d));
+        Constants.Gains.Elbow.kD.setConsumer((d) -> getController().setD(d));
+        Constants.Gains.Elbow.TOLERANCE.setConsumer((d) -> getController().setTolerance(d));
+        Constants.Geometries.Elbow.MAX_VELOCITY_METERS_PER_SECOND.setConsumer((d) -> getController()
                 .setConstraints(
                         new TrapezoidProfile.Constraints(
                                 d,
-                                Constants.Elbow.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
+                                Constants.Geometries.Elbow.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
 
-        Constants.Elbow.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.setConsumer((d) -> getController()
+        Constants.Geometries.Elbow.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.setConsumer((d) -> getController()
                 .setConstraints(
                         new TrapezoidProfile.Constraints(
-                                Constants.Elbow.MAX_VELOCITY_METERS_PER_SECOND.get(),
+                                Constants.Geometries.Elbow.MAX_VELOCITY_METERS_PER_SECOND.get(),
                                 d)));
 
         this.ligament = ligament;

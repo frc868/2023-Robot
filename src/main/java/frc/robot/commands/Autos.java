@@ -19,9 +19,9 @@ public class Autos {
         return new SwerveAutoBuilder(
                 drivetrain::getPose,
                 (p) -> drivetrain.resetPoseEstimator(p),
-                Constants.Drivetrain.Geometry.KINEMATICS,
-                new PIDConstants(Constants.Drivetrain.Gains.Trajectories.xkP, 0, 0),
-                new PIDConstants(Constants.Drivetrain.Gains.Trajectories.thetakP, 0, 0),
+                Constants.Geometries.Drivetrain.KINEMATICS,
+                new PIDConstants(Constants.Gains.Trajectories.xkP, 0, 0),
+                new PIDConstants(Constants.Gains.Trajectories.thetakP, 0, 0),
                 (s) -> drivetrain.setModuleStates(s, true, true),
                 AutoManager.getInstance().getEventMap(),
                 false,

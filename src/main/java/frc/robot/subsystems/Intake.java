@@ -37,23 +37,23 @@ public class Intake extends SubsystemBase {
     /**
      * The motor that drives the left side of the passover.
      */
-    private CANSparkMax leftPassoverMotor = new CANSparkMax(Constants.Intake.CANIDs.LEFT_MOTOR,
+    private CANSparkMax leftPassoverMotor = new CANSparkMax(Constants.CAN.PASSOVER_LEFT_MOTOR,
             MotorType.kBrushless);
     /**
      * The motor that drives the right side of the passover.
      */
-    private CANSparkMax rightPassoverMotor = new CANSparkMax(Constants.Intake.CANIDs.RIGHT_MOTOR,
+    private CANSparkMax rightPassoverMotor = new CANSparkMax(Constants.CAN.PASSOVER_RIGHT_MOTOR,
             MotorType.kBrushless);
     /**
      * The solenoid that controls the passover extending or retracting.
      */
     private DoubleSolenoid passoverSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-            Constants.Intake.Pneumatics.PASSOVER[0], Constants.Intake.Pneumatics.PASSOVER[1]);
+            Constants.Pneumatics.PASSOVER[0], Constants.Pneumatics.PASSOVER[1]);
     /**
      * The solenoid that controls the intake moving up or down.
      */
     private DoubleSolenoid intakeSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-            Constants.Intake.Pneumatics.INTAKE[0], Constants.Intake.Pneumatics.INTAKE[1]);
+            Constants.Pneumatics.INTAKE[0], Constants.Pneumatics.INTAKE[1]);
     /**
      * The object that controlls both passover motors.
      */
@@ -63,7 +63,7 @@ public class Intake extends SubsystemBase {
     private MechanismLigament2d ligament;
 
     /** The beam break that detects if a game piece is in the robot. */
-    private DigitalInput gamePieceDetector = new DigitalInput(Constants.Intake.GAME_PIECE_SENSOR_PORT);
+    private DigitalInput gamePieceDetector = new DigitalInput(Constants.DIO.GAME_PIECE_SENSOR);
 
     /**
      * The wrapper of the gamePieceDetector for simulation. This allows you to set

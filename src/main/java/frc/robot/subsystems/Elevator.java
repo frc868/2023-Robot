@@ -66,29 +66,29 @@ public class Elevator extends ProfiledPIDSubsystem {
     }
 
     /** The left motor of the elevator. */
-    private CANSparkMax leftMotor = new CANSparkMax(Constants.Elevator.CANIDs.LEFT_MOTOR, MotorType.kBrushless);
+    private CANSparkMax leftMotor = new CANSparkMax(Constants.CAN.ELEVATOR_LEFT_MOTOR, MotorType.kBrushless);
 
     /** The right motor of the elevator. */
-    private CANSparkMax rightMotor = new CANSparkMax(Constants.Elevator.CANIDs.RIGHT_MOTOR, MotorType.kBrushless);
+    private CANSparkMax rightMotor = new CANSparkMax(Constants.CAN.ELEVATOR_RIGHT_MOTOR, MotorType.kBrushless);
 
     /** The object that controlls both elevator motors. */
     private MotorControllerGroup motors = new MotorControllerGroup(leftMotor, rightMotor);
 
     /** Hall effect sensor that represents the minimum extension of the elevator. */
-    private DigitalInput bottomHallEffect = new DigitalInput(Constants.Elevator.BOTTOM_HALL_EFFECT_PORT);
+    private DigitalInput bottomHallEffect = new DigitalInput(Constants.DIO.ELEVATOR_BOTTOM_LIMIT);
 
     /** Hall effect sensor that represents the maximum extension of the elevator. */
-    private DigitalInput topHallEffect = new DigitalInput(Constants.Elevator.TOP_HALL_EFFECT_PORT);
+    private DigitalInput topHallEffect = new DigitalInput(Constants.DIO.ELEVATOR_TOP_LIMIT);
 
     /**
      * The feedforward controller (calculates voltage based on the setpoint's
      * velocity and acceleration).
      */
     private ElevatorFeedforward feedforwardController = new ElevatorFeedforward(
-            Constants.Elevator.Gains.kS,
-            Constants.Elevator.Gains.kG,
-            Constants.Elevator.Gains.kV,
-            Constants.Elevator.Gains.kA);
+            Constants.Gains.Elevator.kS,
+            Constants.Gains.Elevator.kG,
+            Constants.Gains.Elevator.kV,
+            Constants.Gains.Elevator.kA);
 
     /** The ligament of the complete mechanism body that this subsystem controls. */
     private MechanismLigament2d ligament;
@@ -134,30 +134,30 @@ public class Elevator extends ProfiledPIDSubsystem {
      */
     public Elevator(MechanismLigament2d ligament) {
         super(new ProfiledPIDController(
-                Constants.Elevator.Gains.kP.get(),
-                Constants.Elevator.Gains.kI.get(),
-                Constants.Elevator.Gains.kD.get(),
+                Constants.Gains.Elevator.kP.get(),
+                Constants.Gains.Elevator.kI.get(),
+                Constants.Gains.Elevator.kD.get(),
                 // 0, 0, 0,
                 new TrapezoidProfile.Constraints(
-                        Constants.Elevator.MAX_VELOCITY_METERS_PER_SECOND.get(),
-                        Constants.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
+                        Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND.get(),
+                        Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
 
-        getController().setTolerance(Constants.Elevator.Gains.TOLERANCE.get());
+        getController().setTolerance(Constants.Gains.Elevator.TOLERANCE.get());
 
-        Constants.Elevator.Gains.kP.setConsumer((d) -> getController().setP(d));
-        Constants.Elevator.Gains.kI.setConsumer((d) -> getController().setI(d));
-        Constants.Elevator.Gains.kD.setConsumer((d) -> getController().setD(d));
-        Constants.Elevator.Gains.TOLERANCE.setConsumer((d) -> getController().setTolerance(d));
-        Constants.Elevator.MAX_VELOCITY_METERS_PER_SECOND.setConsumer((d) -> getController()
+        Constants.Gains.Elevator.kP.setConsumer((d) -> getController().setP(d));
+        Constants.Gains.Elevator.kI.setConsumer((d) -> getController().setI(d));
+        Constants.Gains.Elevator.kD.setConsumer((d) -> getController().setD(d));
+        Constants.Gains.Elevator.TOLERANCE.setConsumer((d) -> getController().setTolerance(d));
+        Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND.setConsumer((d) -> getController()
                 .setConstraints(
                         new TrapezoidProfile.Constraints(
                                 d,
-                                Constants.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
+                                Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
 
-        Constants.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.setConsumer((d) -> getController()
+        Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.setConsumer((d) -> getController()
                 .setConstraints(
                         new TrapezoidProfile.Constraints(
-                                Constants.Elevator.MAX_VELOCITY_METERS_PER_SECOND.get(),
+                                Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND.get(),
                                 d)));
 
         this.ligament = ligament;
@@ -165,14 +165,14 @@ public class Elevator extends ProfiledPIDSubsystem {
         SparkMaxConfigurator.configure(leftMotor)
                 .withIdleMode(IdleMode.kBrake)
                 .withCurrentLimit(40)
-                .withPositionConversionFactor(Constants.Elevator.ENCODER_DISTANCE_TO_METERS, true)
+                .withPositionConversionFactor(Constants.Geometries.Elevator.ENCODER_DISTANCE_TO_METERS, true)
                 .burnFlash();
 
         SparkMaxConfigurator.configure(rightMotor)
                 .withIdleMode(IdleMode.kBrake)
                 .withCurrentLimit(40)
                 .withInverted(true)
-                .withPositionConversionFactor(Constants.Elevator.ENCODER_DISTANCE_TO_METERS, true)
+                .withPositionConversionFactor(Constants.Geometries.Elevator.ENCODER_DISTANCE_TO_METERS, true)
                 .burnFlash();
 
         LoggingManager.getInstance().addGroup("Elevator", new LogGroup(
@@ -271,7 +271,7 @@ public class Elevator extends ProfiledPIDSubsystem {
     public boolean isAtPosition(ElevatorPosition position) {
         return isEnabled()
                 ? this.getGoal() == position.value && isAtGoal()
-                : (this.getMeasurement() - position.value) < Constants.Elevator.Gains.TOLERANCE.get();
+                : (this.getMeasurement() - position.value) < Constants.Gains.Elevator.TOLERANCE.get();
     }
 
     /**
