@@ -1,0 +1,552 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Profile xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="2" xmlns="http://www.fsgs.com/SPAD">
+  <Devices>
+    <Device VendorID="0x06A3" ProductID="0x0D67" DevicePath="\\?\hid#vid_06a3&amp;pid_0d67#8&amp;b7ad7e3&amp;0&amp;0000#{4d1e55b2-f16f-11cf-88cb-001111000030}" Serial="" DeviceIndex="1" Version="3">
+      <DevicePage ID="72c73483-060e-4a22-94be-a6d0c6e32179" IsDefaultPage="true" Name="Default">
+        <Events>
+          <Event BoundTo="SWITCH_MASTER_BAT">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="1" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="1" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_AVIONICS_MASTER">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="3" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="3" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_FUEL_PUMP">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="4" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="4" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_DEICE">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="5" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="5" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_PITOT_HEAT">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="6" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="6" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_PANEL_LIGHTS">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="7" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="7" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_BEACON_LIGHTS">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="8" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="8" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_NAV_LIGHTS">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="9" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="9" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_STROBE_LIGHTS">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="10" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="10" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_MASTER_ALT">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="2" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="2" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_TAXI_LIGHTS">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="11" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="11" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_LANDING_LIGHTS">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="12" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="12" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_COWL">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="13" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="13" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_GEAR">
+            <EventDefinitions>
+              <EventDefinition Trigger="GEAR_UP">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="14" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="GEAR_DOWN">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="14" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_ENGINE">
+            <EventDefinitions>
+              <EventDefinition Trigger="SEL_OFF_VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="15" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_R_VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="16" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_L_VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="17" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_ALL_VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="18" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_START_VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="19" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_OFF_VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="15" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_R_VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="16" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_L_VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="17" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_ALL_VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="18" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_START_VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="1" JoystickTarget="19" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+        </Events>
+        <Extensions />
+      </DevicePage>
+      <Events />
+      <Extensions />
+    </Device>
+    <Device VendorID="0x06A3" ProductID="0x0D67" DevicePath="\\?\hid#vid_06a3&amp;pid_0d67#8&amp;e6e505e&amp;0&amp;0000#{4d1e55b2-f16f-11cf-88cb-001111000030}" Serial="" DeviceIndex="0" Version="3">
+      <DevicePage ID="72c73483-060e-4a22-94be-a6d0c6e32179" IsDefaultPage="true" Name="Default">
+        <Events>
+          <Event BoundTo="SWITCH_MASTER_BAT">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="1" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="1" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_AVIONICS_MASTER">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="3" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="3" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_FUEL_PUMP">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="4" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="4" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_DEICE">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="5" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="5" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_PITOT_HEAT">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="6" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="6" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_PANEL_LIGHTS">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="7" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="7" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_BEACON_LIGHTS">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="8" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="8" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_NAV_LIGHTS">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="9" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="9" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_STROBE_LIGHTS">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="10" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="10" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_MASTER_ALT">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="2" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="2" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_TAXI_LIGHTS">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="11" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="11" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_LANDING_LIGHTS">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="12" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="12" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_COWL">
+            <EventDefinitions>
+              <EventDefinition Trigger="VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="13" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="13" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_GEAR">
+            <EventDefinitions>
+              <EventDefinition Trigger="GEAR_UP">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="14" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="GEAR_DOWN">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="14" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+          <Event BoundTo="SWITCH_ENGINE">
+            <EventDefinitions>
+              <EventDefinition Trigger="SEL_OFF_VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="15" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_R_VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="16" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_L_VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="17" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_ALL_VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="18" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_START_VALUEON">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="19" JoystickMode="PRESS" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_OFF_VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="15" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_R_VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="16" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_L_VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="17" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_ALL_VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="18" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+              <EventDefinition Trigger="SEL_START_VALUEOFF">
+                <EventActions>
+                  <EventActionVirtualJoyStick Value="0" JoystickAction="VJOY_BUTTON" JoystickNumber="2" JoystickTarget="19" JoystickMode="RELEASE" />
+                </EventActions>
+              </EventDefinition>
+            </EventDefinitions>
+          </Event>
+        </Events>
+        <Extensions />
+      </DevicePage>
+      <Events />
+      <Extensions />
+    </Device>
+  </Devices>
+  <Options>
+    <Option Key="Elgato.Streamdeck.Brightness" Value="100" />
+    <Option Key="Elgato.Streamdeck.DarkenDevice" Value="True" />
+    <Option Key="Elgato.Streamdeck.HeldThreshold" Value="500" />
+    <Option Key="Elgato.Streamdeck.HeldFrequency" Value="1" />
+    <Option Key="Saitek.BIP.EnableVirtualPower" Value="True" />
+    <Option Key="Saitek.BIP.Brightness" Value="50" />
+    <Option Key="Saitek.BIP.Priority.VALUEOFF" Value="0" />
+    <Option Key="Saitek.BIP.Priority.VALUEGREEN" Value="1" />
+    <Option Key="Saitek.BIP.Priority.VALUEYELLOW" Value="2" />
+    <Option Key="Saitek.BIP.Priority.VALUERED" Value="4" />
+    <Option Key="Saitek.BIP.Priority.VALUEREDBLINK" Value="3" />
+    <Option Key="Saitek.FIP.BindLightToMode" Value="False" />
+    <Option Key="Saitek.FIP.EnableVirtualPower" Value="True" />
+    <Option Key="Saitek.FIP.DefaultPagingButtons" Value="True" />
+    <Option Key="Saitek.FIP.PagingButtonsOn" Value="True" />
+    <Option Key="Saitek.RadioPanel.EnableVirtualPower" Value="True" />
+    <Option Key="Saitek.SwitchPanel.RaiseOnFirst" Value="False" />
+    <Option Key="Saitek.SwitchPanel.SwapRL" Value="True" />
+    <Option Key="Saitek.SwitchPanel.EnableVirtualPower" Value="True" />
+    <Option Key="Saitek.TrimWheel.ReverseTrim" Value="True" />
+    <Option Key="Ultimarc.PacDrive.EnableVirtualPower" Value="True" />
+    <Option Key="Ultimarc.PacLed64.EnableVirtualPower" Value="True" />
+    <Option Key="Ultimarc.PacLed64.Brightness" Value="128" />
+  </Options>
+  <ProfileInformation ProfileID="01e32836-991d-4133-ad2b-d7768e3fe6b2" Version="0.3">
+    <Description />
+    <LastChanged>2023-02-18T12:42:03.9419496-08:00</LastChanged>
+  </ProfileInformation>
+</Profile>
