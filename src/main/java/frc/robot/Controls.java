@@ -47,6 +47,8 @@ public class Controls {
                 .onTrue(RobotStates.intakeGamePiece(() -> joystick.getHID().getRawButton(6), intake, manipulator,
                         elevator, elbow,
                         leds));
+        joystick.button(8)
+                .whileTrue(drivetrain.chargeStationBalanceCommand());
         // joystick.button(5).whileTrue(Commands.runOnce(
         // () -> AutoManager.getInstance().getField().getObject("Traj")
         // .setTrajectory(PathPlanner.generatePath(
@@ -100,7 +102,7 @@ public class Controls {
 
         INITIALIZE(1, 8),
         STOW_HP(1, 9),
-        ELEVATOR_DISABLE(1, 10),
+        HP_PICKUP(1, 10),
         ELEVATOR_STEP_UP(1, 11);
 
         public final int hid;
@@ -186,10 +188,12 @@ public class Controls {
                 .whileTrue(RobotStates.stowElevator(intake, manipulator, elevator, elbow, leds).finallyDo(safeStop));
 
         hids[OperatorControls.STOW_HP.hid].button(OperatorControls.STOW_HP.button)
-                .whileTrue(RobotStates.stowElevator(intake, manipulator, elevator, elbow, leds, false)
+                .whileTrue(RobotStates.stowElevatorHPStation(intake, manipulator, elevator, elbow, leds)
                         .andThen(Commands.runOnce(() -> hids[OperatorControls.STOW_HP.hid].getHID()
                                 .setOutput(OperatorControls.STOW_HP.button, true)))
-                        .finallyDo(safeStop));
+                        .finallyDo(safeStop))
+                .onFalse(Commands.runOnce(() -> hids[OperatorControls.STOW_HP.hid].getHID()
+                        .setOutput(OperatorControls.STOW_HP.button, false)));
 
         hids[OperatorControls.INITIALIZE.hid].button(OperatorControls.INITIALIZE.button)
                 .onTrue(RobotStates.initializeMechanisms(intake, manipulator, elevator, elbow, leds));
@@ -199,8 +203,8 @@ public class Controls {
         hids[OperatorControls.ELEVATOR_STEP_DOWN.hid].button(OperatorControls.ELEVATOR_STEP_DOWN.button)
                 .onTrue(elevator.setDesiredPositionDeltaCommand(-0.1, intake, elbow, leds));
 
-        hids[OperatorControls.ELEVATOR_DISABLE.hid].button(OperatorControls.ELEVATOR_DISABLE.button)
-                .onTrue(Commands.runOnce(elevator::disable));
+        hids[OperatorControls.HP_PICKUP.hid].button(OperatorControls.HP_PICKUP.button)
+                .onTrue(RobotStates.humanPlayerPickup(gridInterface, intake, manipulator, elevator, elbow, leds));
         hids[OperatorControls.ELBOW_DISABLE.hid].button(OperatorControls.ELBOW_DISABLE.button)
                 .onTrue(Commands.runOnce(elbow::disable));
 
