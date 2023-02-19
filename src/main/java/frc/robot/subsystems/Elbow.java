@@ -353,7 +353,7 @@ public class Elbow extends ProfiledPIDSubsystem {
                 Commands.sequence(
                         runOnce(() -> setGoal(position.value)),
                         runOnce(this::enable),
-                        Commands.waitUntil(this::isAtGoal)),
+                        Commands.waitUntil(this::isAtGoal).withTimeout(1.5)),
                 RobotStates.singularErrorCommand(() -> getIfSafeToMove(position, elevator).getSecond()),
                 () -> getIfSafeToMove(position, elevator).getFirst());
     }
