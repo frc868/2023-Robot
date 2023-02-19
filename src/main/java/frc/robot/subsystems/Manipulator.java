@@ -62,7 +62,8 @@ public class Manipulator extends SubsystemBase {
 
         if (RobotBase.isSimulation()) {
             poleSwitchSim = new DIOSim(poleSwitch);
-            poleSwitchSim.setValue(false);
+            poleSwitchSim.setValue(true);
+
         }
     }
 
@@ -132,7 +133,7 @@ public class Manipulator extends SubsystemBase {
      * @return true if IR beam broken by pole
      */
     public boolean isPoleDetected() {
-        return poleSwitch.get();
+        return !poleSwitch.get();
     }
 
     /**
