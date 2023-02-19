@@ -1,0 +1,50 @@
+{
+    "camera": "Arducam Forward (0c45:6366)",
+    "platform": "Macintosh; Intel Mac OS X 10_15_7",
+    "avg_reprojection_error": 0.04528126302700655,
+    "camera_matrix": {
+        "type_id": "opencv-matrix",
+        "rows": 3,
+        "cols": 3,
+        "dt": "d",
+        "data": [
+            591.683102070884,
+            0,
+            296.1977850775416,
+            0,
+            591.6021408837476,
+            267.7752105601824,
+            0,
+            0,
+            1
+        ]
+    },
+    "distortion_coefficients": {
+        "type_id": "opencv-matrix",
+        "rows": 5,
+        "cols": 1,
+        "dt": "d",
+        "data": [
+            -0.012705975099284632,
+            0.011997600639892785,
+            0.00011479173145266209,
+            0.0014840728487856593,
+            -0.025185887492349218
+        ]
+    },
+    "distortion_model": "rectilinear",
+    "img_size": {
+        "type_id": "opencv-matrix",
+        "rows": 2,
+        "cols": 1,
+        "dt": "d",
+        "data": [
+            640,
+            480
+        ]
+    },
+    "calibration_time": "Fri, 17 Feb 2023 05:26:01 GMT",
+    "caveats": [
+        "cropped"
+    ]
+}
