@@ -254,7 +254,7 @@ public class SwerveModule {
             this.driveMotorVel = driveEncoder.getVelocity();
             this.driveMotorVelCF = driveEncoder.getVelocityConversionFactor();
 
-            double turnOutput = turnPIDController.calculate(getWheelAngle(),
+            double turnOutput = turnPIDControllerSimple.calculate(getWheelAngle(),
                     state.angle.getRadians());
 
             driveMotor.setVoltage(drivePIDControllerOutput + driveFFControllerOutput);
