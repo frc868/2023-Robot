@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
 
 /**
  * The container for robot-wide numerical or boolean constants. This should not
@@ -27,17 +28,17 @@ public final class Constants {
 
     public static final double ROBOT_SIDE_LENGTH = Units.inchesToMeters(34.75);
 
-    public static final boolean IS_USING_CAMERAS = false;
-    public static boolean IS_MECHANISM_LIMITS_ENABLED = false;
-    public static final boolean IS_SAFETIES_ENABLED = false;
+    public static final boolean IS_USING_CAMERAS = true;
+    public static boolean IS_NT_COMMANDS_ENABLED = RobotBase.isSimulation();
+    public static boolean IS_VIRTUAL_BUTTON_PANEL_ENABLED = RobotBase.isSimulation();
 
     public static final class CAN {
         public static final int FRONT_LEFT_DRIVE_MOTOR = 1;
         public static final int FRONT_LEFT_TURN_MOTOR = 2;
-        public static final int FRONT_RIGHT_DRIVE_MOTOR = 3;
-        public static final int FRONT_RIGHT_TURN_MOTOR = 4;
-        public static final int BACK_LEFT_DRIVE_MOTOR = 5;
-        public static final int BACK_LEFT_TURN_MOTOR = 6;
+        public static final int FRONT_RIGHT_DRIVE_MOTOR = 4;
+        public static final int FRONT_RIGHT_TURN_MOTOR = 3;
+        public static final int BACK_LEFT_DRIVE_MOTOR = 6;
+        public static final int BACK_LEFT_TURN_MOTOR = 5;
         public static final int BACK_RIGHT_DRIVE_MOTOR = 7;
         public static final int BACK_RIGHT_TURN_MOTOR = 8;
 
@@ -54,10 +55,10 @@ public final class Constants {
     }
 
     public static final class Pneumatics {
-        public static final int[] PINCERS = { 2, 3 };
-        public static final int[] WRIST = { 5, 4 };
+        public static final int[] PINCERS = { 3, 2 };
+        public static final int[] WRIST = { 4, 5 };
         public static final int[] INTAKE = { 1, 0 };
-        public static final int[] PASSOVER = { 6, 7 };
+        public static final int[] PASSOVER = { 9, 8 };
     }
 
     public static final class DIO {
@@ -98,25 +99,25 @@ public final class Constants {
         }
 
         public static final class Elevator {
-            public static final TunableNumber kP = new TunableNumber("Elevator", "kP", 175.66); // untested
-            public static final TunableNumber kI = new TunableNumber("Elevator", "kI", 0); // untested
-            public static final TunableNumber kD = new TunableNumber("Elevator", "kD", 6.9053); // untested
-            public static final TunableNumber TOLERANCE = new TunableNumber("Elevator", "Tolerance", 0.05); // untested
-            public static final double kS = 0.1353; // untested
-            public static final double kG = 0.12507; // untested
-            public static final double kV = 8.6409; // untested
-            public static final double kA = 0.22396; // untested
+            public static final TunableNumber kP = new TunableNumber("Elevator", "kP", 195.06);
+            public static final TunableNumber kI = new TunableNumber("Elevator", "kI", 0);
+            public static final TunableNumber kD = new TunableNumber("Elevator", "kD", 9.0933);
+            public static final TunableNumber TOLERANCE = new TunableNumber("Elevator", "Tolerance", 0.05);
+            public static final double kS = 0.12;
+            public static final double kG = 0.113;
+            public static final double kV = 8.6264;
+            public static final double kA = 0.299153;
         }
 
         public static final class Elbow {
-            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 7.3101);
+            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 6.2);
             public static final TunableNumber kI = new TunableNumber("Elbow", "kI", 0);
-            public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0.90992);
-            public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 0.03);
-            public static final double kS = 0.41159;
+            public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0.89);
+            public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 0.07);
+            public static final double kS = 0.31;
             public static final double kG = 0.54038;
-            public static final double kV = 0.47366;
-            public static final double kA = 0.055865;
+            public static final double kV = 0.85;
+            public static final double kA = 0.041;
         }
 
     }
@@ -206,20 +207,29 @@ public final class Constants {
     }
 
     public static final class Vision {
-        public static final String[] CAMERA_NAMES = new String[] { "OV9281-01", "OV9281-02", "OV9281-03", "OV9281-04" };
+        public static final String[] CAMERA_NAMES = new String[] {
+                "OV9281-03",
+                "OV9281-04",
+                "OV9281-01",
+                // "OV9281-02"
+        };
         public static final Transform3d[] ROBOT_TO_CAMS = new Transform3d[] {
                 new Transform3d(
-                        new Translation3d(0.24, 0.0, 0.0), // untested
-                        new Rotation3d(0, 0, 0)), // untested
+                        new Translation3d(Units.inchesToMeters(10.125), -Units.inchesToMeters(7.75),
+                                Units.inchesToMeters(21.75)),
+                        new Rotation3d(0, 0, 0)),
                 new Transform3d(
-                        new Translation3d(0.24, 0.0, 0.0), // untested
-                        new Rotation3d(0, 0, 0)), // untested
+                        new Translation3d(-Units.inchesToMeters(11), -Units.inchesToMeters(5.5),
+                                Units.inchesToMeters(26.8)),
+                        new Rotation3d(0, 0, -Math.PI / 2.0)),
                 new Transform3d(
-                        new Translation3d(0.24, 0.0, 0.0), // untested
-                        new Rotation3d(0, 0, 0)), // untested
-                new Transform3d(
-                        new Translation3d(0.24, 0.0, 0.0), // untested
-                        new Rotation3d(0, 0, 0)), // untested
+                        new Translation3d(-Units.inchesToMeters(12.625), -Units.inchesToMeters(6.25),
+                                Units.inchesToMeters(26.3)),
+                        new Rotation3d(0, 0, Math.PI)),
+                // new Transform3d(
+                // new Translation3d(-Units.inchesToMeters(11), -Units.inchesToMeters(8),
+                // Units.inchesToMeters(26.8)),
+                // new Rotation3d(0, 0, Math.PI / 2.0)),
         };
     }
 }
