@@ -229,6 +229,7 @@ public class RobotStates {
             LEDs leds) {
         return Commands.either(
                 Commands.sequence(
+                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow, leds),
                         elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
                         intake.setIntakeDownCommand(elevator, leds),
                         manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow()),
@@ -241,10 +242,9 @@ public class RobotStates {
                         manipulator.setPincersPincingCommand(() -> intakeMode.orElseThrow()),
                         intake.setPassoversRetractedCommand(elevator, leds),
                         intake.setIntakeUpCommand(elevator, leds),
-                        Commands.waitSeconds(0.25),
+                        RobotStates.setCurrentStateCommand(RobotState.SCORING),
                         elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator),
-                        RobotStates.clearIntakeModeCommand(),
-                        RobotStates.setCurrentStateCommand(RobotState.SCORING)),
+                        RobotStates.clearIntakeModeCommand()),
                 singularErrorCommand(() -> "Intake mode not present"),
                 () -> intakeMode.isPresent()).withName("Intake Game Piece");
     }
@@ -345,6 +345,25 @@ public class RobotStates {
                         Commands.waitSeconds(0.5)),
                 singularErrorCommand(() -> "Grid interface location not present"),
                 () -> gridInterface.getSetLocation().isPresent()).withName("Score Game Piece");
+    }
+
+    public static CommandBase humanPlayerPickup(
+            GridInterface gridInterface,
+            Intake intake,
+            Manipulator manipulator,
+            Elevator elevator,
+            Elbow elbow,
+            LEDs leds) {
+        return Commands.sequence(
+                Commands.parallel(
+                        elevator.setDesiredPositionCommand(ElevatorPosition.CUBE_MID, intake, elbow, leds),
+                        Commands.sequence(
+                                elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
+                                Commands.waitSeconds(1.5),
+                                elbow.setDesiredPositionCommand(ElbowPosition.HIGH,
+                                        elevator))),
+                manipulator.setPincersOpenCommand(),
+                Commands.waitSeconds(0.5)).withName("Score Game Piece");
     }
 
     /**
