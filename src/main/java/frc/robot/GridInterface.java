@@ -36,8 +36,12 @@ public class GridInterface {
     }
 
     public boolean setGrid(GamePieceLocation.Grid grid) {
-        if (this.setGrid.isPresent()) {
+        if (this.setLocation.isPresent()) {
             return false;
+        }
+
+        if (this.setGrid.isPresent()) {
+            this.reset();
         }
 
         this.setGrid = Optional.of(grid);
@@ -79,48 +83,48 @@ public class GridInterface {
                 case LEFT:
                     switch (level) {
                         case LOW:
-                            hids.orElseThrow()[OperatorControls.GRIDPOS_LEFT_LOW.hid]
-                                    .setOutput(OperatorControls.GRIDPOS_LEFT_LOW.button, true);
+                            hids.orElseThrow()[OperatorControls.GRIDPOS_C1.hid]
+                                    .setOutput(OperatorControls.GRIDPOS_C1.button, true);
                             break;
                         case MIDDLE:
-                            hids.orElseThrow()[OperatorControls.GRIDPOS_LEFT_MIDDLE.hid]
-                                    .setOutput(OperatorControls.GRIDPOS_LEFT_MIDDLE.button, true);
+                            hids.orElseThrow()[OperatorControls.GRIDPOS_B1.hid]
+                                    .setOutput(OperatorControls.GRIDPOS_B1.button, true);
                             break;
                         case HIGH:
-                            hids.orElseThrow()[OperatorControls.GRIDPOS_LEFT_HIGH.hid]
-                                    .setOutput(OperatorControls.GRIDPOS_LEFT_HIGH.button, true);
+                            hids.orElseThrow()[OperatorControls.GRIDPOS_A1.hid]
+                                    .setOutput(OperatorControls.GRIDPOS_A1.button, true);
                             break;
                     }
                     break;
                 case MIDDLE:
                     switch (level) {
                         case LOW:
-                            hids.orElseThrow()[OperatorControls.GRIDPOS_MIDDLE_LOW.hid]
-                                    .setOutput(OperatorControls.GRIDPOS_MIDDLE_LOW.button, true);
+                            hids.orElseThrow()[OperatorControls.GRIDPOS_C2.hid]
+                                    .setOutput(OperatorControls.GRIDPOS_C2.button, true);
                             break;
                         case MIDDLE:
-                            hids.orElseThrow()[OperatorControls.GRIDPOS_MIDDLE_MIDDLE.hid]
-                                    .setOutput(OperatorControls.GRIDPOS_MIDDLE_MIDDLE.button, true);
+                            hids.orElseThrow()[OperatorControls.GRIDPOS_B2.hid]
+                                    .setOutput(OperatorControls.GRIDPOS_B2.button, true);
                             break;
                         case HIGH:
-                            hids.orElseThrow()[OperatorControls.GRIDPOS_MIDDLE_HIGH.hid]
-                                    .setOutput(OperatorControls.GRIDPOS_MIDDLE_HIGH.button, true);
+                            hids.orElseThrow()[OperatorControls.GRIDPOS_A2.hid]
+                                    .setOutput(OperatorControls.GRIDPOS_A2.button, true);
                             break;
                     }
                     break;
                 case RIGHT:
                     switch (level) {
                         case LOW:
-                            hids.orElseThrow()[OperatorControls.GRIDPOS_RIGHT_LOW.hid]
-                                    .setOutput(OperatorControls.GRIDPOS_RIGHT_LOW.button, true);
+                            hids.orElseThrow()[OperatorControls.GRIDPOS_C3.hid]
+                                    .setOutput(OperatorControls.GRIDPOS_C3.button, true);
                             break;
                         case MIDDLE:
-                            hids.orElseThrow()[OperatorControls.GRIDPOS_RIGHT_MIDDLE.hid]
-                                    .setOutput(OperatorControls.GRIDPOS_RIGHT_MIDDLE.button, true);
+                            hids.orElseThrow()[OperatorControls.GRIDPOS_B3.hid]
+                                    .setOutput(OperatorControls.GRIDPOS_B3.button, true);
                             break;
                         case HIGH:
-                            hids.orElseThrow()[OperatorControls.GRIDPOS_RIGHT_HIGH.hid]
-                                    .setOutput(OperatorControls.GRIDPOS_RIGHT_HIGH.button, true);
+                            hids.orElseThrow()[OperatorControls.GRIDPOS_A3.hid]
+                                    .setOutput(OperatorControls.GRIDPOS_A3.button, true);
                             break;
                     }
                     break;
@@ -132,7 +136,7 @@ public class GridInterface {
     public CommandBase setGridCommand(GamePieceLocation.Grid grid) {
         return runOnce(() -> {
             setGrid(grid);
-        });
+        }).ignoringDisable(true);
     }
 
     public CommandBase setLocationCommand(
@@ -141,7 +145,7 @@ public class GridInterface {
             GamePieceLocation.Level level) {
         return runOnce(() -> {
             setLocation(gamePiece, gridPosition, level);
-        });
+        }).ignoringDisable(true);
     }
 
     /**
