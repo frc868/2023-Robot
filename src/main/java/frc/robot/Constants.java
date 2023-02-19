@@ -99,9 +99,9 @@ public final class Constants {
         }
 
         public static final class Elevator {
-            public static final TunableNumber kP = new TunableNumber("Elevator", "kP", 195.06);
+            public static final TunableNumber kP = new TunableNumber("Elevator", "kP", 80.06);
             public static final TunableNumber kI = new TunableNumber("Elevator", "kI", 0);
-            public static final TunableNumber kD = new TunableNumber("Elevator", "kD", 9.0933);
+            public static final TunableNumber kD = new TunableNumber("Elevator", "kD", 5.0933);
             public static final TunableNumber TOLERANCE = new TunableNumber("Elevator", "Tolerance", 0.05);
             public static final double kS = 0.12;
             public static final double kG = 0.113;
@@ -110,7 +110,7 @@ public final class Constants {
         }
 
         public static final class Elbow {
-            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 6.2);
+            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 3.5);
             public static final TunableNumber kI = new TunableNumber("Elbow", "kI", 0);
             public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0.89);
             public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 0.07);
@@ -165,9 +165,9 @@ public final class Constants {
 
         public static final class Elevator {
             public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new TunableNumber("Elevator",
-                    "Max Velocity", 0.5); // untested
+                    "Max Velocity", 1.2); // untested
             public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elevator",
-                    "Max Acceleration", 1.0); // untested
+                    "Max Acceleration", 2); // untested
 
             public static final double GEARING = 1.0 / 12.0; // untested
             public static final double DRUM_RADIUS_METERS = Units.inchesToMeters(1.2); // untested // 0.0305
@@ -179,9 +179,9 @@ public final class Constants {
         public static final class Elbow {
             public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new TunableNumber("Elbow",
                     "Max Velocity",
-                    2 * Math.PI); // untested
+                    1.5 * Math.PI); // untested
             public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elbow",
-                    "Max Acceleration", 2 * Math.PI); // untested
+                    "Max Acceleration", 1.5 * Math.PI); // untested
         }
     }
 
