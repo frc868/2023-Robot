@@ -53,8 +53,8 @@ public class Elevator extends ProfiledPIDSubsystem {
     public static enum ElevatorPosition {
         BOTTOM(0),
         CONE_LOW(Units.inchesToMeters(10)),
-        CONE_MID(1.18482),
-        CONE_HIGH(1.65220),
+        CONE_MID(1.18482 - 0.03),
+        CONE_HIGH(1.65220 + 0.17),
         CUBE_LOW(Units.inchesToMeters(10)),
         CUBE_MID(1.18482), // untested
         CUBE_HIGH(1.65220), // untested
@@ -378,7 +378,7 @@ public class Elevator extends ProfiledPIDSubsystem {
                 Commands.sequence(
                         runOnce(() -> setGoal(position.value)),
                         runOnce(this::enable),
-                        Commands.waitUntil(this::isAtGoal).withTimeout(5)),
+                        Commands.waitUntil(this::isAtGoal).withTimeout(2)),
                 RobotStates.singularErrorCommand(() -> getIfSafeToMove(intake, elbow).getSecond()),
                 () -> getIfSafeToMove(intake, elbow).getFirst());
     }
