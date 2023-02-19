@@ -123,7 +123,7 @@ public class FieldConstants {
 
             public static final Pose2d SINGLE_SUBSTATION = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(78.145),
+                            14.56,
                             WIDTH_METERS - Constants.ROBOT_SIDE_LENGTH),
                     Rotation2d.fromDegrees(90));
 
@@ -175,33 +175,29 @@ public class FieldConstants {
 
     public static class AutoDrive {
         public static final Rectangle2d BOTTOM_LEFT_ZONE = new Rectangle2d(
-                new Pose2d(0, 0, new Rotation2d()), new Pose2d(0, 0, new Rotation2d())); //
-        public static final Rectangle2d BOTTOM_LEFT_CENTER_ZONE = new Rectangle2d(
                 new Pose2d(4.90, 1.52, new Rotation2d()), new Pose2d(2.90, 0, new Rotation2d()));
         public static final Rectangle2d BOTTOM_CENTER_ZONE = new Rectangle2d(
-                new Pose2d(11.65, 2.76, new Rotation2d()), new Pose2d(4.90, 0, new Rotation2d()));
-        public static final Rectangle2d BOTTOM_RIGHT_CENTER_ZONE = new Rectangle2d(
-                new Pose2d(13.64, 1.52, new Rotation2d()), new Pose2d(11.65, 0, new Rotation2d()));
+                new Pose2d(11.65, 2.77, new Rotation2d()), new Pose2d(4.90, 0, new Rotation2d()));
         public static final Rectangle2d BOTTOM_RIGHT_ZONE = new Rectangle2d(
-                new Pose2d(0, 0, new Rotation2d()), new Pose2d(0, 0, new Rotation2d())); //
+                new Pose2d(13.64, 1.52, new Rotation2d()), new Pose2d(11.65, 0, new Rotation2d()));
 
-        public static final Rectangle2d COMMUNITY_TOP_LEFT_ZONE = new Rectangle2d(
-                new Pose2d(2.90, 5.50, new Rotation2d()), new Pose2d(1.40, 2.90, new Rotation2d()));
-        public static final Rectangle2d COMMUNITY_TOP_LEFT_RIGHT_ZONE = new Rectangle2d(
+        public static final Rectangle2d COMMUNITY_BLUE_TOP_ZONE = new Rectangle2d(
+                new Pose2d(2.90, 5.50, new Rotation2d()), new Pose2d(1.40, 2.77, new Rotation2d()));
+        public static final Rectangle2d COMMUNITY_BLUE_TOP_SLIVER_ZONE = new Rectangle2d(
                 new Pose2d(3.34, 5.50, new Rotation2d()), new Pose2d(2.90, 4.01, new Rotation2d())); //
-        public static final Rectangle2d COMMUNITY_BOTTOM_LEFT_ZONE = new Rectangle2d(
-                new Pose2d(2.90, 2.90, new Rotation2d()), new Pose2d(1.40, 0, new Rotation2d()));
+        public static final Rectangle2d COMMUNITY_BLUE_BOTTOM_ZONE = new Rectangle2d(
+                new Pose2d(2.90, 2.77, new Rotation2d()), new Pose2d(1.40, 0, new Rotation2d()));
 
-        public static final Rectangle2d COMMUNITY_TOP_RIGHT_ZONE = new Rectangle2d(
-                new Pose2d(15.14, 5.50, new Rotation2d()), new Pose2d(13.64, 2.90, new Rotation2d())); //
-        public static final Rectangle2d COMMUNITY_TOP_RIGHT_LEFT_ZONE = new Rectangle2d(
+        public static final Rectangle2d COMMUNITY_RED_TOP_ZONE = new Rectangle2d(
+                new Pose2d(15.14, 5.50, new Rotation2d()), new Pose2d(13.64, 2.77, new Rotation2d())); //
+        public static final Rectangle2d COMMUNITY_RED_TOP_SLIVER_ZONE = new Rectangle2d(
                 new Pose2d(13.64, 5.50, new Rotation2d()), new Pose2d(13.20, 4.01, new Rotation2d())); //
-        public static final Rectangle2d COMMUNITY_BOTTOM_RIGHT_ZONE = new Rectangle2d(
-                new Pose2d(15.14, 2.90, new Rotation2d()), new Pose2d(13.64, 0, new Rotation2d())); //
+        public static final Rectangle2d COMMUNITY_RED_BOTTOM_ZONE = new Rectangle2d(
+                new Pose2d(15.14, 2.77, new Rotation2d()), new Pose2d(13.64, 0, new Rotation2d())); //
 
-        public static final Rectangle2d CHARGE_STATION_LEFT_ZONE = new Rectangle2d(
+        public static final Rectangle2d CHARGE_STATION_BLUE_ZONE = new Rectangle2d(
                 new Pose2d(4.90, 4.01, new Rotation2d()), new Pose2d(2.90, 1.52, new Rotation2d()));
-        public static final Rectangle2d CHARGE_STATION_RIGHT_ZONE = new Rectangle2d(
+        public static final Rectangle2d CHARGE_STATION_RED_ZONE = new Rectangle2d(
                 new Pose2d(13.64, 4.01, new Rotation2d()), new Pose2d(11.64, 1.52, new Rotation2d()));
 
         public static final Rectangle2d TOP_LEFT_ZONE = new Rectangle2d(
@@ -209,7 +205,7 @@ public class FieldConstants {
         public static final Rectangle2d TOP_LEFT_CENTER_ZONE = new Rectangle2d(
                 new Pose2d(4.90, 8.01, new Rotation2d()), new Pose2d(3.34, 4.01, new Rotation2d()));
         public static final Rectangle2d TOP_CENTER_ZONE = new Rectangle2d(
-                new Pose2d(11.65, 8.01, new Rotation2d()), new Pose2d(4.90, 2.76, new Rotation2d()));
+                new Pose2d(11.65, 8.01, new Rotation2d()), new Pose2d(4.90, 2.77, new Rotation2d()));
         public static final Rectangle2d TOP_RIGHT_CENTER_ZONE = new Rectangle2d(
                 new Pose2d(13.20, 8.01, new Rotation2d()), new Pose2d(11.65, 4.01, new Rotation2d()));
         public static final Rectangle2d TOP_RIGHT_ZONE = new Rectangle2d(
@@ -218,141 +214,271 @@ public class FieldConstants {
         public static final Translation2d TOP_LEFT_INTERMEDIARY = new Translation2d(4.16, 6.50);
         public static final Translation2d TOP_RIGHT_INTERMEDIARY = new Translation2d(12.38, 6.50);
 
-        public static final Translation2d MIDDLE_LEFT_LEFT_INTERMEDIARY = new Translation2d(2.25, 4.67);
-        public static final Translation2d MIDDLE_LEFT_CENTER_INTERMEDIARY = new Translation2d(4.16, 4.67);
-        public static final Translation2d MIDDLE_LEFT_RIGHT_INTERMEDIARY = new Translation2d(5.65, 4.67);
-        public static final Translation2d MIDDLE_RIGHT_LEFT_INTERMEDIARY = new Translation2d(10.89, 4.67);
-        public static final Translation2d MIDDLE_RIGHT_CENTER_INTERMEDIARY = new Translation2d(12.38, 4.67);
-        public static final Translation2d MIDDLE_RIGHT_RIGHT_INTERMEDIARY = new Translation2d(14.29, 4.67);
+        public static final Translation2d UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY = new Translation2d(2.25, 4.67);
+        public static final Translation2d UPPER_MIDDLE_BLUE_CENTER_INTERMEDIARY = new Translation2d(4.16, 4.67);
+        public static final Translation2d UPPER_MIDDLE_BLUE_RIGHT_INTERMEDIARY = new Translation2d(5.65, 4.67);
+        public static final Translation2d UPPER_MIDDLE_RED_LEFT_INTERMEDIARY = new Translation2d(10.89, 4.67);
+        public static final Translation2d UPPER_MIDDLE_RED_CENTER_INTERMEDIARY = new Translation2d(12.38, 4.67);
+        public static final Translation2d UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY = new Translation2d(14.29, 4.67);
 
-        public static final Translation2d LOWER_MIDDLE_LEFT_LEFT_INTERMEDIARY = new Translation2d(2.25, 2.715);
-        public static final Translation2d LOWER_MIDDLE_LEFT_RIGHT_INTERMEDIARY = new Translation2d(5.65, 2.715);
-        public static final Translation2d LOWER_MIDDLE_RIGHT_LEFT_INTERMEDIARY = new Translation2d(10.89, 2.715);
-        public static final Translation2d LOWER_MIDDLE_RIGHT_RIGHT_INTERMEDIARY = new Translation2d(14.29, 2.715);
+        public static final Translation2d LOWER_MIDDLE_BLUE_LEFT_INTERMEDIARY = new Translation2d(2.25, 2.715);
+        public static final Translation2d LOWER_MIDDLE_BLUE_RIGHT_INTERMEDIARY = new Translation2d(5.65, 2.715);
+        public static final Translation2d LOWER_MIDDLE_RED_LEFT_INTERMEDIARY = new Translation2d(10.89, 2.715);
+        public static final Translation2d LOWER_MIDDLE_RED_RIGHT_INTERMEDIARY = new Translation2d(14.29, 2.715);
 
-        public static final Translation2d BOTTOM_LEFT_LEFT_INTERMEDIARY = new Translation2d(2.25, 0.76);
-        public static final Translation2d BOTTOM_LEFT_RIGHT_INTERMEDIARY = new Translation2d(5.65, 0.76);
-        public static final Translation2d BOTTOM_RIGHT_LEFT_INTERMEDIARY = new Translation2d(10.89, 0.76);
-        public static final Translation2d BOTTOM_RIGHT_RIGHT_INTERMEDIARY = new Translation2d(14.29, 0.76);
+        public static final Translation2d BOTTOM_BLUE_LEFT_INTERMEDIARY = new Translation2d(2.25, 0.76);
+        public static final Translation2d BOTTOM_BLUE_RIGHT_INTERMEDIARY = new Translation2d(5.65, 0.76);
+        public static final Translation2d BOTTOM_RED_LEFT_INTERMEDIARY = new Translation2d(10.89, 0.76);
+        public static final Translation2d BOTTOM_RED_RIGHT_INTERMEDIARY = new Translation2d(14.29, 0.76);
 
         public static final Map<Alliance, Map<Rectangle2d, Pose2d[]>> SCORING_AREA_ZONE_TO_INTERMEDIARY = Map.of(
                 Alliance.Blue,
                 Map.ofEntries(
-                        Map.entry(BOTTOM_LEFT_CENTER_ZONE,
+                        Map.entry(BOTTOM_LEFT_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(BOTTOM_LEFT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                                        new Pose2d(BOTTOM_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
                         Map.entry(BOTTOM_CENTER_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(BOTTOM_LEFT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
-                                        new Pose2d(BOTTOM_LEFT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
-                        Map.entry(BOTTOM_RIGHT_CENTER_ZONE,
+                                        new Pose2d(BOTTOM_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(BOTTOM_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(BOTTOM_RIGHT_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(BOTTOM_LEFT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                                        new Pose2d(BOTTOM_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
                         Map.entry(TOP_LEFT_ZONE,
                                 new Pose2d[] {
                                         new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(-45)),
-                                        new Pose2d(MIDDLE_LEFT_CENTER_INTERMEDIARY, Rotation2d.fromDegrees(180)),
-                                        new Pose2d(MIDDLE_LEFT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_CENTER_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
                         Map.entry(TOP_LEFT_CENTER_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(MIDDLE_LEFT_CENTER_INTERMEDIARY, Rotation2d.fromDegrees(180)),
-                                        new Pose2d(MIDDLE_LEFT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_CENTER_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
                         Map.entry(TOP_CENTER_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(MIDDLE_LEFT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
-                                        new Pose2d(MIDDLE_LEFT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
                         Map.entry(TOP_RIGHT_CENTER_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(MIDDLE_LEFT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
-                                        new Pose2d(MIDDLE_LEFT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
                         Map.entry(TOP_RIGHT_ZONE,
                                 new Pose2d[] {
                                         new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
-                                        new Pose2d(MIDDLE_LEFT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
-                                        new Pose2d(MIDDLE_LEFT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
-
-                        /////
-                        Map.entry(COMMUNITY_TOP_LEFT_RIGHT_ZONE,
+                                        new Pose2d(UPPER_MIDDLE_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(COMMUNITY_BLUE_TOP_SLIVER_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(MIDDLE_LEFT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
-                        Map.entry(CHARGE_STATION_LEFT_ZONE,
+                                        new Pose2d(UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(CHARGE_STATION_BLUE_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(LOWER_MIDDLE_LEFT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
-                        Map.entry(CHARGE_STATION_RIGHT_ZONE,
+                                        new Pose2d(LOWER_MIDDLE_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(CHARGE_STATION_RED_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(LOWER_MIDDLE_RIGHT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
-                                        new Pose2d(MIDDLE_LEFT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
-                                        new Pose2d(MIDDLE_LEFT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
-                        Map.entry(COMMUNITY_TOP_RIGHT_ZONE,
+                                        new Pose2d(LOWER_MIDDLE_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(COMMUNITY_RED_TOP_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(MIDDLE_RIGHT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
-                                        new Pose2d(MIDDLE_LEFT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
-                        Map.entry(COMMUNITY_TOP_RIGHT_LEFT_ZONE,
+                                        new Pose2d(UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(COMMUNITY_RED_TOP_SLIVER_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(MIDDLE_RIGHT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
-                                        new Pose2d(MIDDLE_LEFT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
-                        Map.entry(COMMUNITY_BOTTOM_RIGHT_ZONE,
+                                        new Pose2d(UPPER_MIDDLE_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(COMMUNITY_RED_BOTTOM_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(BOTTOM_RIGHT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
-                                        new Pose2d(BOTTOM_LEFT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) })),
+                                        new Pose2d(BOTTOM_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(BOTTOM_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) })),
                 Alliance.Red,
                 Map.ofEntries(
-                        Map.entry(BOTTOM_LEFT_CENTER_ZONE,
+                        Map.entry(BOTTOM_LEFT_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(BOTTOM_RIGHT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                                        new Pose2d(BOTTOM_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
                         Map.entry(BOTTOM_CENTER_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(BOTTOM_RIGHT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
-                                        new Pose2d(BOTTOM_RIGHT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
-                        Map.entry(BOTTOM_RIGHT_CENTER_ZONE,
+                                        new Pose2d(BOTTOM_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(BOTTOM_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(BOTTOM_RIGHT_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(BOTTOM_RIGHT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                                        new Pose2d(BOTTOM_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
                         Map.entry(TOP_LEFT_ZONE,
                                 new Pose2d[] {
                                         new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
-                                        new Pose2d(MIDDLE_RIGHT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
-                                        new Pose2d(MIDDLE_RIGHT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                                        new Pose2d(UPPER_MIDDLE_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
                         Map.entry(TOP_LEFT_CENTER_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(MIDDLE_RIGHT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
-                                        new Pose2d(MIDDLE_RIGHT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                                        new Pose2d(UPPER_MIDDLE_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
                         Map.entry(TOP_CENTER_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(MIDDLE_RIGHT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
-                                        new Pose2d(MIDDLE_RIGHT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                                        new Pose2d(UPPER_MIDDLE_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
                         Map.entry(TOP_RIGHT_CENTER_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(MIDDLE_RIGHT_CENTER_INTERMEDIARY, Rotation2d.fromDegrees(0)),
-                                        new Pose2d(MIDDLE_RIGHT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                                        new Pose2d(UPPER_MIDDLE_RED_CENTER_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
                         Map.entry(TOP_RIGHT_ZONE,
                                 new Pose2d[] {
                                         new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(-135)),
-                                        new Pose2d(MIDDLE_RIGHT_CENTER_INTERMEDIARY, Rotation2d.fromDegrees(0)),
-                                        new Pose2d(MIDDLE_RIGHT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                                        new Pose2d(UPPER_MIDDLE_RED_CENTER_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
 
                         //////
-                        Map.entry(COMMUNITY_TOP_RIGHT_LEFT_ZONE,
+                        Map.entry(COMMUNITY_RED_TOP_SLIVER_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(MIDDLE_RIGHT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
-                        Map.entry(CHARGE_STATION_LEFT_ZONE,
+                                        new Pose2d(UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(CHARGE_STATION_BLUE_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(LOWER_MIDDLE_LEFT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
-                                        new Pose2d(MIDDLE_RIGHT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
-                                        new Pose2d(MIDDLE_RIGHT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
-                        Map.entry(CHARGE_STATION_RIGHT_ZONE,
+                                        new Pose2d(LOWER_MIDDLE_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(UPPER_MIDDLE_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(CHARGE_STATION_RED_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(LOWER_MIDDLE_RIGHT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
-                        Map.entry(COMMUNITY_TOP_LEFT_ZONE,
+                                        new Pose2d(LOWER_MIDDLE_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(COMMUNITY_BLUE_TOP_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(MIDDLE_LEFT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
-                                        new Pose2d(MIDDLE_RIGHT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
-                        Map.entry(COMMUNITY_TOP_LEFT_RIGHT_ZONE,
+                                        new Pose2d(UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(COMMUNITY_BLUE_TOP_SLIVER_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(MIDDLE_RIGHT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
-                        Map.entry(COMMUNITY_BOTTOM_LEFT_ZONE,
+                                        new Pose2d(UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(COMMUNITY_BLUE_BOTTOM_ZONE,
                                 new Pose2d[] {
-                                        new Pose2d(BOTTOM_LEFT_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
-                                        new Pose2d(BOTTOM_LEFT_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) })));
+                                        new Pose2d(BOTTOM_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(BOTTOM_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) })));
+
+        public static final Map<Alliance, Map<Rectangle2d, Pose2d[]>> HP_STATION_ZONE_TO_INTERMEDIARY = Map.of(
+                Alliance.Blue,
+                Map.ofEntries(
+                        Map.entry(BOTTOM_LEFT_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(BOTTOM_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(BOTTOM_CENTER_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(UPPER_MIDDLE_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(BOTTOM_RIGHT_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(BOTTOM_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(UPPER_MIDDLE_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(TOP_LEFT_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(TOP_LEFT_CENTER_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(TOP_CENTER_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(TOP_RIGHT_CENTER_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(CHARGE_STATION_BLUE_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(LOWER_MIDDLE_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(CHARGE_STATION_RED_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(LOWER_MIDDLE_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(UPPER_MIDDLE_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(COMMUNITY_BLUE_TOP_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(COMMUNITY_BLUE_TOP_SLIVER_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(UPPER_MIDDLE_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(COMMUNITY_BLUE_BOTTOM_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(BOTTOM_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(BOTTOM_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(COMMUNITY_RED_TOP_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(UPPER_MIDDLE_RED_CENTER_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(COMMUNITY_RED_TOP_SLIVER_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(UPPER_MIDDLE_RED_CENTER_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) }),
+                        Map.entry(COMMUNITY_RED_BOTTOM_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(BOTTOM_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(BOTTOM_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(UPPER_MIDDLE_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(0)),
+                                        new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(0)) })),
+
+                Alliance.Red,
+                Map.ofEntries(Map.entry(BOTTOM_LEFT_ZONE,
+                        new Pose2d[] {
+                                new Pose2d(BOTTOM_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                new Pose2d(UPPER_MIDDLE_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                new Pose2d(TOP_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(BOTTOM_CENTER_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(UPPER_MIDDLE_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(BOTTOM_RIGHT_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(BOTTOM_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(TOP_LEFT_CENTER_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(TOP_CENTER_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(TOP_RIGHT_CENTER_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(TOP_RIGHT_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(CHARGE_STATION_BLUE_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(LOWER_MIDDLE_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(CHARGE_STATION_RED_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(LOWER_MIDDLE_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(COMMUNITY_BLUE_TOP_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_CENTER_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(COMMUNITY_BLUE_TOP_SLIVER_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(UPPER_MIDDLE_BLUE_CENTER_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(COMMUNITY_BLUE_BOTTOM_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(BOTTOM_BLUE_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(BOTTOM_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(UPPER_MIDDLE_BLUE_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(COMMUNITY_RED_TOP_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(UPPER_MIDDLE_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(COMMUNITY_RED_TOP_SLIVER_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(UPPER_MIDDLE_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) }),
+                        Map.entry(COMMUNITY_RED_BOTTOM_ZONE,
+                                new Pose2d[] {
+                                        new Pose2d(BOTTOM_RED_RIGHT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(BOTTOM_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
+                                        new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) })));
 
     }
 
@@ -423,7 +549,7 @@ public class FieldConstants {
                     Map.entry(GamePieceLocation.I2, Red.RightGrid.CONE_9),
                     Map.entry(GamePieceLocation.I3, Red.RightGrid.CONE_9)));
 
-    public static void displayOnField() {
+    public static void displayItemsOnField() {
         AutoManager.getInstance().getField().getObject("Blue_Cone_1").setPose(FieldConstants.Blue.LeftGrid.CONE_1);
         AutoManager.getInstance().getField().getObject("Blue_Cube_2").setPose(FieldConstants.Blue.LeftGrid.CUBE_2);
         AutoManager.getInstance().getField().getObject("Blue_Cone_3").setPose(FieldConstants.Blue.LeftGrid.CONE_3);
@@ -488,6 +614,78 @@ public class FieldConstants {
         AutoManager.getInstance().getField().getObject("Red_DoubleSubstation_S")
                 .setPose(FieldConstants.Red.Substations.DOUBLE_SUBSTATION_S);
         AutoManager.getInstance().getField().getObject("Red_SingleSubstation")
+                .setPose(FieldConstants.Red.Substations.SINGLE_SUBSTATION);
+    }
+
+    public void displayAutoDriveOnField() {
+        FieldConstants.AutoDrive.TOP_LEFT_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.TOP_LEFT_CENTER_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.TOP_CENTER_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.TOP_RIGHT_CENTER_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.TOP_RIGHT_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.BOTTOM_LEFT_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.BOTTOM_CENTER_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.BOTTOM_RIGHT_ZONE.drawOnField(AutoManager.getInstance().getField());
+
+        FieldConstants.AutoDrive.CHARGE_STATION_BLUE_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.CHARGE_STATION_RED_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.COMMUNITY_BLUE_BOTTOM_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.COMMUNITY_BLUE_TOP_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.COMMUNITY_BLUE_TOP_SLIVER_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.COMMUNITY_RED_BOTTOM_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.COMMUNITY_RED_TOP_ZONE.drawOnField(AutoManager.getInstance().getField());
+        FieldConstants.AutoDrive.COMMUNITY_RED_TOP_SLIVER_ZONE.drawOnField(AutoManager.getInstance().getField());
+
+        AutoManager.getInstance().getField().getObject("TOP_LEFT_INTERMEDIARY")
+                .setPose(new Pose2d(FieldConstants.AutoDrive.TOP_LEFT_INTERMEDIARY, new Rotation2d(Math.PI / 2)));
+        AutoManager.getInstance().getField().getObject("TOP_RIGHT_INTERMEDIARY")
+                .setPose(new Pose2d(FieldConstants.AutoDrive.TOP_RIGHT_INTERMEDIARY, new Rotation2d(Math.PI / 2)));
+        AutoManager.getInstance().getField().getObject("UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY")
+                .setPose(new Pose2d(FieldConstants.AutoDrive.UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY,
+                        new Rotation2d(Math.PI / 2)));
+        AutoManager.getInstance().getField().getObject("UPPER_MIDDLE_BLUE_CENTER_INTERMEDIARY")
+                .setPose(new Pose2d(FieldConstants.AutoDrive.UPPER_MIDDLE_BLUE_CENTER_INTERMEDIARY,
+                        new Rotation2d(Math.PI / 2)));
+        AutoManager.getInstance().getField().getObject("UPPER_MIDDLE_BLUE_RIGHT_INTERMEDIARY")
+                .setPose(new Pose2d(FieldConstants.AutoDrive.UPPER_MIDDLE_BLUE_RIGHT_INTERMEDIARY,
+                        new Rotation2d(Math.PI / 2)));
+        AutoManager.getInstance().getField().getObject("UPPER_MIDDLE_RED_LEFT_INTERMEDIARY")
+                .setPose(new Pose2d(FieldConstants.AutoDrive.UPPER_MIDDLE_RED_LEFT_INTERMEDIARY,
+                        new Rotation2d(Math.PI / 2)));
+        AutoManager.getInstance().getField().getObject("UPPER_MIDDLE_RED_CENTER_INTERMEDIARY")
+                .setPose(new Pose2d(FieldConstants.AutoDrive.UPPER_MIDDLE_RED_CENTER_INTERMEDIARY,
+                        new Rotation2d(Math.PI / 2)));
+        AutoManager.getInstance().getField().getObject("UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY")
+                .setPose(new Pose2d(FieldConstants.AutoDrive.UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY,
+                        new Rotation2d(Math.PI / 2)));
+        AutoManager.getInstance().getField().getObject("LOWER_MIDDLE_BLUE_LEFT_INTERMEDIARY")
+                .setPose(new Pose2d(FieldConstants.AutoDrive.LOWER_MIDDLE_BLUE_LEFT_INTERMEDIARY,
+                        new Rotation2d(Math.PI / 2)));
+        AutoManager.getInstance().getField().getObject("LOWER_MIDDLE_BLUE_RIGHT_INTERMEDIARY")
+                .setPose(new Pose2d(FieldConstants.AutoDrive.LOWER_MIDDLE_BLUE_RIGHT_INTERMEDIARY,
+                        new Rotation2d(Math.PI / 2)));
+        AutoManager.getInstance().getField().getObject("LOWER_MIDDLE_RED_LEFT_INTERMEDIARY")
+                .setPose(new Pose2d(FieldConstants.AutoDrive.LOWER_MIDDLE_RED_LEFT_INTERMEDIARY,
+                        new Rotation2d(Math.PI / 2)));
+        AutoManager.getInstance().getField().getObject("LOWER_MIDDLE_RED_RIGHT_INTERMEDIARY")
+                .setPose(new Pose2d(FieldConstants.AutoDrive.LOWER_MIDDLE_RED_RIGHT_INTERMEDIARY,
+                        new Rotation2d(Math.PI / 2)));
+        AutoManager.getInstance().getField().getObject("BOTTOM_BLUE_LEFT_INTERMEDIARY")
+                .setPose(new Pose2d(FieldConstants.AutoDrive.BOTTOM_BLUE_LEFT_INTERMEDIARY,
+                        new Rotation2d(Math.PI / 2)));
+        AutoManager.getInstance().getField().getObject("BOTTOM_BLUE_RIGHT_INTERMEDIARY")
+                .setPose(new Pose2d(FieldConstants.AutoDrive.BOTTOM_BLUE_RIGHT_INTERMEDIARY,
+                        new Rotation2d(Math.PI / 2)));
+        AutoManager.getInstance().getField().getObject("BOTTOM_RED_LEFT_INTERMEDIARY")
+                .setPose(
+                        new Pose2d(FieldConstants.AutoDrive.BOTTOM_RED_LEFT_INTERMEDIARY, new Rotation2d(Math.PI / 2)));
+        AutoManager.getInstance().getField().getObject("BOTTOM_RED_RIGHT_INTERMEDIARY")
+                .setPose(new Pose2d(FieldConstants.AutoDrive.BOTTOM_RED_RIGHT_INTERMEDIARY,
+                        new Rotation2d(Math.PI / 2)));
+
+        AutoManager.getInstance().getField().getObject("Blue Substation")
+                .setPose(FieldConstants.Blue.Substations.SINGLE_SUBSTATION);
+        AutoManager.getInstance().getField().getObject("Red Substation")
                 .setPose(FieldConstants.Red.Substations.SINGLE_SUBSTATION);
 
     }
