@@ -6,7 +6,6 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.CANSparkMax.IdleMode;
-import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
 import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
@@ -32,7 +31,9 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Overrides;
@@ -47,8 +48,8 @@ import frc.robot.commands.RobotStates;
 public class Elbow extends ProfiledPIDSubsystem {
     public static enum ElbowPosition {
         LOW(0.502),
-        MID(1.005),
-        HIGH(1.507);
+        MID(0.97),
+        HIGH(1.6);
 
         public final double value;
 
@@ -152,16 +153,22 @@ public class Elbow extends ProfiledPIDSubsystem {
 
         this.ligament = ligament;
 
-        SparkMaxConfigurator.configure(motor, false)
-                .withIdleMode(IdleMode.kBrake)
-                .withCurrentLimit(20)
-                .withInverted(true)
-                .withPositionConversionFactor(2 * Math.PI / 100.0, true)
-                .burnFlash();
+        // SparkMaxConfigurator.configure(motor, false)
+        // .withIdleMode(IdleMode.kBrake)
+        // .withCurrentLimit(20)
+        // .withInverted(true)
+        // .withPositionConversionFactor(2 * Math.PI / 100.0, true)
+        // .burnFlash();
 
-        encoder.setPositionConversionFactor(2 * Math.PI);
+        motor.setInverted(true);
+        motor.getEncoder().setPositionConversionFactor(2 * Math.PI / 100.0);
+        motor.getEncoder().setVelocityConversionFactor(2 * Math.PI / 100.0 / 60.0);
+
         encoder.setInverted(true);
+        encoder.setPositionConversionFactor(2 * Math.PI);
+        encoder.setZeroOffset(3.4760098 - Math.PI);
         motor.getEncoder().setPosition(encoder.getPosition());
+        motor.burnFlash();
 
         LoggingManager.getInstance().addGroup("Elbow", new LogGroup(
                 new BooleanLogItem("Bottom Hall Effect", bottomHallEffect::get, LogLevel.MAIN),
@@ -269,7 +276,7 @@ public class Elbow extends ProfiledPIDSubsystem {
         boolean safe = true;
         String str = "none";
 
-        if (Constants.IS_SAFETIES_ENABLED) {
+        if (!Overrides.SAFETIES_DISABLE.getStatus()) {
             if (!RobotStates.isInitialized()) {
                 safe = false;
                 str = "Robot not initialized: cannot move elbow";
@@ -301,8 +308,11 @@ public class Elbow extends ProfiledPIDSubsystem {
      * @param speed the speed, from -1.0 to 1.0
      */
     private void setSpeed(double speed) {
-        if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(),
-                speed) || !Constants.IS_MECHANISM_LIMITS_ENABLED) {
+        if (Math.abs(speed) > 8) {
+            speed = Math.copySign(8, speed);
+        }
+        if (!Utils.limitMechanism(bottomHallEffect.get(), false,
+                speed) || Overrides.MECH_LIMITS_DISABLE.getStatus()) {
             if (RobotBase.isReal())
                 motor.set(speed);
             else
@@ -319,8 +329,12 @@ public class Elbow extends ProfiledPIDSubsystem {
      * @param voltage the voltage, from -12.0v to 12.0v
      */
     private void setVoltage(double voltage) {
-        if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(),
-                voltage) || !Constants.IS_MECHANISM_LIMITS_ENABLED) {
+        if (!Utils.limitMechanism(bottomHallEffect.get(), false,
+                voltage) || Overrides.MECH_LIMITS_DISABLE.getStatus()) {
+
+            if (Math.abs(voltage) > 8) {
+                voltage = Math.copySign(8, voltage);
+            }
             motor.setVoltage(voltage);
         } else {
             motor.setVoltage(0);
@@ -354,6 +368,21 @@ public class Elbow extends ProfiledPIDSubsystem {
         return Commands.either(
                 run(() -> setSpeed(speed.getAsDouble())),
                 Commands.none(),
-                Overrides::isOperatorOverridden);
+                Overrides.MANUAL_MECH_CONTROL_MODE.getStatusSupplier());
+    }
+
+    public CommandBase motorOverride() {
+        return new FunctionalCommand(
+                () -> {
+                    motor.setIdleMode(IdleMode.kCoast);
+                },
+                () -> {
+                    motor.stopMotor();
+                },
+                (d) -> {
+                    motor.setIdleMode(IdleMode.kBrake);
+                },
+                () -> false,
+                this).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
     }
 }
