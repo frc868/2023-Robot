@@ -15,6 +15,7 @@ import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import com.techhounds.houndutil.houndlog.logitems.DoubleLogItem;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -34,7 +35,9 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PIDCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -282,7 +285,7 @@ public class Drivetrain extends SubsystemBase {
                 break;
             case FIELD_ORIENTED:
                 chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed,
-                        thetaSpeed, poseEstimator.getEstimatedPosition().getRotation());
+                        thetaSpeed, getGyroRotation2d());
 
                 break;
         }
@@ -673,6 +676,48 @@ public class Drivetrain extends SubsystemBase {
                             true);
                 },
                 this);
+    }
+
+    /**
+     * Creates a command that supplies SwerveModuleStates to follow a
+     * PathPlannerTrajectory, but the holonomic rotation is overridden to always be
+     * π rad/s.
+     * 
+     * @return the command
+     */
+    public CommandBase chargeStationBalanceCommand() {
+        BangBangController controller = new BangBangController(1);
+        return new FunctionalCommand(
+                () -> {
+                },
+                () -> {
+                    double setpoint = 0.0;
+                    if (Math.abs(pigeon.getRoll()) > 1) {
+                        setpoint = pigeon.getRoll() > 0 ? 0.1 : -0.1;
+                    }
+                    drive(setpoint, 0, 0,
+                            DriveMode.ROBOT_RELATIVE);
+                },
+                (d) -> this.stop(),
+                controller::atSetpoint, this).finallyDo((d) -> this.stop());
+    }
+
+    /**
+     * Creates a command that supplies SwerveModuleStates to follow a
+     * PathPlannerTrajectory, but the holonomic rotation is overridden to always be
+     * π rad/s.
+     * 
+     * @return the command
+     */
+    public CommandBase chargeStationBalancePIDCommand() {
+        PIDController controller = new PIDController(0.1, 0, 0);
+        controller.setTolerance(1);
+        return new PIDCommand(
+                controller,
+                pigeon::getRoll,
+                0,
+                (d) -> drive(d > 0.2 ? 0.2 : d, 0, 0, DriveMode.ROBOT_RELATIVE),
+                this).finallyDo((d) -> this.stop());
     }
 
     // public CommandBase motorOverride(Motor) {

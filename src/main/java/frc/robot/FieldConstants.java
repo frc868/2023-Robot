@@ -122,9 +122,8 @@ public class FieldConstants {
                     Rotation2d.fromDegrees(180));
 
             public static final Pose2d SINGLE_SUBSTATION = new Pose2d(
-                    new Translation2d(
-                            14.56,
-                            WIDTH_METERS - Constants.ROBOT_SIDE_LENGTH),
+                    14.1857,
+                    6.80434, // set at 1781 Scrimmage
                     Rotation2d.fromDegrees(90));
 
         }

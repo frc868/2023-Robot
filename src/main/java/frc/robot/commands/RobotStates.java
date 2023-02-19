@@ -229,6 +229,7 @@ public class RobotStates {
             LEDs leds) {
         return Commands.either(
                 Commands.sequence(
+                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow, leds),
                         elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
                         intake.setIntakeDownCommand(elevator, leds),
                         manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow()),
@@ -241,10 +242,9 @@ public class RobotStates {
                         manipulator.setPincersPincingCommand(() -> intakeMode.orElseThrow()),
                         intake.setPassoversRetractedCommand(elevator, leds),
                         intake.setIntakeUpCommand(elevator, leds),
-                        Commands.waitSeconds(0.25),
+                        RobotStates.setCurrentStateCommand(RobotState.SCORING),
                         elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator),
-                        RobotStates.clearIntakeModeCommand(),
-                        RobotStates.setCurrentStateCommand(RobotState.SCORING)),
+                        RobotStates.clearIntakeModeCommand()),
                 singularErrorCommand(() -> "Intake mode not present"),
                 () -> intakeMode.isPresent()).withName("Intake Game Piece");
     }
@@ -347,31 +347,23 @@ public class RobotStates {
                 () -> gridInterface.getSetLocation().isPresent()).withName("Score Game Piece");
     }
 
-    /**
-     * Creates a command to stow the elevator after scoring a game piece.
-     * 
-     * Runs this sequence:
-     *     1. Sets the wrist to the down position.
-     *     2. Sets the elbow to the middle position.
-     *     3. Moves the elevator to the bottom position, returns when the goal has
-     * been reached.
-     * 
-     * The entire sequence will not run unless the intake mode has been set.
-     * 
-     * @param intake
-     * @param manipulator
-     * @param elevator
-     * @param elbow
-     * @param leds
-     * @return
-     */
-    public static CommandBase stowElevator(
+    public static CommandBase humanPlayerPickup(
+            GridInterface gridInterface,
             Intake intake,
             Manipulator manipulator,
             Elevator elevator,
             Elbow elbow,
             LEDs leds) {
-        return stowElevator(intake, manipulator, elevator, elbow, leds, true);
+        return Commands.sequence(
+                Commands.parallel(
+                        elevator.setDesiredPositionCommand(ElevatorPosition.CUBE_MID, intake, elbow, leds),
+                        Commands.sequence(
+                                elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
+                                Commands.waitSeconds(1.5),
+                                elbow.setDesiredPositionCommand(ElbowPosition.HIGH,
+                                        elevator))),
+                manipulator.setPincersOpenCommand(),
+                Commands.waitSeconds(0.5)).withName("Score Game Piece");
     }
 
     /**
@@ -397,15 +389,46 @@ public class RobotStates {
             Manipulator manipulator,
             Elevator elevator,
             Elbow elbow,
-            LEDs leds,
-            boolean closePincers) {
+            LEDs leds) {
         return Commands.sequence(
                 manipulator.setWristDownCommand(),
-                Commands.either(
-                        manipulator.setPincersClosedCommand(), Commands.none(), () -> closePincers),
+                manipulator.setPincersClosedCommand(),
                 elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
                 elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow, leds),
                 RobotStates.setCurrentStateCommand(RobotState.SEEKING))
+                .withName("Stow Elevator");
+    }
+
+    /**
+     * Creates a command to stow the elevator after scoring a game piece.
+     * 
+     * Runs this sequence:
+     *     1. Sets the wrist to the down position.
+     *     2. Sets the elbow to the middle position.
+     *     3. Moves the elevator to the bottom position, returns when the goal has
+     * been reached.
+     * 
+     * The entire sequence will not run unless the intake mode has been set.
+     * 
+     * @param intake
+     * @param manipulator
+     * @param elevator
+     * @param elbow
+     * @param leds
+     * @return
+     */
+    public static CommandBase stowElevatorHPStation(
+            Intake intake,
+            Manipulator manipulator,
+            Elevator elevator,
+            Elbow elbow,
+            LEDs leds) {
+        return Commands.sequence(
+                manipulator.setPincersOpenCommand(),
+                elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
+                elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow, leds),
+                elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator),
+                RobotStates.setCurrentStateCommand(RobotState.SCORING))
                 .withName("Stow Elevator");
     }
 

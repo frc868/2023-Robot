@@ -123,7 +123,8 @@ public class RobotContainer {
                 new TrajectorySettings("Circle").withMaxVelocity(0.5).withMaxAcceleration(1),
                 new TrajectorySettings("Figure8").withMaxVelocity(1).withMaxAcceleration(3),
                 new TrajectorySettings("1 Piece Hold N").withMaxVelocity(3).withMaxAcceleration(4),
-                new TrajectorySettings("3 Piece N").withMaxVelocity(4.2).withMaxAcceleration(8));
+                new TrajectorySettings("3 Piece N").withMaxVelocity(4.2).withMaxAcceleration(8),
+                new TrajectorySettings("Charge Station N").withMaxVelocity(3).withMaxAcceleration(2));
         TrajectoryLoader.loadAutoPaths();
 
         AutoManager.getInstance().addEvent("event1", Commands.print("1"));
@@ -141,6 +142,9 @@ public class RobotContainer {
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("3 Piece N",
                         Autos.pathPlannerTrajectory(TrajectoryLoader.getAutoPath("3 Piece N"), drivetrain)));
+        AutoManager.getInstance().addRoutine(
+                new AutoRoutine("Charge Station N",
+                        Autos.pathPlannerTrajectory(TrajectoryLoader.getAutoPath("Charge Station N"), drivetrain)));
     }
 
     private void configureNTCommands() {
