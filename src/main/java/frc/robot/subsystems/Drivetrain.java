@@ -1,16 +1,12 @@
 package frc.robot.subsystems;
 
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
-
-import org.photonvision.EstimatedRobotPose;
 
 import com.ctre.phoenix.sensors.Pigeon2;
 import com.ctre.phoenix.unmanaged.Unmanaged;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.techhounds.houndutil.houndauto.AutoManager;
-import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
@@ -37,7 +33,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -87,18 +82,6 @@ public class Drivetrain extends SubsystemBase {
 
     /** The Pigeon 2, the overpriced but really good gyro that we use. */
     private Pigeon2 pigeon = new Pigeon2(0);
-
-    /** The PhotonVision cameras, used to detect the AprilTags. */
-    private AprilTagPhotonCamera[] photonCameras = new AprilTagPhotonCamera[] {
-            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[0],
-                    Constants.Vision.ROBOT_TO_CAMS[0]),
-            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[1],
-                    Constants.Vision.ROBOT_TO_CAMS[1]),
-            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[2],
-                    Constants.Vision.ROBOT_TO_CAMS[2]),
-            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[3],
-                    Constants.Vision.ROBOT_TO_CAMS[3])
-    };
 
     /**
      * The pose estimator, which takes in wheel odometry and latency-compensated
@@ -299,7 +282,7 @@ public class Drivetrain extends SubsystemBase {
                 break;
             case FIELD_ORIENTED:
                 chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed,
-                        thetaSpeed, getGyroRotation2d());
+                        thetaSpeed, poseEstimator.getEstimatedPosition().getRotation());
 
                 break;
         }
@@ -435,26 +418,6 @@ public class Drivetrain extends SubsystemBase {
      */
     private void updatePoseEstimator() {
         poseEstimator.update(getGyroRotation2d(), getSwerveModulePositions());
-        Pose2d estimatedPosition = poseEstimator.getEstimatedPosition();
-        Field2d field = AutoManager.getInstance().getField();
-        if (Constants.IS_USING_CAMERAS) {
-            for (int i = 0; i < photonCameras.length; i++) {
-                Optional<EstimatedRobotPose> result = photonCameras[i]
-                        .getEstimatedGlobalPose(estimatedPosition);
-
-                FieldObject2d fieldObject = field.getObject("apriltag_cam" + i +
-                        "_est_pose");
-                if (result.isPresent()) {
-                    EstimatedRobotPose camPose = result.get();
-                    poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(),
-                            camPose.timestampSeconds);
-                    fieldObject.setPose(camPose.estimatedPose.toPose2d());
-                } else {
-                    // move it way off the screen to make it disappear
-                    fieldObject.setPose(new Pose2d(-100, -100, new Rotation2d()));
-                }
-            }
-        }
         drawRobotOnField(AutoManager.getInstance().getField());
     }
 
@@ -710,5 +673,23 @@ public class Drivetrain extends SubsystemBase {
                             true);
                 },
                 this);
+    }
+
+    // public CommandBase motorOverride(Motor) {
+    // return new FunctionalCommand(
+    // () -> {
+    // driveMotor.setIdleMode(IdleMode.kCoast);
+    // },
+    // () -> {
+    // driveMotor.stopMotor();
+    // },
+    // (d) -> {
+    // driveMotor.setIdleMode(IdleMode.kBrake);
+    // },
+    // () -> false).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+    // }
+
+    public SwerveDrivePoseEstimator getPoseEstimator() {
+        return this.poseEstimator;
     }
 }
