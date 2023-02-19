@@ -23,12 +23,12 @@ import frc.robot.commands.RobotStates;
  */
 public class LEDs extends SubsystemBase {
     /** The LEDs. */
-    private AddressableLED led = new AddressableLED(9);
+    private AddressableLED led = new AddressableLED(0);
 
     /** The last state of the LEDs before it was in {@code state}. */
     private LEDState previousState = LEDState.TechHOUNDS;
     /** The current state of the LEDs. */
-    private LEDState state = LEDState.Uninitialized;
+    private LEDState state = LEDState.TechHOUNDS;
 
     /**
      * Describes the states that the LEDs can be in.
