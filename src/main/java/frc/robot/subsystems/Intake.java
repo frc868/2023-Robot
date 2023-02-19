@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Overrides;
 import frc.robot.commands.RobotStates;
 
 /**
@@ -150,7 +151,7 @@ public class Intake extends SubsystemBase {
         boolean safe = true;
         String str = "none";
 
-        if (Constants.IS_SAFETIES_ENABLED) {
+        if (!Overrides.SAFETIES_DISABLE.getStatus()) {
             if (!elevator.isSafeForIntake().getFirst()) {
                 safe = false;
                 str = elevator.isSafeForIntake().getSecond();
