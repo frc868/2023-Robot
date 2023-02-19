@@ -371,7 +371,13 @@ public class RobotStates {
             Elevator elevator,
             Elbow elbow,
             LEDs leds) {
-        return stowElevator(intake, manipulator, elevator, elbow, leds, true);
+        return Commands.sequence(
+                manipulator.setWristDownCommand(),
+                manipulator.setPincersClosedCommand(),
+                elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
+                elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow, leds),
+                RobotStates.setCurrentStateCommand(RobotState.SEEKING))
+                .withName("Stow Elevator");
     }
 
     /**
@@ -392,20 +398,18 @@ public class RobotStates {
      * @param leds
      * @return
      */
-    public static CommandBase stowElevator(
+    public static CommandBase stowElevatorHPStation(
             Intake intake,
             Manipulator manipulator,
             Elevator elevator,
             Elbow elbow,
-            LEDs leds,
-            boolean closePincers) {
+            LEDs leds) {
         return Commands.sequence(
-                manipulator.setWristDownCommand(),
-                Commands.either(
-                        manipulator.setPincersClosedCommand(), Commands.none(), () -> closePincers),
+                manipulator.setPincersOpenCommand(),
                 elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
                 elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow, leds),
-                RobotStates.setCurrentStateCommand(RobotState.SEEKING))
+                elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator),
+                RobotStates.setCurrentStateCommand(RobotState.SCORING))
                 .withName("Stow Elevator");
     }
 
