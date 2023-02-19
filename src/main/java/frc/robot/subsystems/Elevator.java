@@ -32,7 +32,10 @@ import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Overrides;
 import frc.robot.GamePieceLocation.GamePiece;
@@ -50,11 +53,11 @@ public class Elevator extends ProfiledPIDSubsystem {
     public static enum ElevatorPosition {
         BOTTOM(0),
         CONE_LOW(Units.inchesToMeters(10)),
-        CONE_MID(0.89141),
-        CONE_HIGH(1.39689),
+        CONE_MID(1.18482),
+        CONE_HIGH(1.65220),
         CUBE_LOW(Units.inchesToMeters(10)),
-        CUBE_MID(0.80), // untested
-        CUBE_HIGH(1.3), // untested
+        CUBE_MID(1.18482), // untested
+        CUBE_HIGH(1.65220), // untested
         HUMAN_PLAYER(0),
         TOP(1.40);
 
@@ -197,6 +200,8 @@ public class Elevator extends ProfiledPIDSubsystem {
             topHallEffectSim.setValue(false);
             RobotStates.enableInitialized();
         }
+
+        new Trigger(bottomHallEffect::get).whileTrue(Commands.runOnce(this::resetEncoders).repeatedly());
     }
 
     /**
@@ -294,7 +299,7 @@ public class Elevator extends ProfiledPIDSubsystem {
     private Pair<Boolean, String> getIfSafeToMove(Intake intake, Elbow elbow) {
         boolean safe = true;
         String str = "none";
-        if (Constants.IS_SAFETIES_ENABLED) {
+        if (!Overrides.SAFETIES_DISABLE.getStatus()) {
 
             if (!RobotStates.isInitialized()) {
                 safe = false;
@@ -334,7 +339,7 @@ public class Elevator extends ProfiledPIDSubsystem {
      */
     public void setSpeed(double speed) {
         if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(),
-                speed) || !Constants.IS_MECHANISM_LIMITS_ENABLED) {
+                speed) || Overrides.MECH_LIMITS_DISABLE.getStatus()) {
             if (RobotBase.isReal()) {
                 motors.set(speed);
             } else {
@@ -354,7 +359,7 @@ public class Elevator extends ProfiledPIDSubsystem {
      */
     private void setVoltage(double voltage) {
         if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(),
-                voltage) || !Constants.IS_MECHANISM_LIMITS_ENABLED)
+                voltage) || Overrides.MECH_LIMITS_DISABLE.getStatus())
             motors.setVoltage(voltage);
         else {
             motors.setVoltage(0);
@@ -385,10 +390,10 @@ public class Elevator extends ProfiledPIDSubsystem {
      * @param position an ElevatorPosition to set the elevator to
      * @return the command
      */
-    public CommandBase dropDesiredPositionCommand(double position, Intake intake, Elbow elbow, LEDs leds) {
+    public CommandBase setDesiredPositionDeltaCommand(double position, Intake intake, Elbow elbow, LEDs leds) {
         return Commands.either(
                 Commands.sequence(
-                        runOnce(() -> setGoal(getGoal() - position)),
+                        runOnce(() -> setGoal(getGoal() + position)),
                         runOnce(this::enable),
                         Commands.waitUntil(this::isAtGoal)),
                 RobotStates.singularErrorCommand(() -> getIfSafeToMove(intake, elbow).getSecond()),
@@ -427,9 +432,10 @@ public class Elevator extends ProfiledPIDSubsystem {
      * the bottom hall effect sensor is reached, then zeros the encoders.
      */
     public CommandBase zeroEncoderCommand() {
-        return startEnd(() -> setSpeed(-0.1), () -> {
+        return startEnd(() -> setSpeed(-0.05), () -> {
             this.resetEncoders();
             RobotStates.enableInitialized();
+            motors.stopMotor();
         }).until(bottomHallEffect::get).withName("Zero Encoder");
     }
 
@@ -458,6 +464,23 @@ public class Elevator extends ProfiledPIDSubsystem {
                                                 () -> getIfSafeToMove(intake, elbow).getSecond())),
                         () -> getIfSafeToMove(intake, elbow).getFirst()),
                 Commands.none(),
-                Overrides::isOperatorOverridden).withName("Set Overridden Elevator Speed");
+                Overrides.MANUAL_MECH_CONTROL_MODE.getStatusSupplier()).withName("Set Overridden Elevator Speed");
+    }
+
+    public CommandBase motorOverride() {
+        return new FunctionalCommand(
+                () -> {
+                    leftMotor.setIdleMode(IdleMode.kCoast);
+                    rightMotor.setIdleMode(IdleMode.kCoast);
+                },
+                () -> {
+                    motors.stopMotor();
+                },
+                (d) -> {
+                    leftMotor.setIdleMode(IdleMode.kBrake);
+                    rightMotor.setIdleMode(IdleMode.kBrake);
+                },
+                () -> false,
+                this).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
     }
 }
