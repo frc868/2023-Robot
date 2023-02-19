@@ -48,8 +48,8 @@ import frc.robot.commands.RobotStates;
 public class Elbow extends ProfiledPIDSubsystem {
     public static enum ElbowPosition {
         LOW(0.502),
-        MID(0.97),
-        HIGH(1.6);
+        MID(0.94),
+        HIGH(1.7);
 
         public final double value;
 
@@ -353,7 +353,7 @@ public class Elbow extends ProfiledPIDSubsystem {
                 Commands.sequence(
                         runOnce(() -> setGoal(position.value)),
                         runOnce(this::enable),
-                        Commands.waitUntil(this::isAtGoal).withTimeout(1.5)),
+                        Commands.waitUntil(this::isAtGoal).withTimeout(2)),
                 RobotStates.singularErrorCommand(() -> getIfSafeToMove(position, elevator).getSecond()),
                 () -> getIfSafeToMove(position, elevator).getFirst());
     }
