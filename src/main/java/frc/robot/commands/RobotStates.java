@@ -15,6 +15,7 @@ import com.techhounds.houndutil.houndlib.Rectangle2d;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -285,6 +286,7 @@ public class RobotStates {
      */
     public static CommandBase scoreGamePiece(
             BooleanSupplier secondaryButton,
+            BooleanConsumer secondaryButtonLED,
             GridInterface gridInterface,
             Intake intake,
             Manipulator manipulator,
@@ -320,7 +322,14 @@ public class RobotStates {
                         Commands.select(
                                 Map.of(
                                         GamePiece.CONE,
-                                        Commands.waitUntil(manipulator::isPoleDetected)
+                                        Commands.waitUntil(
+                                                () -> manipulator.isPoleDetected() || secondaryButton.getAsBoolean())
+                                                .alongWith(Commands.sequence(
+                                                        Commands.runOnce(() -> secondaryButtonLED.accept(true)),
+                                                        Commands.waitSeconds(0.5),
+                                                        Commands.runOnce(() -> secondaryButtonLED.accept(false)),
+                                                        Commands.waitSeconds(0.5)).repeatedly()
+                                                        .finallyDo((d) -> secondaryButtonLED.accept(false)))
                                                 .andThen(
                                                         Commands.parallel(
                                                                 manipulator
@@ -335,7 +344,12 @@ public class RobotStates {
                                                                         ElbowPosition.HIGH, elevator))),
 
                                         GamePiece.CUBE,
-                                        Commands.waitUntil(secondaryButton::getAsBoolean)
+                                        Commands.waitUntil(secondaryButton::getAsBoolean).alongWith(Commands.sequence(
+                                                Commands.runOnce(() -> secondaryButtonLED.accept(true)),
+                                                Commands.waitSeconds(0.5),
+                                                Commands.runOnce(() -> secondaryButtonLED.accept(false)),
+                                                Commands.waitSeconds(0.5)).repeatedly()
+                                                .finallyDo((d) -> secondaryButtonLED.accept(false)))
                                                 .andThen(manipulator
                                                         .setPincersReleasedCommand(
                                                                 () -> gridInterface.getSetLocation()
@@ -348,6 +362,7 @@ public class RobotStates {
     }
 
     public static CommandBase humanPlayerPickup(
+            GamePiece gamePiece,
             GridInterface gridInterface,
             Intake intake,
             Manipulator manipulator,
@@ -362,7 +377,7 @@ public class RobotStates {
                                 Commands.waitSeconds(1.5),
                                 elbow.setDesiredPositionCommand(ElbowPosition.HIGH,
                                         elevator))),
-                manipulator.setPincersOpenCommand(),
+                manipulator.setPincersReleasedCommand(() -> gamePiece),
                 Commands.waitSeconds(0.5)).withName("Score Game Piece");
     }
 
@@ -424,7 +439,7 @@ public class RobotStates {
             Elbow elbow,
             LEDs leds) {
         return Commands.sequence(
-                manipulator.setPincersOpenCommand(),
+                manipulator.setPincersPincingCommand(() -> manipulator.getPincers() ? GamePiece.CONE : GamePiece.CUBE),
                 elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
                 elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow, leds),
                 elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator),
@@ -502,7 +517,7 @@ public class RobotStates {
         pathPoints.add(new PathPoint(targetPose.getTranslation(), targetPose.getRotation(), targetPose.getRotation()));
 
         PathPlannerTrajectory traj = PathPlanner.generatePath(
-                new PathConstraints(2, 1),
+                new PathConstraints(6, 8),
                 pathPoints);
 
         AutoManager.getInstance().getField().getObject("AutoDrive Trajectory").setTrajectory(traj);
