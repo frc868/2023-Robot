@@ -145,6 +145,7 @@ public class RobotContainer {
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("Charge Station N",
                         Autos.pathPlannerTrajectory(TrajectoryLoader.getAutoPath("Charge Station N"), drivetrain)));
+        FieldConstants.displayAutoDriveOnField();
     }
 
     private void configureNTCommands() {
@@ -191,7 +192,8 @@ public class RobotContainer {
                             Commands.runOnce(() -> gridInterface.reset()).withName("Reset")),
                     new SendableLogger("Score",
                             RobotStates
-                                    .scoreGamePiece(() -> true, gridInterface, intake, manipulator, elevator, elbow,
+                                    .scoreGamePiece(() -> true, (d) -> {
+                                    }, gridInterface, intake, manipulator, elevator, elbow,
                                             leds)
                                     .andThen(RobotStates.stowElevator(intake, manipulator, elevator, elbow, leds))
                                     .withName("Score"))));
@@ -221,7 +223,8 @@ public class RobotContainer {
                                     Commands.print("3"),
                                     RobotStates.autoDrive(drivetrain, gridInterface, leds),
                                     Commands.print("4"),
-                                    RobotStates.scoreGamePiece(() -> true, gridInterface, intake, manipulator,
+                                    RobotStates.scoreGamePiece(() -> true, (d) -> {
+                                    }, gridInterface, intake, manipulator,
                                             elevator,
                                             elbow, leds),
                                     Commands.print("5"),
@@ -235,7 +238,8 @@ public class RobotContainer {
                             RobotStates.intakeGamePiece(() -> true, intake, manipulator, elevator, elbow,
                                     leds)),
                     new SendableLogger("Score Game Piece",
-                            RobotStates.scoreGamePiece(() -> true, gridInterface, intake, manipulator,
+                            RobotStates.scoreGamePiece(() -> true, (d) -> {
+                            }, gridInterface, intake, manipulator,
                                     elevator,
                                     elbow, leds)),
                     new SendableLogger("Stow Elevator",
