@@ -36,7 +36,7 @@ public class Manipulator extends SubsystemBase {
             Constants.Pneumatics.WRIST[1]);
 
     /** The solenoid that controls the pincer to hold game pieces. */
-    private DoubleSolenoid pincer = new DoubleSolenoid(PneumaticsModuleType.REVPH,
+    private DoubleSolenoid pincers = new DoubleSolenoid(PneumaticsModuleType.REVPH,
             Constants.Pneumatics.PINCERS[0],
             Constants.Pneumatics.PINCERS[1]);
 
@@ -56,8 +56,8 @@ public class Manipulator extends SubsystemBase {
         LoggingManager.getInstance().addGroup("Manipulator", new LogGroup(
                 new DeviceLogger<DoubleSolenoid>(wrist, "Wrist",
                         LogProfileBuilder.buildDoubleSolenoidLogItems(wrist)),
-                new DeviceLogger<DoubleSolenoid>(pincer, "Pincer",
-                        LogProfileBuilder.buildDoubleSolenoidLogItems(pincer)),
+                new DeviceLogger<DoubleSolenoid>(pincers, "Pincer",
+                        LogProfileBuilder.buildDoubleSolenoidLogItems(pincers)),
                 new BooleanLogItem("Is Pole Detected", this::isPoleDetected, LogLevel.MAIN)));
 
         if (RobotBase.isSimulation()) {
@@ -83,6 +83,10 @@ public class Manipulator extends SubsystemBase {
     // private boolean isSafeForWristMove(Elevator elevator) {
     // return elevator.isSafeForWrist();
     // }
+
+    public boolean getPincers() {
+        return pincers.get() == Value.kForward;
+    }
 
     /**
      * Creates an InstantCommand that sets the wrist to the
@@ -114,7 +118,7 @@ public class Manipulator extends SubsystemBase {
      * @return the command
      */
     public CommandBase setPincersOpenCommand() {
-        return runOnce(() -> pincer.set(Value.kForward)).withName("Pincers Open"); // untested
+        return runOnce(() -> pincers.set(Value.kForward)).withName("Pincers Open"); // untested
     }
 
     /**
@@ -124,7 +128,7 @@ public class Manipulator extends SubsystemBase {
      * @return the command
      */
     public CommandBase setPincersClosedCommand() {
-        return runOnce(() -> pincer.set(Value.kReverse)).withName("Pincers Closed"); // untested
+        return runOnce(() -> pincers.set(Value.kReverse)).withName("Pincers Closed"); // untested
     }
 
     /**

@@ -4,6 +4,7 @@ import java.util.function.DoubleSupplier;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.techhounds.houndutil.houndlib.Utils;
@@ -163,11 +164,11 @@ public class Elbow extends ProfiledPIDSubsystem {
         motor.setInverted(true);
         motor.getEncoder().setPositionConversionFactor(2 * Math.PI / 100.0);
         motor.getEncoder().setVelocityConversionFactor(2 * Math.PI / 100.0 / 60.0);
+        motor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 20);
 
         encoder.setInverted(true);
         encoder.setPositionConversionFactor(2 * Math.PI);
         encoder.setZeroOffset(3.4760098 - Math.PI);
-        motor.getEncoder().setPosition(encoder.getPosition());
         motor.burnFlash();
 
         LoggingManager.getInstance().addGroup("Elbow", new LogGroup(
@@ -246,7 +247,7 @@ public class Elbow extends ProfiledPIDSubsystem {
      */
     @Override
     protected double getMeasurement() {
-        return motor.getEncoder().getPosition();
+        return encoder.getPosition();
     }
 
     /**

@@ -2,6 +2,8 @@ package frc.robot;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -9,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.GamePieceLocation.GridPosition;
 import frc.robot.GamePieceLocation.Level;
@@ -47,34 +50,9 @@ public class Controls {
                 .onTrue(RobotStates.intakeGamePiece(() -> joystick.getHID().getRawButton(6), intake, manipulator,
                         elevator, elbow,
                         leds));
+
         joystick.button(8)
                 .whileTrue(drivetrain.chargeStationBalanceCommand());
-        // joystick.button(5).whileTrue(Commands.runOnce(
-        // () -> AutoManager.getInstance().getField().getObject("Traj")
-        // .setTrajectory(PathPlanner.generatePath(
-        // new PathConstraints(0.5, 0.5),
-        // new PathPoint(drivetrain.getPose().getTranslation(),
-        // drivetrain.getPose().getRotation()),
-        // new PathPoint(
-        // drivetrain.getPose()
-        // .plus(new Transform2d(new Translation2d(1, 0),
-        // new Rotation2d(0)))
-        // .getTranslation(),
-        // Rotation2d.fromDegrees(0)))))
-        // .andThen(
-        // new ProxyCommand(
-        // () -> drivetrain.pathFollowingCommand(PathPlanner.generatePath(
-        // new PathConstraints(0.5, 0.5),
-        // new PathPoint(drivetrain.getPose().getTranslation(),
-        // drivetrain.getPose().getRotation()),
-        // new PathPoint(
-        // drivetrain.getPose()
-        // .plus(new Transform2d(
-        // new Translation2d(1, 0),
-        // new Rotation2d(0)))
-        // .getTranslation(),
-        // Rotation2d.fromDegrees(0), drivetrain.getPose().getRotation())))))
-        // .andThen(() -> drivetrain.stop()));
         joystick.button(5).whileTrue(RobotStates.autoDrive(drivetrain, gridInterface, leds));
 
     }
@@ -95,15 +73,15 @@ public class Controls {
         RESET(0, 8), //
         SCORE(0, 11),
 
-        SECONDARY_BUTTON(1, 4),
-        STOW(1, 5),
-        ELBOW_DISABLE(1, 6),
-        ELEVATOR_STEP_DOWN(1, 7),
+        GAME_PIECE_DROP(1, 4),
+        HP_CUBE(1, 5),
+        STOW(1, 6),
+        UNBOUND1(1, 7),
 
         INITIALIZE(1, 8),
-        STOW_HP(1, 9),
-        HP_PICKUP(1, 10),
-        ELEVATOR_STEP_UP(1, 11);
+        HP_CONE(1, 9),
+        HP_STOW(1, 10),
+        UNBOUND2(1, 11);
 
         public final int hid;
         public final int button;
@@ -144,69 +122,85 @@ public class Controls {
                 new CommandGenericHID(port1),
                 new CommandGenericHID(port2) };
 
+        Function<OperatorControls, Trigger> getButton = (control) -> {
+            return hids[control.hid].button(control.button);
+        };
+        BiConsumer<OperatorControls, Boolean> setOutput = (control, bool) -> {
+            hids[control.hid].getHID().setOutput(control.button, bool);
+        };
+
         gridInterface.setHIDOutputDevices(hids[0].getHID(), hids[1].getHID());
 
-        hids[OperatorControls.LEFT_GRID.hid].button(OperatorControls.LEFT_GRID.button)
+        getButton.apply(OperatorControls.LEFT_GRID)
                 .onTrue(gridInterface.setGridCommand(GamePieceLocation.Grid.LEFT));
-        hids[OperatorControls.MIDDLE_GRID.hid].button(OperatorControls.MIDDLE_GRID.button)
+        getButton.apply(OperatorControls.MIDDLE_GRID)
                 .onTrue(gridInterface.setGridCommand(GamePieceLocation.Grid.MIDDLE));
-        hids[OperatorControls.RIGHT_GRID.hid].button(OperatorControls.RIGHT_GRID.button)
+        getButton.apply(OperatorControls.RIGHT_GRID)
                 .onTrue(gridInterface.setGridCommand(GamePieceLocation.Grid.RIGHT));
 
-        hids[OperatorControls.GRIDPOS_A1.hid].button(OperatorControls.GRIDPOS_A1.button)
+        getButton.apply(OperatorControls.GRIDPOS_A1)
                 .onTrue(gridInterface.setLocationCommand(GamePiece.CONE, GridPosition.LEFT, Level.HIGH));
-        hids[OperatorControls.GRIDPOS_A2.hid].button(OperatorControls.GRIDPOS_A2.button)
+        getButton.apply(OperatorControls.GRIDPOS_A2)
                 .onTrue(gridInterface.setLocationCommand(GamePiece.CUBE, GridPosition.MIDDLE, Level.HIGH));
-        hids[OperatorControls.GRIDPOS_A3.hid].button(OperatorControls.GRIDPOS_A3.button)
+        getButton.apply(OperatorControls.GRIDPOS_A3)
                 .onTrue(gridInterface.setLocationCommand(GamePiece.CONE, GridPosition.RIGHT, Level.HIGH));
-        hids[OperatorControls.GRIDPOS_B1.hid].button(OperatorControls.GRIDPOS_B1.button)
+        getButton.apply(OperatorControls.GRIDPOS_B1)
                 .onTrue(gridInterface.setLocationCommand(GamePiece.CONE, GridPosition.LEFT, Level.MIDDLE));
-        hids[OperatorControls.GRIDPOS_B2.hid].button(OperatorControls.GRIDPOS_B2.button)
+        getButton.apply(OperatorControls.GRIDPOS_B2)
                 .onTrue(gridInterface.setLocationCommand(GamePiece.CUBE, GridPosition.MIDDLE, Level.MIDDLE));
-        hids[OperatorControls.GRIDPOS_B3.hid].button(OperatorControls.GRIDPOS_B3.button)
+        getButton.apply(OperatorControls.GRIDPOS_B3)
                 .onTrue(gridInterface.setLocationCommand(GamePiece.CONE, GridPosition.RIGHT, Level.MIDDLE));
-        hids[OperatorControls.GRIDPOS_C1.hid].button(OperatorControls.GRIDPOS_C1.button)
+        getButton.apply(OperatorControls.GRIDPOS_C1)
                 .onTrue(gridInterface.setLocationCommand(GamePiece.HYBRID, GridPosition.LEFT, Level.LOW));
-        hids[OperatorControls.GRIDPOS_C2.hid].button(OperatorControls.GRIDPOS_C2.button)
+        getButton.apply(OperatorControls.GRIDPOS_C2)
                 .onTrue(gridInterface.setLocationCommand(GamePiece.HYBRID, GridPosition.MIDDLE, Level.LOW));
-        hids[OperatorControls.GRIDPOS_C3.hid].button(OperatorControls.GRIDPOS_C3.button)
+        getButton.apply(OperatorControls.GRIDPOS_C3)
                 .onTrue(gridInterface.setLocationCommand(GamePiece.HYBRID, GridPosition.RIGHT, Level.LOW));
 
-        hids[OperatorControls.RESET.hid].button(OperatorControls.RESET.button)
+        getButton.apply(OperatorControls.RESET)
                 .onTrue(Commands.runOnce(() -> gridInterface.reset()).ignoringDisable(true));
 
-        hids[OperatorControls.SCORE.hid].button(OperatorControls.SCORE.button)
+        getButton.apply(OperatorControls.SCORE)
                 .whileTrue(RobotStates
                         .scoreGamePiece(
-                                () -> hids[OperatorControls.SECONDARY_BUTTON.hid].getHID()
-                                        .getRawButton(OperatorControls.SECONDARY_BUTTON.button),
+                                () -> hids[OperatorControls.GAME_PIECE_DROP.hid].getHID()
+                                        .getRawButton(OperatorControls.GAME_PIECE_DROP.button),
+                                (b) -> setOutput.accept(OperatorControls.GAME_PIECE_DROP, b),
                                 gridInterface, intake, manipulator,
                                 elevator, elbow, leds)
-                        .finallyDo(safeStop));
-
-        hids[OperatorControls.STOW.hid].button(OperatorControls.STOW.button)
-                .whileTrue(RobotStates.stowElevator(intake, manipulator, elevator, elbow, leds).finallyDo(safeStop));
-
-        hids[OperatorControls.STOW_HP.hid].button(OperatorControls.STOW_HP.button)
-                .whileTrue(RobotStates.stowElevatorHPStation(intake, manipulator, elevator, elbow, leds)
-                        .andThen(Commands.runOnce(() -> hids[OperatorControls.STOW_HP.hid].getHID()
-                                .setOutput(OperatorControls.STOW_HP.button, true)))
+                        .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.STOW, true)))
                         .finallyDo(safeStop))
-                .onFalse(Commands.runOnce(() -> hids[OperatorControls.STOW_HP.hid].getHID()
-                        .setOutput(OperatorControls.STOW_HP.button, false)));
+                .onFalse(Commands.runOnce(() -> setOutput.accept(OperatorControls.STOW, false)));
 
-        hids[OperatorControls.INITIALIZE.hid].button(OperatorControls.INITIALIZE.button)
-                .onTrue(RobotStates.initializeMechanisms(intake, manipulator, elevator, elbow, leds));
+        getButton.apply(OperatorControls.STOW)
+                .whileTrue(RobotStates.stowElevator(intake, manipulator, elevator, elbow, leds)
+                        .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.STOW, true)))
+                        .finallyDo(safeStop))
+                .onFalse(Commands.runOnce(() -> setOutput.accept(OperatorControls.STOW, false)));
 
-        hids[OperatorControls.ELEVATOR_STEP_UP.hid].button(OperatorControls.ELEVATOR_STEP_UP.button)
-                .onTrue(elevator.setDesiredPositionDeltaCommand(0.1, intake, elbow, leds));
-        hids[OperatorControls.ELEVATOR_STEP_DOWN.hid].button(OperatorControls.ELEVATOR_STEP_DOWN.button)
-                .onTrue(elevator.setDesiredPositionDeltaCommand(-0.1, intake, elbow, leds));
+        getButton.apply(OperatorControls.HP_STOW)
+                .whileTrue(RobotStates.stowElevatorHPStation(intake, manipulator, elevator, elbow, leds)
+                        .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_STOW, true)))
+                        .finallyDo(safeStop))
+                .onFalse(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_STOW, false)));
 
-        hids[OperatorControls.HP_PICKUP.hid].button(OperatorControls.HP_PICKUP.button)
-                .onTrue(RobotStates.humanPlayerPickup(gridInterface, intake, manipulator, elevator, elbow, leds));
-        hids[OperatorControls.ELBOW_DISABLE.hid].button(OperatorControls.ELBOW_DISABLE.button)
-                .onTrue(Commands.runOnce(elbow::disable));
+        getButton.apply(OperatorControls.HP_CONE)
+                .whileTrue(
+                        RobotStates.humanPlayerPickup(GamePiece.CONE, gridInterface, intake, manipulator, elevator,
+                                elbow, leds)
+                                .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_CONE, true)))
+                                .finallyDo(safeStop))
+                .onFalse(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_CONE, false)));
+
+        getButton.apply(OperatorControls.HP_CUBE)
+                .whileTrue(RobotStates.humanPlayerPickup(GamePiece.CUBE, gridInterface, intake, manipulator, elevator,
+                        elbow, leds).andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_CONE, true)))
+                        .finallyDo(safeStop))
+                .onFalse(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_STOW, false)));
+
+        getButton.apply(OperatorControls.INITIALIZE)
+                .onTrue(RobotStates.initializeMechanisms(intake, manipulator, elevator, elbow, leds)
+                        .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.INITIALIZE, true))));
 
     }
 
