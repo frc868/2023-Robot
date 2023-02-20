@@ -616,7 +616,7 @@ public class FieldConstants {
                 .setPose(FieldConstants.Red.Substations.SINGLE_SUBSTATION);
     }
 
-    public void displayAutoDriveOnField() {
+    public static void displayAutoDriveOnField() {
         FieldConstants.AutoDrive.TOP_LEFT_ZONE.drawOnField(AutoManager.getInstance().getField());
         FieldConstants.AutoDrive.TOP_LEFT_CENTER_ZONE.drawOnField(AutoManager.getInstance().getField());
         FieldConstants.AutoDrive.TOP_CENTER_ZONE.drawOnField(AutoManager.getInstance().getField());
