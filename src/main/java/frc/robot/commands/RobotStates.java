@@ -15,6 +15,8 @@ import com.techhounds.houndutil.houndlib.Rectangle2d;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -25,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import frc.robot.FieldConstants;
 import frc.robot.GamePieceLocation;
 import frc.robot.GamePieceLocation.GamePiece;
+import frc.robot.GamePieceLocation.Level;
 import frc.robot.GridInterface;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elbow;
@@ -191,7 +194,9 @@ public class RobotStates {
         return currentContinuousError;
     }
 
-    // Sequences
+    //////////////////////////////
+    ////////// Sequences /////////
+    //////////////////////////////
 
     /**
      * Creates a command to intake a game piece.
@@ -239,7 +244,6 @@ public class RobotStates {
                                 Commands.waitUntil(secondaryButton::getAsBoolean),
                                 intake.runPassoverMotorsCommand(),
                                 manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow()).repeatedly()),
-                        // Commands.waitUntil(),
                         manipulator.setPincersPincingCommand(() -> intakeMode.orElseThrow()),
                         intake.setPassoversRetractedCommand(elevator, leds),
                         intake.setIntakeUpCommand(elevator, leds),
@@ -249,6 +253,156 @@ public class RobotStates {
                 singularErrorCommand(() -> "Intake mode not present"),
                 () -> intakeMode.isPresent()).withName("Intake Game Piece");
     }
+
+    public static CommandBase raiseEVIntermediateSequence(
+            GridInterface gridInterface,
+            Intake intake,
+            Manipulator manipulator,
+            Elevator elevator,
+            Elbow elbow,
+            LEDs leds) {
+        return Commands.parallel(
+                elevator.setScoringPositionCommand(
+                        () -> gridInterface.getSetLocation()
+                                .orElseThrow().gamePiece,
+                        () -> gridInterface.getSetLocation().orElseThrow().level, intake, elbow, leds),
+                Commands.sequence(
+                        elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
+                        Commands.select(
+                                Map.of(
+                                        GamePiece.CONE,
+                                        Commands.waitSeconds(2)
+                                                .andThen(elbow.setDesiredPositionCommand(
+                                                        ElbowPosition.HIGH,
+                                                        elevator).andThen(
+                                                                manipulator.setWristUpCommand(elevator,
+                                                                        leds))),
+
+                                        GamePiece.CUBE,
+                                        Commands.waitSeconds(2)
+                                                .andThen(elbow.setDesiredPositionCommand(
+                                                        ElbowPosition.HIGH,
+                                                        elevator))),
+                                () -> gridInterface.getSetLocation()
+                                        .orElseThrow().gamePiece)));
+    }
+
+    public static CommandBase scoreIntermediateSequence(
+            BooleanSupplier secondaryButton,
+            BooleanConsumer secondaryButtonLED,
+            boolean driveBackwards,
+            Drivetrain drivetrain,
+            GridInterface gridInterface,
+            Intake intake,
+            Manipulator manipulator,
+            Elevator elevator,
+            Elbow elbow,
+            LEDs leds) {
+        return Commands.select(
+                Map.of(
+                        GamePiece.CONE,
+                        Commands.deadline(
+                                Commands.waitUntil(
+                                        () -> (manipulator.isPoleDetected() || secondaryButton.getAsBoolean())),
+                                Commands.sequence(
+                                        Commands.runOnce(() -> secondaryButtonLED.accept(true)),
+                                        Commands.waitSeconds(0.5),
+                                        Commands.runOnce(() -> secondaryButtonLED.accept(false)),
+                                        Commands.waitSeconds(0.5)).repeatedly()
+                                        .finallyDo((d) -> secondaryButtonLED.accept(false)))
+                                .andThen(
+                                        Commands.parallel(
+                                                manipulator
+                                                        .setPincersReleasedCommand(
+                                                                () -> gridInterface.getSetLocation()
+                                                                        .orElseThrow().gamePiece),
+                                                elbow.setDesiredPositionCommand(ElbowPosition.LOW,
+                                                        elevator),
+                                                elevator.setDesiredPositionDeltaCommand(-0.2, intake,
+                                                        elbow, leds))
+                                                .andThen(
+                                                        Commands.either(
+                                                                drivetrain.moveDeltaPathFollowingCommand(
+                                                                        new Transform2d(
+                                                                                new Translation2d(
+                                                                                        DriverStation
+                                                                                                .getAlliance() == Alliance.Blue
+                                                                                                        ? 0.2
+                                                                                                        : -0.2,
+                                                                                        0),
+                                                                                new Rotation2d(Math.PI)),
+                                                                        new PathConstraints(3,
+                                                                                3)),
+                                                                Commands.none(),
+                                                                () -> driveBackwards && gridInterface.getSetLocation()
+                                                                        .orElseThrow().level == Level.HIGH
+                                                                        && gridInterface.getSetLocation()
+                                                                                .orElseThrow().gamePiece == GamePiece.CONE))
+                                                .andThen(elbow.setDesiredPositionCommand(
+                                                        ElbowPosition.HIGH, elevator))),
+
+                        GamePiece.CUBE,
+                        Commands.waitUntil(secondaryButton::getAsBoolean).alongWith(Commands.sequence(
+                                Commands.runOnce(() -> secondaryButtonLED.accept(true)),
+                                Commands.waitSeconds(0.5),
+                                Commands.runOnce(() -> secondaryButtonLED.accept(false)),
+                                Commands.waitSeconds(0.5)).repeatedly()
+                                .finallyDo((d) -> secondaryButtonLED.accept(false)))
+                                .andThen(manipulator
+                                        .setPincersReleasedCommand(
+                                                () -> gridInterface.getSetLocation()
+                                                        .orElseThrow().gamePiece))),
+                () -> gridInterface.getSetLocation()
+                        .orElseThrow().gamePiece);
+    }
+
+    /**
+     * Creates a command to score a game piece, using
+     * everything but the drivetrain.
+     * 
+     * Runs this sequence:
+     *     1. Runs these two items in parallel:
+     *         1. Starts moving the elevator up to the position set by the operator.
+     *         2. Runs this sequence:
+     *             1. Sets the elbow to the middle position.
+     *             2. If the robot is set to the cone mode:
+     *                 1. Waits 0.5 seconds.
+     *                 2. Sets the elbow to the high position.
+     *                 3. Sets the wrist up.
+     *             3. If the robot is set to the cube mode:
+     *                 1. Does nothing.
+     *     2. If the robot is set to the cone mode:
+     *         1. Waits until the pole is detected.
+     *         2. Sets the pincers to release the cone.
+     *         3. Sets the elbow to the low position.
+     *     3. If the robot is set to the cube mode:
+     *         1. Waits until the elevator reaches its goal position.
+     *         2. Sets the pincers to release the cube, dropping it onto the box.
+     * 
+     * The entire sequence will not run unless the scoring position has been set by
+     * the operator.
+     * 
+     * @param gridInterface
+     * @param intake
+     * @param manipulator
+     * @param elevator
+     * @param elbow
+     * @param leds
+     * @return the command
+     */
+    // public static CommandBase scoreGamePiece(
+    // BooleanSupplier secondaryButton,
+    // BooleanConsumer secondaryButtonLED,
+    // GridInterface gridInterface,
+    // Intake intake,
+    // Manipulator manipulator,
+    // Elevator elevator,
+    // Elbow elbow,
+    // LEDs leds) {
+    // return scoreGamePiece(secondaryButton, secondaryButtonLED, null,
+    // gridInterface, intake, manipulator, elevator,
+    // elbow, leds);
+    // }
 
     /**
      * Creates a command to score a game piece, using
@@ -287,6 +441,8 @@ public class RobotStates {
     public static CommandBase scoreGamePiece(
             BooleanSupplier secondaryButton,
             BooleanConsumer secondaryButtonLED,
+            Drivetrain drivetrain,
+            boolean driveBackwards,
             GridInterface gridInterface,
             Intake intake,
             Manipulator manipulator,
@@ -295,67 +451,10 @@ public class RobotStates {
             LEDs leds) {
         return Commands.either(
                 Commands.sequence(
-                        Commands.parallel(
-                                elevator.setScoringPositionCommand(
-                                        () -> gridInterface.getSetLocation()
-                                                .orElseThrow().gamePiece,
-                                        () -> gridInterface.getSetLocation().orElseThrow().level, intake, elbow, leds),
-                                Commands.sequence(
-                                        elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
-                                        Commands.select(
-                                                Map.of(
-                                                        GamePiece.CONE,
-                                                        Commands.waitSeconds(2)
-                                                                .andThen(elbow.setDesiredPositionCommand(
-                                                                        ElbowPosition.HIGH,
-                                                                        elevator).andThen(
-                                                                                manipulator.setWristUpCommand(elevator,
-                                                                                        leds))),
-
-                                                        GamePiece.CUBE,
-                                                        Commands.waitSeconds(2)
-                                                                .andThen(elbow.setDesiredPositionCommand(
-                                                                        ElbowPosition.HIGH,
-                                                                        elevator))),
-                                                () -> gridInterface.getSetLocation()
-                                                        .orElseThrow().gamePiece))),
-                        Commands.select(
-                                Map.of(
-                                        GamePiece.CONE,
-                                        Commands.waitUntil(
-                                                () -> manipulator.isPoleDetected() || secondaryButton.getAsBoolean())
-                                                .alongWith(Commands.sequence(
-                                                        Commands.runOnce(() -> secondaryButtonLED.accept(true)),
-                                                        Commands.waitSeconds(0.5),
-                                                        Commands.runOnce(() -> secondaryButtonLED.accept(false)),
-                                                        Commands.waitSeconds(0.5)).repeatedly()
-                                                        .finallyDo((d) -> secondaryButtonLED.accept(false)))
-                                                .andThen(
-                                                        Commands.parallel(
-                                                                manipulator
-                                                                        .setPincersReleasedCommand(
-                                                                                () -> gridInterface.getSetLocation()
-                                                                                        .orElseThrow().gamePiece),
-                                                                elbow.setDesiredPositionCommand(ElbowPosition.LOW,
-                                                                        elevator),
-                                                                elevator.setDesiredPositionDeltaCommand(-0.2, intake,
-                                                                        elbow, leds))
-                                                                .andThen(elbow.setDesiredPositionCommand(
-                                                                        ElbowPosition.HIGH, elevator))),
-
-                                        GamePiece.CUBE,
-                                        Commands.waitUntil(secondaryButton::getAsBoolean).alongWith(Commands.sequence(
-                                                Commands.runOnce(() -> secondaryButtonLED.accept(true)),
-                                                Commands.waitSeconds(0.5),
-                                                Commands.runOnce(() -> secondaryButtonLED.accept(false)),
-                                                Commands.waitSeconds(0.5)).repeatedly()
-                                                .finallyDo((d) -> secondaryButtonLED.accept(false)))
-                                                .andThen(manipulator
-                                                        .setPincersReleasedCommand(
-                                                                () -> gridInterface.getSetLocation()
-                                                                        .orElseThrow().gamePiece))),
-                                () -> gridInterface.getSetLocation()
-                                        .orElseThrow().gamePiece),
+                        raiseEVIntermediateSequence(gridInterface, intake, manipulator, elevator, elbow, leds),
+                        scoreIntermediateSequence(secondaryButton, secondaryButtonLED, driveBackwards, drivetrain,
+                                gridInterface,
+                                intake, manipulator, elevator, elbow, leds),
                         Commands.waitSeconds(0.5)),
                 singularErrorCommand(() -> "Grid interface location not present"),
                 () -> gridInterface.getSetLocation().isPresent()).withName("Score Game Piece");
