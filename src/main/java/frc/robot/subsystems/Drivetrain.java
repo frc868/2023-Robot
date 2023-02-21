@@ -4,7 +4,10 @@ import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix.sensors.Pigeon2;
 import com.ctre.phoenix.unmanaged.Unmanaged;
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndlog.LogGroup;
@@ -38,6 +41,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -651,6 +655,26 @@ public class Drivetrain extends SubsystemBase {
                 new PIDController(Constants.Gains.Trajectories.thetakP, 0, 0),
                 (s) -> this.setModuleStates(s, true, true),
                 this);
+    }
+
+    /**
+     * Creates a command that supplies SwerveModuleStates to follow a
+     * PathPlannerTrajectory.
+     * 
+     * @return the command
+     */
+    public CommandBase moveDeltaPathFollowingCommand(Transform2d delta, PathConstraints constraints) {
+        return new ProxyCommand(
+                () -> pathFollowingCommand(PathPlanner.generatePath(
+                        constraints,
+                        new PathPoint(
+                                getPose().getTranslation(),
+                                getPose().plus(delta).getRotation(),
+                                getPose().getRotation()),
+                        new PathPoint(
+                                getPose().plus(delta).getTranslation(),
+                                getPose().plus(delta).getRotation(),
+                                getPose().getRotation()))));
     }
 
     /**
