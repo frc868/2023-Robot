@@ -58,7 +58,7 @@ public final class Constants {
         public static final int[] PINCERS = { 13, 12 };
         public static final int[] WRIST = { 11, 10 };
         public static final int[] INTAKE = { 14, 15 };
-        public static final int[] PASSOVER = { 9, 8 };
+        public static final int[] PASSOVER = { 8, 9 };
     }
 
     public static final class DIO {
