@@ -62,8 +62,7 @@ public class Manipulator extends SubsystemBase {
 
         if (RobotBase.isSimulation()) {
             poleSwitchSim = new DIOSim(poleSwitch);
-            poleSwitchSim.setValue(true);
-
+            poleSwitchSim.setValue(false);
         }
     }
 
@@ -76,7 +75,7 @@ public class Manipulator extends SubsystemBase {
         if (wrist.get() == Value.kForward) {
             wristLigament.setAngle(0);
         } else {
-            wristLigament.setAngle(90);
+            wristLigament.setAngle(60);
         }
     }
 
