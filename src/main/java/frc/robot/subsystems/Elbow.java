@@ -48,9 +48,9 @@ import frc.robot.commands.RobotStates;
  */
 public class Elbow extends ProfiledPIDSubsystem {
     public static enum ElbowPosition {
-        LOW(0.502),
-        MID(0.94),
-        HIGH(1.7);
+        LOW(0.502 - 0.94),
+        MID(0.94 - 0.94),
+        HIGH(1.7 - 0.94);
 
         public final double value;
 
@@ -169,7 +169,8 @@ public class Elbow extends ProfiledPIDSubsystem {
 
         encoder.setInverted(true);
         encoder.setPositionConversionFactor(2 * Math.PI);
-        encoder.setZeroOffset(3.4760098 - Math.PI); // TODO: fix this to make it the true 0 poitn
+        encoder.setZeroOffset(3.4760098 - Math.PI + 0.94);
+
         motor.burnFlash();
 
         LoggingManager.getInstance().addGroup("Elbow", new LogGroup(

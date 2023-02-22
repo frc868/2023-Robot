@@ -110,7 +110,7 @@ public final class Constants {
         }
 
         public static final class Elbow {
-            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 3.5);
+            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 5);
             public static final TunableNumber kI = new TunableNumber("Elbow", "kI", 0);
             public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0.89);
             public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 0.07);
