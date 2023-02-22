@@ -59,11 +59,11 @@ public class RobotContainer {
     private MechanismLigament2d fromRobot = root
             .append(new MechanismLigament2d("fromRobot", -0.33, 0, 0, new Color8Bit(Color.kBlue)));
     private MechanismLigament2d elevatorBaseLigament = fromRobot
-            .append(new MechanismLigament2d("elevatorBase", 0.71, 42, 4, new Color8Bit(Color.kCyan)));
+            .append(new MechanismLigament2d("elevatorBase", 0.71, 35, 4, new Color8Bit(Color.kCyan)));
     private MechanismLigament2d elevatorLigament = elevatorBaseLigament
             .append(new MechanismLigament2d("elevator", 1.32, 0, 5, new Color8Bit(Color.kOrange)));
     private MechanismLigament2d elbowLigament = elevatorLigament
-            .append(new MechanismLigament2d("elbow", 0.2, -42, 3, new Color8Bit(Color.kGreen)));
+            .append(new MechanismLigament2d("elbow", 0.2, -35, 3, new Color8Bit(Color.kGreen)));
     private MechanismLigament2d wristLigament = elbowLigament
             .append(new MechanismLigament2d("wrist", 0.2, 90, 3, new Color8Bit(Color.kRed)));
 
@@ -110,7 +110,7 @@ public class RobotContainer {
     private void configureButtonBindings() {
         Controls.configureDriverControls(0, drivetrain, gridInterface, intake, manipulator,
                 elevator, elbow, leds);
-        Controls.configureOperatorControls(1, 2, gridInterface, intake, manipulator,
+        Controls.configureOperatorControls(1, 2, drivetrain, gridInterface, intake, manipulator,
                 elevator, elbow, leds);
         Controls.configureBackupOperatorControls(3, gridInterface, intake, manipulator, elevator,
                 elbow, leds);
@@ -193,14 +193,13 @@ public class RobotContainer {
                     new SendableLogger("Score",
                             RobotStates
                                     .scoreGamePiece(() -> true, (d) -> {
-                                    }, gridInterface, intake, manipulator, elevator, elbow,
+                                    }, drivetrain, true, gridInterface, intake, manipulator, elevator, elbow,
                                             leds)
                                     .andThen(RobotStates.stowElevator(intake, manipulator, elevator, elbow, leds))
                                     .withName("Score"))));
         }
 
         if (Constants.IS_NT_COMMANDS_ENABLED) {
-
             LoggingManager.getInstance().addGroup("Main", new LogGroup(
                     new StringLogItem("Intake Mode",
                             () -> RobotStates.getIntakeMode().isEmpty() ? "null"
@@ -224,7 +223,7 @@ public class RobotContainer {
                                     RobotStates.autoDrive(drivetrain, gridInterface, leds),
                                     Commands.print("4"),
                                     RobotStates.scoreGamePiece(() -> true, (d) -> {
-                                    }, gridInterface, intake, manipulator,
+                                    }, drivetrain, true, gridInterface, intake, manipulator,
                                             elevator,
                                             elbow, leds),
                                     Commands.print("5"),
@@ -239,9 +238,15 @@ public class RobotContainer {
                                     leds)),
                     new SendableLogger("Score Game Piece",
                             RobotStates.scoreGamePiece(() -> true, (d) -> {
-                            }, gridInterface, intake, manipulator,
+                            }, drivetrain, true, gridInterface, intake, manipulator,
                                     elevator,
                                     elbow, leds)),
+                    new SendableLogger("Score Game Piece w/Stow",
+                            RobotStates.scoreGamePiece(() -> true, (d) -> {
+                            }, drivetrain, true, gridInterface, intake, manipulator,
+                                    elevator,
+                                    elbow, leds)
+                                    .andThen(RobotStates.stowElevator(intake, manipulator, elevator, elbow, leds))),
                     new SendableLogger("Stow Elevator",
                             RobotStates.stowElevator(intake, manipulator, elevator, elbow, leds)),
                     new SendableLogger("Drive to Scoring Location",
