@@ -212,7 +212,7 @@ public class Controls {
                 .onFalse(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_CUBE, false)));
 
         getButton.apply(OperatorControls.INITIALIZE)
-                .onTrue(RobotStates.initializeMechanisms(intake, manipulator, elevator, elbow, leds)
+                .whileTrue(RobotStates.initializeMechanisms(intake, manipulator, elevator, elbow, leds)
                         .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.INITIALIZE, true))));
 
     }
