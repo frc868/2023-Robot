@@ -135,6 +135,7 @@ public class Elbow extends ProfiledPIDSubsystem {
                         Constants.Geometries.Elbow.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
 
         getController().setTolerance(Constants.Gains.Elbow.TOLERANCE.get());
+        getController().enableContinuousInput(0, 2 * Math.PI);
 
         Constants.Gains.Elbow.kP.setConsumer((d) -> getController().setP(d));
         Constants.Gains.Elbow.kI.setConsumer((d) -> getController().setI(d));
@@ -168,7 +169,7 @@ public class Elbow extends ProfiledPIDSubsystem {
 
         encoder.setInverted(true);
         encoder.setPositionConversionFactor(2 * Math.PI);
-        encoder.setZeroOffset(3.4760098 - Math.PI);
+        encoder.setZeroOffset(3.4760098 - Math.PI); // TODO: fix this to make it the true 0 poitn
         motor.burnFlash();
 
         LoggingManager.getInstance().addGroup("Elbow", new LogGroup(
@@ -202,7 +203,7 @@ public class Elbow extends ProfiledPIDSubsystem {
     @Override
     public void periodic() {
         super.periodic();
-        ligament.setAngle(-42 + Units.radiansToDegrees(motor.getEncoder().getPosition() - 1.04));
+        ligament.setAngle(-35 + Units.radiansToDegrees(motor.getEncoder().getPosition() - 1.04));
     }
 
     /**
@@ -247,7 +248,7 @@ public class Elbow extends ProfiledPIDSubsystem {
      */
     @Override
     protected double getMeasurement() {
-        return encoder.getPosition();
+        return RobotBase.isReal() ? encoder.getPosition() : motor.getEncoder().getPosition();
     }
 
     /**
