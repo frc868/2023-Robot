@@ -108,7 +108,8 @@ public class Controls {
         }
     }
 
-    public static void configureOperatorControls(int port1, int port2, GridInterface gridInterface, Intake intake,
+    public static void configureOperatorControls(int port1, int port2, Drivetrain drivetrain,
+            GridInterface gridInterface, Intake intake,
             Manipulator manipulator, Elevator elevator, Elbow elbow, LEDs leds) {
 
         BooleanConsumer safeStop = (d) -> {
@@ -166,11 +167,23 @@ public class Controls {
                                 () -> hids[OperatorControls.GAME_PIECE_DROP.hid].getHID()
                                         .getRawButton(OperatorControls.GAME_PIECE_DROP.button),
                                 (b) -> setOutput.accept(OperatorControls.GAME_PIECE_DROP, b),
-                                gridInterface, intake, manipulator,
+                                drivetrain, false, gridInterface, intake, manipulator,
                                 elevator, elbow, leds)
-                        .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.STOW, true)))
+                        .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.SCORE, true)))
                         .finallyDo(safeStop))
-                .onFalse(Commands.runOnce(() -> setOutput.accept(OperatorControls.STOW, false)));
+                .onFalse(Commands.runOnce(() -> setOutput.accept(OperatorControls.SCORE, false)));
+
+        getButton.apply(OperatorControls.UNBOUND1)
+                .whileTrue(RobotStates
+                        .scoreGamePiece(
+                                () -> hids[OperatorControls.GAME_PIECE_DROP.hid].getHID()
+                                        .getRawButton(OperatorControls.GAME_PIECE_DROP.button),
+                                (b) -> setOutput.accept(OperatorControls.GAME_PIECE_DROP, b),
+                                drivetrain, false, gridInterface, intake, manipulator,
+                                elevator, elbow, leds)
+                        .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.UNBOUND1, true)))
+                        .finallyDo(safeStop))
+                .onFalse(Commands.runOnce(() -> setOutput.accept(OperatorControls.UNBOUND1, false)));
 
         getButton.apply(OperatorControls.STOW)
                 .whileTrue(RobotStates.stowElevator(intake, manipulator, elevator, elbow, leds)
@@ -196,7 +209,7 @@ public class Controls {
                 .whileTrue(RobotStates.humanPlayerPickup(GamePiece.CUBE, gridInterface, intake, manipulator, elevator,
                         elbow, leds).andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_CONE, true)))
                         .finallyDo(safeStop))
-                .onFalse(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_STOW, false)));
+                .onFalse(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_CUBE, false)));
 
         getButton.apply(OperatorControls.INITIALIZE)
                 .onTrue(RobotStates.initializeMechanisms(intake, manipulator, elevator, elbow, leds)
