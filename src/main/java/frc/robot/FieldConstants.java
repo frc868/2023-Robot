@@ -213,22 +213,22 @@ public class FieldConstants {
         public static final Translation2d TOP_LEFT_INTERMEDIARY = new Translation2d(4.16, 6.50);
         public static final Translation2d TOP_RIGHT_INTERMEDIARY = new Translation2d(12.38, 6.50);
 
-        public static final Translation2d UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY = new Translation2d(2.25, 4.67);
+        public static final Translation2d UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY = new Translation2d(2.35, 4.67);
         public static final Translation2d UPPER_MIDDLE_BLUE_CENTER_INTERMEDIARY = new Translation2d(4.16, 4.67);
         public static final Translation2d UPPER_MIDDLE_BLUE_RIGHT_INTERMEDIARY = new Translation2d(5.65, 4.67);
         public static final Translation2d UPPER_MIDDLE_RED_LEFT_INTERMEDIARY = new Translation2d(10.89, 4.67);
         public static final Translation2d UPPER_MIDDLE_RED_CENTER_INTERMEDIARY = new Translation2d(12.38, 4.67);
-        public static final Translation2d UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY = new Translation2d(14.29, 4.67);
+        public static final Translation2d UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY = new Translation2d(14.19, 4.67);
 
-        public static final Translation2d LOWER_MIDDLE_BLUE_LEFT_INTERMEDIARY = new Translation2d(2.25, 2.715);
+        public static final Translation2d LOWER_MIDDLE_BLUE_LEFT_INTERMEDIARY = new Translation2d(2.35, 2.715);
         public static final Translation2d LOWER_MIDDLE_BLUE_RIGHT_INTERMEDIARY = new Translation2d(5.65, 2.715);
         public static final Translation2d LOWER_MIDDLE_RED_LEFT_INTERMEDIARY = new Translation2d(10.89, 2.715);
-        public static final Translation2d LOWER_MIDDLE_RED_RIGHT_INTERMEDIARY = new Translation2d(14.29, 2.715);
+        public static final Translation2d LOWER_MIDDLE_RED_RIGHT_INTERMEDIARY = new Translation2d(14.19, 2.715);
 
-        public static final Translation2d BOTTOM_BLUE_LEFT_INTERMEDIARY = new Translation2d(2.25, 0.76);
+        public static final Translation2d BOTTOM_BLUE_LEFT_INTERMEDIARY = new Translation2d(2.35, 0.76);
         public static final Translation2d BOTTOM_BLUE_RIGHT_INTERMEDIARY = new Translation2d(5.65, 0.76);
         public static final Translation2d BOTTOM_RED_LEFT_INTERMEDIARY = new Translation2d(10.89, 0.76);
-        public static final Translation2d BOTTOM_RED_RIGHT_INTERMEDIARY = new Translation2d(14.29, 0.76);
+        public static final Translation2d BOTTOM_RED_RIGHT_INTERMEDIARY = new Translation2d(14.19, 0.76);
 
         public static final Map<Alliance, Map<Rectangle2d, Pose2d[]>> SCORING_AREA_ZONE_TO_INTERMEDIARY = Map.of(
                 Alliance.Blue,
