@@ -55,9 +55,9 @@ public final class Constants {
     }
 
     public static final class Pneumatics {
-        public static final int[] PINCERS = { 3, 2 };
-        public static final int[] WRIST = { 4, 5 };
-        public static final int[] INTAKE = { 1, 0 };
+        public static final int[] PINCERS = { 13, 12 };
+        public static final int[] WRIST = { 11, 10 };
+        public static final int[] INTAKE = { 14, 15 };
         public static final int[] PASSOVER = { 9, 8 };
     }
 
