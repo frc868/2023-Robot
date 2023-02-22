@@ -271,7 +271,7 @@ public class RobotStates {
                         Commands.select(
                                 Map.of(
                                         GamePiece.CONE,
-                                        Commands.waitSeconds(2)
+                                        Commands.waitSeconds(1)
                                                 .andThen(elbow.setDesiredPositionCommand(
                                                         ElbowPosition.HIGH,
                                                         elevator).andThen(
@@ -279,7 +279,7 @@ public class RobotStates {
                                                                         leds))),
 
                                         GamePiece.CUBE,
-                                        Commands.waitSeconds(2)
+                                        Commands.waitSeconds(1)
                                                 .andThen(elbow.setDesiredPositionCommand(
                                                         ElbowPosition.HIGH,
                                                         elevator))),
@@ -342,12 +342,14 @@ public class RobotStates {
                                                         ElbowPosition.HIGH, elevator))),
 
                         GamePiece.CUBE,
-                        Commands.waitUntil(secondaryButton::getAsBoolean).alongWith(Commands.sequence(
-                                Commands.runOnce(() -> secondaryButtonLED.accept(true)),
-                                Commands.waitSeconds(0.5),
-                                Commands.runOnce(() -> secondaryButtonLED.accept(false)),
-                                Commands.waitSeconds(0.5)).repeatedly()
-                                .finallyDo((d) -> secondaryButtonLED.accept(false)))
+                        Commands.deadline(
+                                Commands.waitUntil(secondaryButton::getAsBoolean),
+                                Commands.sequence(
+                                        Commands.runOnce(() -> secondaryButtonLED.accept(true)),
+                                        Commands.waitSeconds(0.5),
+                                        Commands.runOnce(() -> secondaryButtonLED.accept(false)),
+                                        Commands.waitSeconds(0.5)).repeatedly()
+                                        .finallyDo((d) -> secondaryButtonLED.accept(false)))
                                 .andThen(manipulator
                                         .setPincersReleasedCommand(
                                                 () -> gridInterface.getSetLocation()
