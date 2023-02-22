@@ -179,7 +179,7 @@ public class Controls {
                                 () -> hids[OperatorControls.GAME_PIECE_DROP.hid].getHID()
                                         .getRawButton(OperatorControls.GAME_PIECE_DROP.button),
                                 (b) -> setOutput.accept(OperatorControls.GAME_PIECE_DROP, b),
-                                drivetrain, false, gridInterface, intake, manipulator,
+                                drivetrain, true, gridInterface, intake, manipulator,
                                 elevator, elbow, leds)
                         .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.UNBOUND1, true)))
                         .finallyDo(safeStop))
