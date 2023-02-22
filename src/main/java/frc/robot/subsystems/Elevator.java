@@ -106,7 +106,7 @@ public class Elevator extends ProfiledPIDSubsystem {
             10,
             Units.inchesToMeters(1.2),
             Units.inchesToMeters(0),
-            1.40,
+            1.8,
             true);
 
     /**
