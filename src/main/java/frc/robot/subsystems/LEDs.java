@@ -23,12 +23,12 @@ import frc.robot.commands.RobotStates;
  */
 public class LEDs extends SubsystemBase {
     /** The LEDs. */
-    private AddressableLED led = new AddressableLED(0);
+    private AddressableLED leds = new AddressableLED(0);
 
     /** The last state of the LEDs before it was in {@code state}. */
     private LEDState previousState = LEDState.TechHOUNDS;
     /** The current state of the LEDs. */
-    private LEDState state = LEDState.TechHOUNDS;
+    private LEDState state = LEDState.Uninitialized;
 
     /**
      * Describes the states that the LEDs can be in.
@@ -65,6 +65,8 @@ public class LEDs extends SubsystemBase {
         /** The supplier for the buffer for each LEDState. */
         private final Runnable bufferRunnable;
 
+        private static final int v = 255;
+
         /** The ctor for the LEDState, takes in a Supplier<AddressableLEDBuffer>. */
         private LEDState(Runnable bufferRunnable) {
             this.bufferRunnable = bufferRunnable;
@@ -89,7 +91,7 @@ public class LEDs extends SubsystemBase {
                 // shape is a circle so only one value needs to precess
                 final var hue = (firstPixelHue + (i * 180 / buffer.getLength())) % 180;
                 // Set the value
-                buffer.setHSV(i, hue, 255, 128);
+                buffer.setHSV(i, hue, 255, v);
 
             }
             // Increase by 3 to make the rainbow "move"
@@ -104,9 +106,9 @@ public class LEDs extends SubsystemBase {
         private static void techHounds() {
             for (int i = 0; i < buffer.getLength(); i++) {
                 if (((i + timeStep) / 8) % 2 == 0) { // shifts back and forth every 8 pixels
-                    buffer.setHSV(i, 24, 250, 128); // gold
+                    buffer.setHSV(i, 15, 250, v); // gold
                 } else {
-                    buffer.setHSV(i, 109, 240, 128); // blue
+                    buffer.setHSV(i, 109, 240, v); // blue
                 }
             }
             timeStep++;
@@ -117,7 +119,7 @@ public class LEDs extends SubsystemBase {
          */
         private static void conePickup() {
             for (int i = 0; i < buffer.getLength(); i++) {
-                buffer.setHSV(i, 30, 255, 128);
+                buffer.setHSV(i, 15, 255, v);
             }
         }
 
@@ -126,7 +128,7 @@ public class LEDs extends SubsystemBase {
          */
         private static void cubePickup() {
             for (int i = 0; i < buffer.getLength(); i++) {
-                buffer.setHSV(i, 150, 255, 128);
+                buffer.setHSV(i, 150, 255, v);
             }
         }
 
@@ -139,7 +141,7 @@ public class LEDs extends SubsystemBase {
             for (int i = 0; i < buffer.getLength(); i++) {
                 // every 0.5 seconds it will switch from off to on
                 if (timeStep / 25 == 1) {
-                    buffer.setHSV(i, 0, 255, 128);
+                    buffer.setHSV(i, 0, 255, v);
                 } else {
                     buffer.setHSV(i, 0, 0, 0);
                 }
@@ -152,7 +154,7 @@ public class LEDs extends SubsystemBase {
          */
         private static void temporaryError() {
             for (int i = 0; i < buffer.getLength(); i++) {
-                buffer.setHSV(i, 0, 255, 128);
+                buffer.setHSV(i, 0, 255, v);
             }
         }
 
@@ -162,11 +164,11 @@ public class LEDs extends SubsystemBase {
          */
         private static void uninitialized() {
             timeStep++; // 50 timesteps is one second
-            timeStep %= 50; // every 1 second it will roll over
+            timeStep %= 20; // every 0.4 seconds it will roll over
             for (int i = 0; i < buffer.getLength(); i++) {
                 // every 0.2 seconds it will switch from off to on
                 if (timeStep / 10 == 1) {
-                    buffer.setHSV(i, 15, 255, 128);
+                    buffer.setHSV(i, 15, 255, v);
                 } else {
                     buffer.setHSV(i, 0, 0, 0);
                 }
@@ -178,9 +180,9 @@ public class LEDs extends SubsystemBase {
      * Initializes the LEDs.
      */
     public LEDs() {
-        led.setLength(50);
-        led.setData(state.getBuffer());
-        led.start();
+        leds.setLength(50);
+        leds.setData(state.getBuffer());
+        leds.start();
 
         new Trigger(() -> RobotStates.getCurrentDiscreteError().isPresent())
                 .onTrue(setLEDStateCommand(LEDState.Error))
@@ -251,6 +253,6 @@ public class LEDs extends SubsystemBase {
     @Override
     public void periodic() {
         super.periodic();
-        led.setData(state.getBuffer());
+        leds.setData(state.getBuffer());
     }
 }
