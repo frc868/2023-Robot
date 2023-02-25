@@ -277,7 +277,7 @@ public class Drivetrain extends SubsystemBase {
      *                      the front of the bot
      */
     public void drive(double xSpeed, double ySpeed, double thetaSpeed, DriveMode driveMode) {
-        if (DriverStation.getAlliance() == Alliance.Red) {
+        if (DriverStation.getAlliance() == Alliance.Red && driveMode == DriveMode.FIELD_ORIENTED) {
             xSpeed *= -1;
             ySpeed *= -1;
         }
