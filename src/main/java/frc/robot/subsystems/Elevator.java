@@ -35,7 +35,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Overrides;
 import frc.robot.GamePieceLocation.GamePiece;
@@ -54,12 +53,13 @@ public class Elevator extends ProfiledPIDSubsystem {
         BOTTOM(0),
         CONE_LOW(Units.inchesToMeters(10)),
         CONE_MID(1.18482 - 0.03),
-        CONE_HIGH(1.65220 + 0.17),
+        CONE_HIGH(1.7),
         CUBE_LOW(Units.inchesToMeters(10)),
         CUBE_MID(1.18482), // untested
-        CUBE_HIGH(1.65220), // untested
+        CUBE_HIGH(1.65220 + 0.05), // untested
         HUMAN_PLAYER(0),
         TOP(1.40);
+        // 1.72 meters max
 
         public final double value;
 
@@ -102,11 +102,11 @@ public class Elevator extends ProfiledPIDSubsystem {
      */
     private ElevatorSim elevatorSim = new ElevatorSim(
             DCMotor.getNEO(2),
-            12,
+            4,
             10,
             Units.inchesToMeters(1.2),
             Units.inchesToMeters(0),
-            1.8,
+            1.72,
             true);
 
     /**
@@ -151,17 +151,19 @@ public class Elevator extends ProfiledPIDSubsystem {
         Constants.Gains.Elevator.kI.setConsumer((d) -> getController().setI(d));
         Constants.Gains.Elevator.kD.setConsumer((d) -> getController().setD(d));
         Constants.Gains.Elevator.TOLERANCE.setConsumer((d) -> getController().setTolerance(d));
-        Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND.setConsumer((d) -> getController()
-                .setConstraints(
-                        new TrapezoidProfile.Constraints(
-                                d,
-                                Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
+        // Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND.setConsumer((d)
+        // -> getController()
+        // .setConstraints(
+        // new TrapezoidProfile.Constraints(
+        // d,
+        // Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
 
-        Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.setConsumer((d) -> getController()
-                .setConstraints(
-                        new TrapezoidProfile.Constraints(
-                                Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND.get(),
-                                d)));
+        // Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.setConsumer((d)
+        // -> getController()
+        // .setConstraints(
+        // new TrapezoidProfile.Constraints(
+        // Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND.get(),
+        // d)));
 
         this.ligament = ligament;
 
@@ -374,9 +376,21 @@ public class Elevator extends ProfiledPIDSubsystem {
      * @param position an ElevatorPosition to set the elevator to
      * @return the command
      */
-    public CommandBase setDesiredPositionCommand(ElevatorPosition position, Intake intake, Elbow elbow, LEDs leds) {
+    public CommandBase setDesiredPositionCommand(ElevatorPosition position, Intake intake, Elbow elbow) {
         return Commands.either(
                 Commands.sequence(
+                        runOnce(() -> {
+                            if (position == ElevatorPosition.BOTTOM)
+                                getController().setConstraints(new TrapezoidProfile.Constraints(
+                                        Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND_STOW.get(),
+                                        Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED_STOW
+                                                .get()));
+                            else
+                                getController().setConstraints(new TrapezoidProfile.Constraints(
+                                        Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND.get(),
+                                        Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED
+                                                .get()));
+                        }),
                         runOnce(() -> setGoal(position.value)),
                         runOnce(this::enable),
                         Commands.waitUntil(this::isAtGoal).withTimeout(2)),
@@ -391,7 +405,7 @@ public class Elevator extends ProfiledPIDSubsystem {
      * @param position an ElevatorPosition to set the elevator to
      * @return the command
      */
-    public CommandBase setDesiredPositionDeltaCommand(double position, Intake intake, Elbow elbow, LEDs leds) {
+    public CommandBase setDesiredPositionDeltaCommand(double position, Intake intake, Elbow elbow) {
         return Commands.either(
                 Commands.sequence(
                         runOnce(() -> setGoal(getGoal() + position)),
@@ -402,28 +416,28 @@ public class Elevator extends ProfiledPIDSubsystem {
     }
 
     public CommandBase setScoringPositionCommand(Supplier<GamePiece> gamePieceMode,
-            Supplier<Level> scoringMode, Intake intake, Elbow elbow, LEDs leds) {
+            Supplier<Level> scoringMode, Intake intake, Elbow elbow) {
         return Commands.select(
                 Map.of(
                         GamePiece.CONE,
                         Commands.select(
                                 Map.of(
                                         Level.LOW,
-                                        setDesiredPositionCommand(ElevatorPosition.CONE_LOW, intake, elbow, leds),
+                                        setDesiredPositionCommand(ElevatorPosition.CONE_LOW, intake, elbow),
                                         Level.MIDDLE,
-                                        setDesiredPositionCommand(ElevatorPosition.CONE_MID, intake, elbow, leds),
+                                        setDesiredPositionCommand(ElevatorPosition.CONE_MID, intake, elbow),
                                         Level.HIGH,
-                                        setDesiredPositionCommand(ElevatorPosition.CONE_HIGH, intake, elbow, leds)),
+                                        setDesiredPositionCommand(ElevatorPosition.CONE_HIGH, intake, elbow)),
                                 scoringMode::get),
                         GamePiece.CUBE,
                         Commands.select(
                                 Map.of(
                                         Level.LOW,
-                                        setDesiredPositionCommand(ElevatorPosition.CUBE_LOW, intake, elbow, leds),
+                                        setDesiredPositionCommand(ElevatorPosition.CUBE_LOW, intake, elbow),
                                         Level.MIDDLE,
-                                        setDesiredPositionCommand(ElevatorPosition.CUBE_MID, intake, elbow, leds),
+                                        setDesiredPositionCommand(ElevatorPosition.CUBE_MID, intake, elbow),
                                         Level.HIGH,
-                                        setDesiredPositionCommand(ElevatorPosition.CUBE_HIGH, intake, elbow, leds)),
+                                        setDesiredPositionCommand(ElevatorPosition.CUBE_HIGH, intake, elbow)),
                                 scoringMode::get)),
                 gamePieceMode::get);
     }
@@ -433,7 +447,7 @@ public class Elevator extends ProfiledPIDSubsystem {
      * the bottom hall effect sensor is reached, then zeros the encoders.
      */
     public CommandBase zeroEncoderCommand() {
-        return startEnd(() -> setSpeed(-0.05), () -> {
+        return startEnd(() -> setSpeed(-0.2), () -> {
             this.resetEncoders();
             RobotStates.enableInitialized();
             motors.stopMotor();
@@ -455,7 +469,7 @@ public class Elevator extends ProfiledPIDSubsystem {
      * @param leds
      * @return the command
      */
-    public CommandBase setOverridenElevatorSpeedCommand(DoubleSupplier speed, Intake intake, Elbow elbow, LEDs leds) {
+    public CommandBase setOverridenElevatorSpeedCommand(DoubleSupplier speed, Intake intake, Elbow elbow) {
         return Commands.either(
                 Commands.either(
                         run(() -> setSpeed(speed.getAsDouble())),
