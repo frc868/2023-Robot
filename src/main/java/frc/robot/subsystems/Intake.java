@@ -104,7 +104,7 @@ public class Intake extends SubsystemBase {
 
         if (RobotBase.isSimulation()) {
             gamePieceDetectorSim = new DIOSim(gamePieceDetector);
-            gamePieceDetectorSim.setValue(false);
+            gamePieceDetectorSim.setValue(true);
         }
     }
 
@@ -168,7 +168,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setPassoversExtendedCommand(Elevator elevator, LEDs leds) {
+    public CommandBase setPassoversExtendedCommand(Elevator elevator) {
         // return Commands.either(
         // runOnce(() -> passoverSolenoid.set(Value.kForward)),
         // leds.errorCommand(),
@@ -185,7 +185,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setPassoversRetractedCommand(Elevator elevator, LEDs leds) {
+    public CommandBase setPassoversRetractedCommand(Elevator elevator) {
         return runOnce(() -> passoverSolenoid.set(Value.kReverse)).withName("Set Passover Retracted");
     }
 
@@ -195,7 +195,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setIntakeDownCommand(Elevator elevator, LEDs leds) {
+    public CommandBase setIntakeDownCommand(Elevator elevator) {
         return Commands
                 .either(
                         runOnce(() -> intakeSolenoid.set(Value.kForward)),
@@ -210,7 +210,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setIntakeUpCommand(Elevator elevator, LEDs leds) {
+    public CommandBase setIntakeUpCommand(Elevator elevator) {
         return Commands
                 .either(runOnce(() -> intakeSolenoid.set(Value.kReverse)),
                         RobotStates.singularErrorCommand(() -> getIfIntakeSafeToMove(elevator).getSecond()),
@@ -252,7 +252,7 @@ public class Intake extends SubsystemBase {
      * @return true if a game piece is detected inside the robot
      */
     public boolean isGamePieceDetected() {
-        return gamePieceDetector.get();
+        return !gamePieceDetector.get();
     }
 
     /**
