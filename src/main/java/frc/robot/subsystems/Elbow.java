@@ -94,7 +94,7 @@ public class Elbow extends ProfiledPIDSubsystem {
     private SingleJointedArmSim armSim = new SingleJointedArmSim(
             DCMotor.getNEO(2),
             100,
-            SingleJointedArmSim.estimateMOI(Units.inchesToMeters(8), 3.6),
+            SingleJointedArmSim.estimateMOI(Units.inchesToMeters(8), 10),
             Units.inchesToMeters(8),
             ElbowPosition.LOW.value - 0.25,
             ElbowPosition.HIGH.value + 0.25,
@@ -169,7 +169,7 @@ public class Elbow extends ProfiledPIDSubsystem {
 
         encoder.setInverted(true);
         encoder.setPositionConversionFactor(2 * Math.PI);
-        encoder.setZeroOffset(3.4760098 - Math.PI + 0.94);
+        encoder.setZeroOffset(1.26);
 
         motor.burnFlash();
 
@@ -204,7 +204,7 @@ public class Elbow extends ProfiledPIDSubsystem {
     @Override
     public void periodic() {
         super.periodic();
-        ligament.setAngle(-35 + Units.radiansToDegrees(motor.getEncoder().getPosition() - 1.04));
+        ligament.setAngle(-34 + Units.radiansToDegrees(motor.getEncoder().getPosition()));
     }
 
     /**
@@ -356,9 +356,18 @@ public class Elbow extends ProfiledPIDSubsystem {
                 Commands.sequence(
                         runOnce(() -> setGoal(position.value)),
                         runOnce(this::enable),
-                        Commands.waitUntil(this::isAtGoal).withTimeout(2)),
+                        Commands.waitUntil(this::isAtGoal).withTimeout(0.5)),
                 RobotStates.singularErrorCommand(() -> getIfSafeToMove(position, elevator).getSecond()),
                 () -> getIfSafeToMove(position, elevator).getFirst());
+    }
+
+    public CommandBase lockPosition() {
+        // set the voltage to the feedforward calculated kg, then idle, then reenable
+        // the controller
+        return Commands.runOnce(this::disable)
+                .andThen(Commands.runOnce(() -> setVoltage(feedforwardController.kg * Math.cos(getMeasurement()))))
+                .andThen(run(() -> { // idle
+                })).finallyDo(d -> this.enable());
     }
 
     /**
