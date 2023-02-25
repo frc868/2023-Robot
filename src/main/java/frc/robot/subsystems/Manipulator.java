@@ -62,7 +62,7 @@ public class Manipulator extends SubsystemBase {
 
         if (RobotBase.isSimulation()) {
             poleSwitchSim = new DIOSim(poleSwitch);
-            poleSwitchSim.setValue(false);
+            poleSwitchSim.setValue(true);
         }
     }
 
@@ -94,7 +94,7 @@ public class Manipulator extends SubsystemBase {
      * @return the command
      */
     public CommandBase setWristDownCommand() {
-        return runOnce(() -> wrist.set(Value.kForward)).withName("Wrist Down"); // untested
+        return Commands.runOnce(() -> wrist.set(Value.kForward)).withName("Wrist Down"); // untested
     }
 
     /**
@@ -103,7 +103,7 @@ public class Manipulator extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setWristUpCommand(Elevator elevator, LEDs leds) {
+    public CommandBase setWristUpCommand(Elevator elevator) {
         return Commands.either(
                 runOnce(() -> wrist.set(Value.kReverse)),
                 RobotStates.singularErrorCommand(() -> "Error"),
@@ -178,8 +178,8 @@ public class Manipulator extends SubsystemBase {
     public CommandBase simPoleSwitchTriggered() {
         // this is commands so that Manipulator isn't added as a requirement
         // automatically
-        return Commands.runOnce(() -> poleSwitchSim.setValue(true))
+        return Commands.runOnce(() -> poleSwitchSim.setValue(false))
                 .andThen(Commands.waitSeconds(1))
-                .andThen(() -> poleSwitchSim.setValue(false)).withName("Sim Pole Switch Triggered");
+                .andThen(() -> poleSwitchSim.setValue(true)).withName("Sim Pole Switch Triggered");
     }
 }
