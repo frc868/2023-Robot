@@ -66,8 +66,9 @@ public class Scoring {
                 new Transform2d(
                         new Translation2d(distance, 0),
                         new Rotation2d(Math.PI)),
-                new PathConstraints(4,
-                        5));
+                new PathConstraints(3,
+                        1))
+                .withTimeout(2);
     }
 
     private static CommandBase placePieceCommand(
@@ -95,17 +96,18 @@ public class Scoring {
                                                                         .setPincersReleasedCommand(gamePieceSupplier),
                                                                 elbow.setDesiredPositionCommand(ElbowPosition.LOW,
                                                                         elevator),
+                                                                manipulator.setWristDownCommand(),
                                                                 elevator.setDesiredPositionDeltaCommand(-0.2, intake,
                                                                         elbow),
                                                                 Commands.either(
-                                                                        driveDeltaCommand(-0.18, drivetrain),
+                                                                        driveDeltaCommand(-0.08, drivetrain),
                                                                         Commands.none(),
                                                                         () -> driveBackwards)),
                                                         Commands.either(
                                                                 Commands.parallel(
                                                                         elbow.setDesiredPositionCommand(
                                                                                 ElbowPosition.HIGH, elevator),
-                                                                        driveDeltaCommand(-0.25,
+                                                                        driveDeltaCommand(-0.4,
                                                                                 drivetrain)),
                                                                 Commands.none(),
                                                                 () -> driveBackwards
@@ -123,7 +125,7 @@ public class Scoring {
                                         .andThen(Commands.sequence(
                                                 manipulator.setPincersReleasedCommand(gamePieceSupplier),
                                                 Commands.either(
-                                                        driveDeltaCommand(-0.18, drivetrain),
+                                                        driveDeltaCommand(-0.25, drivetrain),
                                                         Commands.none(),
                                                         () -> driveBackwards)))),
                         gamePieceSupplier::get));
@@ -143,13 +145,11 @@ public class Scoring {
                         Map.of(
                                 GamePiece.CONE,
                                 Commands.sequence(
-                                        Commands.waitUntil(manipulator::isPoleDetected).deadlineWith(
-                                                drivetrain.moveDeltaPathFollowingCommand(
-                                                        new Transform2d(
-                                                                new Translation2d(0.1, 0),
-                                                                new Rotation2d()),
-                                                        new PathConstraints(1,
-                                                                1))),
+                                        Commands.waitUntil(manipulator::isPoleDetected)
+                                                .deadlineWith(
+                                                        Commands.parallel(
+                                                                driveDeltaCommand(0.6, drivetrain),
+                                                                drivetrain.setCoastCommand())),
                                         Commands.parallel(
                                                 manipulator
                                                         .setPincersReleasedCommand(gamePieceSupplier),
@@ -157,12 +157,12 @@ public class Scoring {
                                                         elevator),
                                                 elevator.setDesiredPositionDeltaCommand(-0.2, intake,
                                                         elbow),
-                                                driveDeltaCommand(-0.18, drivetrain)),
+                                                driveDeltaCommand(-0.08, drivetrain)),
                                         Commands.either(
                                                 Commands.parallel(
                                                         elbow.setDesiredPositionCommand(
                                                                 ElbowPosition.HIGH, elevator),
-                                                        driveDeltaCommand(-0.25, drivetrain)),
+                                                        driveDeltaCommand(-0.4, drivetrain)),
                                                 Commands.none(),
                                                 () -> levelSupplier.get() == Level.HIGH
                                                         && gamePieceSupplier
@@ -170,7 +170,7 @@ public class Scoring {
                                 GamePiece.CUBE,
                                 drivetrain.moveDeltaPathFollowingCommand(
                                         new Transform2d(
-                                                new Translation2d(0.1, 0),
+                                                new Translation2d(0.4, 0),
                                                 new Rotation2d()),
                                         new PathConstraints(1,
                                                 1))
