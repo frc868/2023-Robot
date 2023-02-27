@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
 import frc.robot.GamePieceLocation;
 import frc.robot.GamePieceLocation.GamePiece;
-import frc.robot.GamePieceLocation.Level;
 import frc.robot.commands.RobotStates.RobotState;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elbow;
@@ -97,7 +96,7 @@ public class Autos {
             Manipulator manipulator, Elevator elevator, Elbow elbow, LEDs leds) {
         return RobotStates.setIntakeModeCommand(gamePiece, leds).andThen(
                 RobotStates.intakeGamePieceAutoCommand(intake, manipulator, elevator, elbow, leds).deadlineWith(
-                        Commands.run(() -> drivetrain.drive(0.1, 0, 0, DriveMode.ROBOT_RELATIVE), drivetrain)
+                        Commands.run(() -> drivetrain.drive(0.3, 0, 0, DriveMode.ROBOT_RELATIVE), drivetrain)
                                 .asProxy()));
     }
 
@@ -112,29 +111,88 @@ public class Autos {
             Manipulator manipulator, Elevator elevator, Elbow elbow, LEDs leds) {
         return () -> new AutoTrajectoryCommand(autoPath,
                 Commands.sequence(
-                        RobotStates.autoDriveCommand(() -> RobotState.SCORING, () -> GamePieceLocation.I1, drivetrain),
-                        Scoring.scoreGamePieceAutoCommand(() -> GamePiece.CONE, () -> Level.HIGH, drivetrain, intake,
-                                manipulator, elevator, elbow),
-                        Commands.parallel(
-                                RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow),
-                                drivetrain.pathFollowingCommand(
-                                        autoPath.getTrajectories().get(0)).asProxy()),
+                        fullAutoScoreWithMovement(GamePieceLocation.I1, drivetrain, intake, manipulator, elevator,
+                                elbow),
+                        drivetrain.pathFollowingCommand(
+                                autoPath.getTrajectories().get(0)).asProxy(),
+                        fullAutoIntakeWithMovement(GamePiece.CUBE, drivetrain, intake, manipulator, elevator, elbow,
+                                leds),
+                        fullAutoScoreWithMovement(GamePieceLocation.H1, drivetrain, intake, manipulator, elevator,
+                                elbow)));
+    }
+
+    /**
+     * Creates the 3 Piece N trajectory command.
+     * 
+     * @param autoPath   the {@link AutoPath} containing the Figure 8 trajectory.
+     * @param drivetrain the drivetrain
+     * @return the command
+     */
+    public static Supplier<AutoTrajectoryCommand> threePieceN(AutoPath autoPath, Drivetrain drivetrain, Intake intake,
+            Manipulator manipulator, Elevator elevator, Elbow elbow, LEDs leds) {
+        return () -> new AutoTrajectoryCommand(autoPath,
+                Commands.sequence(
+                        fullAutoScoreWithMovement(GamePieceLocation.I1, drivetrain, intake, manipulator, elevator,
+                                elbow),
+                        drivetrain.pathFollowingCommand(
+                                autoPath.getTrajectories().get(0)).asProxy(),
+                        fullAutoIntakeWithMovement(GamePiece.CUBE, drivetrain, intake, manipulator, elevator, elbow,
+                                leds),
+                        fullAutoScoreWithMovement(GamePieceLocation.H1, drivetrain, intake, manipulator, elevator,
+                                elbow),
+                        drivetrain.pathFollowingCommand(
+                                autoPath.getTrajectories().get(2)).asProxy(),
                         fullAutoIntakeWithMovement(GamePiece.CONE, drivetrain, intake, manipulator, elevator, elbow,
                                 leds),
+                        fullAutoScoreWithMovement(GamePieceLocation.G1, drivetrain, intake, manipulator, elevator,
+                                elbow)));
+    }
 
-                        // RobotStates.autoDrive(() -> RobotState.SCORING, () -> GamePieceLocation.G1,
-                        // drivetrain),
-                        Commands.parallel(
-                                drivetrain.pathFollowingCommand(autoPath.getTrajectories().get(1)).asProxy(),
-                                Commands.waitSeconds(1)
-                                        .andThen(Scoring.scoreGamePieceAutoCommand(() -> GamePiece.CONE,
-                                                () -> Level.HIGH,
-                                                drivetrain,
-                                                intake,
-                                                manipulator, elevator, elbow))),
-                        Commands.parallel(
-                                RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow),
-                                drivetrain.pathFollowingCommand(autoPath.getTrajectories().get(2)).asProxy()),
-                        drivetrain.chargeStationBalanceCommand().asProxy()));
+    /**
+     * Creates the 2 Piece S trajectory command.
+     * 
+     * @param autoPath   the {@link AutoPath} containing the Figure 8 trajectory.
+     * @param drivetrain the drivetrain
+     * @return the command
+     */
+    public static Supplier<AutoTrajectoryCommand> twoPieceS(AutoPath autoPath, Drivetrain drivetrain, Intake intake,
+            Manipulator manipulator, Elevator elevator, Elbow elbow, LEDs leds) {
+        return () -> new AutoTrajectoryCommand(autoPath,
+                Commands.sequence(
+                        fullAutoScoreWithMovement(GamePieceLocation.A1, drivetrain, intake, manipulator, elevator,
+                                elbow),
+                        drivetrain.pathFollowingCommand(
+                                autoPath.getTrajectories().get(0)).asProxy(),
+                        fullAutoIntakeWithMovement(GamePiece.CUBE, drivetrain, intake, manipulator, elevator, elbow,
+                                leds),
+                        fullAutoScoreWithMovement(GamePieceLocation.B1, drivetrain, intake, manipulator, elevator,
+                                elbow)));
+    }
+
+    /**
+     * Creates the 3 Piece S trajectory command.
+     * 
+     * @param autoPath   the {@link AutoPath} containing the Figure 8 trajectory.
+     * @param drivetrain the drivetrain
+     * @return the command
+     */
+    public static Supplier<AutoTrajectoryCommand> threePieceS(AutoPath autoPath, Drivetrain drivetrain, Intake intake,
+            Manipulator manipulator, Elevator elevator, Elbow elbow, LEDs leds) {
+        return () -> new AutoTrajectoryCommand(autoPath,
+                Commands.sequence(
+                        fullAutoScoreWithMovement(GamePieceLocation.A1, drivetrain, intake, manipulator, elevator,
+                                elbow),
+                        drivetrain.pathFollowingCommand(
+                                autoPath.getTrajectories().get(0)).asProxy(),
+                        fullAutoIntakeWithMovement(GamePiece.CUBE, drivetrain, intake, manipulator, elevator, elbow,
+                                leds),
+                        fullAutoScoreWithMovement(GamePieceLocation.B1, drivetrain, intake, manipulator, elevator,
+                                elbow),
+                        drivetrain.pathFollowingCommand(
+                                autoPath.getTrajectories().get(2)).asProxy(),
+                        fullAutoIntakeWithMovement(GamePiece.CONE, drivetrain, intake, manipulator, elevator, elbow,
+                                leds),
+                        fullAutoScoreWithMovement(GamePieceLocation.C1, drivetrain, intake, manipulator, elevator,
+                                elbow)));
     }
 }
