@@ -233,7 +233,7 @@ public class RobotStates {
             LEDs leds) {
         return Commands.either(
                 Commands.sequence(
-                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow),
+                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow).withTimeout(0.5),
                         elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
                         intake.setIntakeDownCommand(elevator),
                         manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow()),
@@ -245,8 +245,10 @@ public class RobotStates {
                                         intake.runPassoverMotorsCommand()),
                                 Commands.either(
                                         Commands.deadline(
-                                                Commands.waitUntil(intake::isGamePieceDetected)
-                                                        .andThen(Commands.waitSeconds(0.5)),
+                                                Commands.race(
+                                                        Commands.waitUntil(intake::isGamePieceDetected)
+                                                                .andThen(Commands.waitSeconds(0.5)),
+                                                        Commands.waitUntil(secondaryButton::getAsBoolean)),
                                                 intake.runPassoverMotorsCommand(),
                                                 manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow())
                                                         .repeatedly())
@@ -430,11 +432,20 @@ public class RobotStates {
                                     targetPose.getY() - drivetrain.getPose().getY()),
                             drivetrain.getPose().getRotation()));
         }
+        Pose2d last;
+        try {
 
-        pathPoints.add(new PathPoint(targetPose.getTranslation(), targetPose.getRotation(), targetPose.getRotation()));
+            last = intermediaryPoses[intermediaryPoses.length - 1];
+        } catch (Exception e) {
+            last = drivetrain.getPose();
+        }
+        pathPoints.add(new PathPoint(targetPose.getTranslation(),
+                new Rotation2d(targetPose.getX() - last.getX(),
+                        targetPose.getY() - last.getY()),
+                targetPose.getRotation()));
 
         PathPlannerTrajectory traj = PathPlanner.generatePath(
-                new PathConstraints(6, 8),
+                new PathConstraints(3, 2),
                 pathPoints);
 
         AutoManager.getInstance().getField().getObject("AutoDrive Trajectory").setTrajectory(traj);
