@@ -46,6 +46,6 @@ public enum Overrides {
     }
 
     public CommandBase disableC() {
-        return Commands.runOnce(() -> this.isEnabled = true);
+        return Commands.runOnce(() -> this.isEnabled = false);
     }
 }
