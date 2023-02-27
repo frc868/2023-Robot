@@ -20,17 +20,17 @@ public class FieldConstants {
         public static class LeftGrid {
             public static final Pose2d CONE_1 = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(76.425),
+                            2.4,
                             Units.inchesToMeters(20)),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CUBE_2 = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(76.425),
+                            2.4,
                             Units.inchesToMeters(42.125)),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CONE_3 = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(76.425),
+                            2.4,
                             Units.inchesToMeters(64)),
                     Rotation2d.fromDegrees(180));
         }
@@ -38,17 +38,17 @@ public class FieldConstants {
         public static class MiddleGrid {
             public static final Pose2d CONE_4 = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(76.425),
+                            2.4,
                             Units.inchesToMeters(86)),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CUBE_5 = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(76.425),
+                            2.4,
                             Units.inchesToMeters(108.125)),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CONE_6 = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(76.425),
+                            2.4,
                             Units.inchesToMeters(130)),
                     Rotation2d.fromDegrees(180));
         }
@@ -56,18 +56,18 @@ public class FieldConstants {
         public static class RightGrid {
             public static final Pose2d CONE_7 = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(76.425),
-                            Units.inchesToMeters(152)),
+                            2.3,
+                            Units.inchesToMeters(156)),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CUBE_8 = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(76.425),
-                            Units.inchesToMeters(174.125)),
+                            2.3,
+                            Units.inchesToMeters(174)),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CONE_9 = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(76.425),
-                            Units.inchesToMeters(196)),
+                            2.3,
+                            5.06),
                     Rotation2d.fromDegrees(180));
         }
 
