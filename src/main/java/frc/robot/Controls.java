@@ -26,41 +26,6 @@ import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Manipulator;
 
 public class Controls {
-    public static void configureDriverControls(int port, Drivetrain drivetrain, GridInterface gridInterface,
-            Intake intake,
-            Manipulator manipulator, Elevator elevator, Elbow elbow, LEDs leds) {
-        CommandJoystick joystick = new CommandJoystick(port);
-
-        drivetrain.setDefaultCommand(
-                drivetrain.teleopDriveCommand(
-                        () -> -joystick.getY(),
-                        () -> -joystick.getX(),
-                        () -> -MathUtil.applyDeadband(joystick.getTwist(), 0.05),
-                        () -> 1 - joystick.getRawAxis(5)));
-
-        joystick.button(13).onTrue(drivetrain.zeroGyroCommand());
-
-        joystick.button(2).onTrue(drivetrain.setSpeedModeCommand(Drivetrain.SpeedMode.ULTRA));
-        joystick.button(3).and(joystick.button(5)).onTrue(drivetrain.setSpeedModeCommand(Drivetrain.SpeedMode.FAST));
-
-        joystick.pov(2, 270, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CONE, leds).ignoringDisable(true));
-        joystick.pov(2, 90, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CUBE, leds).ignoringDisable(true));
-
-        joystick.button(14)
-                .onTrue(RobotStates.intakeGamePiece(
-                        false,
-                        true,
-                        () -> joystick.getHID().getRawButton(6),
-                        intake, manipulator, elevator, elbow, leds));
-
-        joystick.button(8)
-                .whileTrue(drivetrain.chargeStationBalanceCommand());
-        joystick.button(5).whileTrue(RobotStates.autoDriveCommand(drivetrain, gridInterface));
-
-    }
-
     public enum OperatorControls {
         LEFT_GRID(1, 1),
         MIDDLE_GRID(1, 2),
@@ -112,6 +77,41 @@ public class Controls {
         }
     }
 
+    public static void configureDriverControls(int port, Drivetrain drivetrain, GridInterface gridInterface,
+            Intake intake,
+            Manipulator manipulator, Elevator elevator, Elbow elbow, LEDs leds) {
+        CommandJoystick joystick = new CommandJoystick(port);
+
+        drivetrain.setDefaultCommand(
+                drivetrain.teleopDriveCommand(
+                        () -> -joystick.getY(),
+                        () -> -joystick.getX(),
+                        () -> -MathUtil.applyDeadband(joystick.getTwist(), 0.05),
+                        () -> 1 - joystick.getRawAxis(5)));
+
+        joystick.button(13).onTrue(drivetrain.zeroGyroCommand());
+
+        joystick.button(2).onTrue(drivetrain.setSpeedModeCommand(Drivetrain.SpeedMode.ULTRA));
+        joystick.button(3).and(joystick.button(5)).onTrue(drivetrain.setSpeedModeCommand(Drivetrain.SpeedMode.FAST));
+
+        joystick.pov(2, 270, CommandScheduler.getInstance().getDefaultButtonLoop())
+                .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CONE, leds).ignoringDisable(true));
+        joystick.pov(2, 90, CommandScheduler.getInstance().getDefaultButtonLoop())
+                .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CUBE, leds).ignoringDisable(true));
+
+        joystick.button(14)
+                .onTrue(RobotStates.intakeGamePiece(
+                        false,
+                        true,
+                        () -> joystick.getHID().getRawButton(6),
+                        intake, manipulator, elevator, elbow, leds));
+
+        joystick.button(8)
+                .whileTrue(drivetrain.chargeStationBalanceCommand());
+        joystick.button(5).whileTrue(RobotStates.autoDriveCommand(drivetrain, gridInterface));
+
+    }
+
     public static void configureOperatorControls(int port1, int port2, Drivetrain drivetrain,
             GridInterface gridInterface, Intake intake,
             Manipulator manipulator, Elevator elevator, Elbow elbow, LEDs leds) {
@@ -122,57 +122,6 @@ public class Controls {
                 elbow.disable();
             }
         };
-
-        // CommandXboxController controller = new CommandXboxController(port1);
-        // controller.a().whileTrue(
-        // RobotStates.scoreGamePieceTeleop(
-        // false,
-        // () -> controller.getHID().getBButton(),
-        // (b) -> {
-        // },
-        // drivetrain, gridInterface, intake, manipulator,
-        // elevator, elbow)
-        // .finallyDo(safeStop));
-        // controller.x().whileTrue(
-        // RobotStates.scoreGamePieceTeleop(
-        // true,
-        // () -> controller.getHID().getBButton(),
-        // (b) -> {
-        // },
-        // drivetrain, gridInterface, intake, manipulator,
-        // elevator, elbow)
-        // .finallyDo(safeStop));
-
-        // controller.y().whileTrue(RobotStates.stowElevator(intake, manipulator,
-        // elevator, elbow)
-        // .finallyDo(safeStop));
-
-        // controller.leftBumper().whileTrue(RobotStates.scoreGamePieceTeleop(
-        // true, () -> true, b -> {
-        // }, drivetrain, gridInterface, intake, manipulator,
-        // elevator, elbow).andThen(
-        // RobotStates.stowElevator(intake, manipulator, elevator, elbow))
-        // .finallyDo(safeStop));
-        // controller.rightBumper().whileTrue(RobotStates.scoreGamePieceTeleop(
-        // true,
-        // () -> controller.getHID().getBButton(),
-        // b -> {
-        // },
-        // drivetrain, gridInterface, intake, manipulator,
-        // elevator, elbow).andThen(
-        // RobotStates.stowElevator(intake, manipulator, elevator, elbow))
-        // .finallyDo(safeStop));
-
-        // controller.povRight()
-        // .whileTrue(RobotStates.initializeMechanisms(intake, manipulator, elevator,
-        // elbow, leds));
-
-        // controller.povUp().onTrue(elbow.setDesiredPositionCommand(ElbowPosition.HIGH,
-        // elevator));
-        // controller.povLeft().onTrue(elbow.setDesiredPositionCommand(ElbowPosition.MID,
-        // elevator));
-        // controller.povDown().onTrue(elbow.setDesiredPositionCommand(ElbowPosition.LOW,
-        // elevator));
 
         CommandGenericHID[] hids = new CommandGenericHID[] {
                 new CommandGenericHID(port1),
@@ -234,26 +183,13 @@ public class Controls {
                                 (b) -> setOutput.accept(OperatorControls.GAME_PIECE_DROP, b),
                                 drivetrain, gridInterface, intake, manipulator,
                                 elevator, elbow)
+                        .andThen(Commands.waitSeconds(0.5))
                         .andThen(RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow))
                         .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.SCORE,
                                 true)))
                         .finallyDo(safeStop))
                 .onFalse(Commands.runOnce(() -> setOutput.accept(OperatorControls.SCORE,
                         false)));
-
-        // getButton.apply(OperatorControls.UNBOUND1)
-        // .whileTrue(RobotStates
-        // .scoreGamePiece(
-        // () -> hids[OperatorControls.GAME_PIECE_DROP.hid].getHID()
-        // .getRawButton(OperatorControls.GAME_PIECE_DROP.button),
-        // (b) -> setOutput.accept(OperatorControls.GAME_PIECE_DROP, b),
-        // drivetrain, true, gridInterface, intake, manipulator,
-        // elevator, elbow, leds)
-        // .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.UNBOUND1,
-        // true)))
-        // .finallyDo(safeStop))
-        // .onFalse(Commands.runOnce(() -> setOutput.accept(OperatorControls.UNBOUND1,
-        // false)));
 
         getButton.apply(OperatorControls.STOW)
                 .whileTrue(RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow)
@@ -304,15 +240,10 @@ public class Controls {
             Elevator elevator, Elbow elbow, LEDs leds) {
         CommandXboxController xbox = new CommandXboxController(port);
 
-        // elevator.setDefaultCommand(
-        // elevator.setOverridenElevatorSpeedCommand(() -> -xbox.getLeftY(), intake,
-        // elbow, leds));
-        // elevator.setDefaultCommand(Commands.run(() ->
-        // elevator.setSpeed(-xbox.getLeftY()), elevator));
-        // elbow.setDefaultCommand(elbow.setOverridenElbowSpeedCommand(() ->
-        // -xbox.getRightY()));
-        // elbow.setDefaultCommand(Commands.run(() -> elbow.setSpeed(-0.25 *
-        // xbox.getRightY()), elbow));
+        elevator.setDefaultCommand(
+                elevator.setOverridenElevatorSpeedCommand(() -> -0.25 * xbox.getLeftY(), intake,
+                        elbow));
+        elbow.setDefaultCommand(elbow.setOverridenElbowSpeedCommand(() -> -0.25 * xbox.getRightY()));
 
         xbox.x().onTrue(intake.setPassoversExtendedCommand(elevator));
         xbox.b().onTrue(intake.setPassoversRetractedCommand(elevator));
@@ -335,41 +266,44 @@ public class Controls {
         // hid1.button(5).whileTrue(elevator.motorOverride());
         // hid1.button(6).whileTrue(elbow.motorOverride());
 
-        hid1.button(15).onTrue(
-                Commands.parallel(
-                        Overrides.MANUAL_MECH_CONTROL_MODE.disableC(),
-                        Overrides.SAFETIES_DISABLE.disableC(),
-                        Overrides.SPEED_LIMITS_DISABLE.disableC(),
-                        Overrides.MECH_LIMITS_DISABLE.disableC(),
-                        Overrides.DRIVER_EMERGENCY_MODE.disableC()));
-        hid1.button(16).onTrue(
-                Commands.parallel(
-                        Overrides.MANUAL_MECH_CONTROL_MODE.enableC(),
-                        Overrides.SAFETIES_DISABLE.disableC(),
-                        Overrides.SPEED_LIMITS_DISABLE.disableC(),
-                        Overrides.MECH_LIMITS_DISABLE.disableC(),
-                        Overrides.DRIVER_EMERGENCY_MODE.disableC()));
-        hid1.button(17).onTrue(
-                Commands.parallel(
-                        Overrides.MANUAL_MECH_CONTROL_MODE.enableC(),
-                        Overrides.SAFETIES_DISABLE.enableC(),
-                        Overrides.SPEED_LIMITS_DISABLE.disableC(),
-                        Overrides.MECH_LIMITS_DISABLE.disableC(),
-                        Overrides.DRIVER_EMERGENCY_MODE.disableC()));
-        hid1.button(18).onTrue(
-                Commands.parallel(
-                        Overrides.MANUAL_MECH_CONTROL_MODE.enableC(),
-                        Overrides.SAFETIES_DISABLE.enableC(),
-                        Overrides.SPEED_LIMITS_DISABLE.enableC(),
-                        Overrides.MECH_LIMITS_DISABLE.enableC(),
-                        Overrides.DRIVER_EMERGENCY_MODE.disableC()));
-        hid1.button(19).onTrue(
-                Commands.parallel(
-                        Overrides.MANUAL_MECH_CONTROL_MODE.enableC(),
-                        Overrides.SAFETIES_DISABLE.enableC(),
-                        Overrides.SPEED_LIMITS_DISABLE.enableC(),
-                        Overrides.MECH_LIMITS_DISABLE.enableC(),
-                        Overrides.DRIVER_EMERGENCY_MODE.enableC()));
+        hid1.button(1).onTrue(Overrides.MANUAL_MECH_CONTROL_MODE.enableC())
+                .onFalse(Overrides.MANUAL_MECH_CONTROL_MODE.disableC());
+
+        // hid1.button(15).onTrue(
+        // Commands.parallel(
+        // Overrides.MANUAL_MECH_CONTROL_MODE.disableC(),
+        // Overrides.SAFETIES_DISABLE.disableC(),
+        // Overrides.SPEED_LIMITS_DISABLE.disableC(),
+        // Overrides.MECH_LIMITS_DISABLE.disableC(),
+        // Overrides.DRIVER_EMERGENCY_MODE.disableC()));
+        // hid1.button(16).onTrue(
+        // Commands.parallel(
+        // Overrides.MANUAL_MECH_CONTROL_MODE.enableC(),
+        // Overrides.SAFETIES_DISABLE.disableC(),
+        // Overrides.SPEED_LIMITS_DISABLE.disableC(),
+        // Overrides.MECH_LIMITS_DISABLE.disableC(),
+        // Overrides.DRIVER_EMERGENCY_MODE.disableC()));
+        // hid1.button(17).onTrue(
+        // Commands.parallel(
+        // Overrides.MANUAL_MECH_CONTROL_MODE.enableC(),
+        // Overrides.SAFETIES_DISABLE.enableC(),
+        // Overrides.SPEED_LIMITS_DISABLE.disableC(),
+        // Overrides.MECH_LIMITS_DISABLE.disableC(),
+        // Overrides.DRIVER_EMERGENCY_MODE.disableC()));
+        // hid1.button(18).onTrue(
+        // Commands.parallel(
+        // Overrides.MANUAL_MECH_CONTROL_MODE.enableC(),
+        // Overrides.SAFETIES_DISABLE.enableC(),
+        // Overrides.SPEED_LIMITS_DISABLE.enableC(),
+        // Overrides.MECH_LIMITS_DISABLE.enableC(),
+        // Overrides.DRIVER_EMERGENCY_MODE.disableC()));
+        // hid1.button(19).onTrue(
+        // Commands.parallel(
+        // Overrides.MANUAL_MECH_CONTROL_MODE.enableC(),
+        // Overrides.SAFETIES_DISABLE.enableC(),
+        // Overrides.SPEED_LIMITS_DISABLE.enableC(),
+        // Overrides.MECH_LIMITS_DISABLE.enableC(),
+        // Overrides.DRIVER_EMERGENCY_MODE.enableC()));
 
         hid2.button(1);
     }
