@@ -28,9 +28,9 @@ public final class Constants {
 
     public static final double ROBOT_SIDE_LENGTH = Units.inchesToMeters(34.75);
 
-    public static final boolean IS_USING_CAMERAS = true;
-    public static boolean IS_NT_COMMANDS_ENABLED = true;
-    public static boolean IS_VIRTUAL_BUTTON_PANEL_ENABLED = true;
+    public static final boolean IS_USING_CAMERAS = false;
+    public static boolean IS_NT_COMMANDS_ENABLED = RobotBase.isSimulation();
+    public static boolean IS_VIRTUAL_BUTTON_PANEL_ENABLED = RobotBase.isSimulation();
 
     public static final class CAN {
         public static final int FRONT_LEFT_DRIVE_MOTOR = 1;
@@ -89,7 +89,7 @@ public final class Constants {
         public static final class Trajectories {
             public static final double xkP = 5; // untested
             public static final double ykP = 5; // untested
-            public static final double thetakP = 1.5; // untested
+            public static final double thetakP = 3; // untested
         }
 
         public static final class TurnToAngle {
@@ -99,7 +99,7 @@ public final class Constants {
         }
 
         public static final class Elevator {
-            public static final TunableNumber kP = new TunableNumber("Elevator", "kP", 10);
+            public static final TunableNumber kP = new TunableNumber("Elevator", "kP", 40);
             public static final TunableNumber kI = new TunableNumber("Elevator", "kI", 0);
             public static final TunableNumber kD = new TunableNumber("Elevator", "kD", 0);
             public static final TunableNumber TOLERANCE = new TunableNumber("Elevator", "Tolerance", 0.005);
@@ -110,7 +110,7 @@ public final class Constants {
         }
 
         public static final class Elbow {
-            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 3);
+            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 10);
             public static final TunableNumber kI = new TunableNumber("Elbow", "kI", 0);
             public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0.5);
             public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 0.3);
@@ -164,10 +164,16 @@ public final class Constants {
         }
 
         public static final class Elevator {
+            // public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new
+            // TunableNumber("Elevator",
+            // "Max Velocity", 2.6); // untested
+            // public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED
+            // = new TunableNumber("Elevator",
+            // "Max Acceleration", 32.5); // untested
             public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new TunableNumber("Elevator",
-                    "Max Velocity", 2.6); // untested
+                    "Max Velocity", 1.5); // untested
             public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elevator",
-                    "Max Acceleration", 32.5); // untested
+                    "Max Acceleration", 1); // untested
             public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND_STOW = new TunableNumber("Elevator",
                     "Max Velocity Stow", 1.3); // untested
             public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED_STOW = new TunableNumber(
