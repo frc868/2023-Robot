@@ -52,8 +52,8 @@ public class Elevator extends ProfiledPIDSubsystem {
     public static enum ElevatorPosition {
         BOTTOM(0),
         CONE_LOW(Units.inchesToMeters(10)),
-        CONE_MID(1.18482 - 0.03),
-        CONE_HIGH(1.7),
+        CONE_MID(1.22),
+        CONE_HIGH(1.74),
         CUBE_LOW(Units.inchesToMeters(10)),
         CUBE_MID(1.18482), // untested
         CUBE_HIGH(1.65220 + 0.05), // untested
@@ -376,11 +376,17 @@ public class Elevator extends ProfiledPIDSubsystem {
      * @param position an ElevatorPosition to set the elevator to
      * @return the command
      */
-    public CommandBase setDesiredPositionCommand(ElevatorPosition position, Intake intake, Elbow elbow) {
+    public CommandBase setDesiredPositionCommand(ElevatorPosition position, Intake intake,
+            Elbow elbow) {
+        return setDesiredPositionCommand(() -> position, intake, elbow);
+    }
+
+    public CommandBase setDesiredPositionCommand(Supplier<ElevatorPosition> positionSupplier, Intake intake,
+            Elbow elbow) {
         return Commands.either(
                 Commands.sequence(
                         runOnce(() -> {
-                            if (position == ElevatorPosition.BOTTOM)
+                            if (positionSupplier.get() == ElevatorPosition.BOTTOM)
                                 getController().setConstraints(new TrapezoidProfile.Constraints(
                                         Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND_STOW.get(),
                                         Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED_STOW
@@ -391,7 +397,7 @@ public class Elevator extends ProfiledPIDSubsystem {
                                         Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED
                                                 .get()));
                         }),
-                        runOnce(() -> setGoal(position.value)),
+                        runOnce(() -> setGoal(positionSupplier.get().value)),
                         runOnce(this::enable),
                         Commands.waitUntil(this::isAtGoal).withTimeout(2)),
                 RobotStates.singularErrorCommand(() -> getIfSafeToMove(intake, elbow).getSecond()),
@@ -408,9 +414,15 @@ public class Elevator extends ProfiledPIDSubsystem {
     public CommandBase setDesiredPositionDeltaCommand(double position, Intake intake, Elbow elbow) {
         return Commands.either(
                 Commands.sequence(
+                        runOnce(() -> {
+                            getController().setConstraints(new TrapezoidProfile.Constraints(
+                                    Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND_STOW.get(),
+                                    Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED_STOW
+                                            .get()));
+                        }),
                         runOnce(() -> setGoal(getGoal() + position)),
                         runOnce(this::enable),
-                        Commands.waitUntil(this::isAtGoal)),
+                        Commands.waitUntil(this::isAtGoal).withTimeout(0.3)),
                 RobotStates.singularErrorCommand(() -> getIfSafeToMove(intake, elbow).getSecond()),
                 () -> getIfSafeToMove(intake, elbow).getFirst());
     }
@@ -470,16 +482,12 @@ public class Elevator extends ProfiledPIDSubsystem {
      * @return the command
      */
     public CommandBase setOverridenElevatorSpeedCommand(DoubleSupplier speed, Intake intake, Elbow elbow) {
-        return Commands.either(
-                Commands.either(
-                        run(() -> setSpeed(speed.getAsDouble())),
-                        runOnce(this::stop)
-                                .andThen(
-                                        RobotStates.continuousErrorCommand(
-                                                () -> getIfSafeToMove(intake, elbow).getSecond())),
-                        () -> getIfSafeToMove(intake, elbow).getFirst()),
-                Commands.none(),
-                Overrides.MANUAL_MECH_CONTROL_MODE.getStatusSupplier()).withName("Set Overridden Elevator Speed");
+        return run(() -> {
+            if (Overrides.MANUAL_MECH_CONTROL_MODE.getStatus()) {
+                this.disable();
+                setSpeed(speed.getAsDouble());
+            }
+        }).withName("Set Overridden Elevator Speed");
     }
 
     public CommandBase motorOverride() {
