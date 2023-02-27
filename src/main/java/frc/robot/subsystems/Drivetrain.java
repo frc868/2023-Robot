@@ -9,6 +9,7 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
@@ -26,7 +27,6 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -38,6 +38,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
@@ -45,7 +46,6 @@ import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.FieldConstants;
 import frc.robot.utils.SwerveModule;
 
 /**
@@ -190,8 +190,7 @@ public class Drivetrain extends SubsystemBase {
                 Constants.Geometries.Drivetrain.KINEMATICS,
                 getGyroRotation2d(),
                 getSwerveModulePositions(),
-                new Pose2d(new Translation2d(FieldConstants.LENGTH_METERS / 2.0, FieldConstants.WIDTH_METERS / 2.0),
-                        new Rotation2d())); // center of the field
+                new Pose2d(1.84, 5.06, new Rotation2d()));
 
         turnController.setTolerance(0.05);
 
@@ -289,7 +288,7 @@ public class Drivetrain extends SubsystemBase {
                 break;
             case FIELD_ORIENTED:
                 chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed,
-                        thetaSpeed, getGyroRotation2d());
+                        thetaSpeed, poseEstimator.getEstimatedPosition().getRotation());
 
                 break;
         }
@@ -669,11 +668,11 @@ public class Drivetrain extends SubsystemBase {
                         constraints,
                         new PathPoint(
                                 getPose().getTranslation(),
-                                getPose().plus(delta).getRotation(),
+                                Rotation2d.fromDegrees(180),
                                 getPose().getRotation()),
                         new PathPoint(
                                 getPose().plus(delta).getTranslation(),
-                                getPose().plus(delta).getRotation(),
+                                Rotation2d.fromDegrees(180),
                                 getPose().getRotation()))));
     }
 
@@ -760,5 +759,19 @@ public class Drivetrain extends SubsystemBase {
 
     public SwerveDrivePoseEstimator getPoseEstimator() {
         return this.poseEstimator;
+    }
+
+    public CommandBase setCoastCommand() {
+        return Commands.runOnce(() -> {
+            frontLeft.setIdleMode(IdleMode.kCoast);
+            frontRight.setIdleMode(IdleMode.kCoast);
+            backLeft.setIdleMode(IdleMode.kCoast);
+            backRight.setIdleMode(IdleMode.kCoast);
+        }).finallyDo(d -> {
+            frontLeft.setIdleMode(IdleMode.kBrake);
+            frontRight.setIdleMode(IdleMode.kBrake);
+            backLeft.setIdleMode(IdleMode.kBrake);
+            backRight.setIdleMode(IdleMode.kBrake);
+        });
     }
 }
