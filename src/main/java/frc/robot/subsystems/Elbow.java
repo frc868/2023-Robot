@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -48,9 +49,9 @@ import frc.robot.commands.RobotStates;
  */
 public class Elbow extends ProfiledPIDSubsystem {
     public static enum ElbowPosition {
-        LOW(0.502 - 0.94),
-        MID(0.94 - 0.94),
-        HIGH(1.7 - 0.94);
+        LOW(-0.31),
+        MID(0),
+        HIGH(0.7);
 
         public final double value;
 
@@ -169,7 +170,7 @@ public class Elbow extends ProfiledPIDSubsystem {
 
         encoder.setInverted(true);
         encoder.setPositionConversionFactor(2 * Math.PI);
-        encoder.setZeroOffset(1.26);
+        encoder.setZeroOffset(1.274);
 
         motor.burnFlash();
 
@@ -352,13 +353,17 @@ public class Elbow extends ProfiledPIDSubsystem {
      * @return the command
      */
     public CommandBase setDesiredPositionCommand(ElbowPosition position, Elevator elevator) {
+        return setDesiredPositionCommand(() -> position, elevator);
+    }
+
+    public CommandBase setDesiredPositionCommand(Supplier<ElbowPosition> positionSupplier, Elevator elevator) {
         return Commands.either(
                 Commands.sequence(
-                        runOnce(() -> setGoal(position.value)),
+                        runOnce(() -> setGoal(positionSupplier.get().value)),
                         runOnce(this::enable),
                         Commands.waitUntil(this::isAtGoal).withTimeout(0.5)),
-                RobotStates.singularErrorCommand(() -> getIfSafeToMove(position, elevator).getSecond()),
-                () -> getIfSafeToMove(position, elevator).getFirst());
+                RobotStates.singularErrorCommand(() -> getIfSafeToMove(positionSupplier.get(), elevator).getSecond()),
+                () -> getIfSafeToMove(positionSupplier.get(), elevator).getFirst());
     }
 
     public CommandBase lockPosition() {
@@ -377,10 +382,12 @@ public class Elbow extends ProfiledPIDSubsystem {
      * @return the command
      */
     public CommandBase setOverridenElbowSpeedCommand(DoubleSupplier speed) {
-        return Commands.either(
-                run(() -> setSpeed(speed.getAsDouble())),
-                Commands.none(),
-                Overrides.MANUAL_MECH_CONTROL_MODE.getStatusSupplier());
+        return run(() -> {
+            if (Overrides.MANUAL_MECH_CONTROL_MODE.getStatus()) {
+                this.disable();
+                setSpeed(speed.getAsDouble());
+            }
+        });
     }
 
     public CommandBase motorOverride() {
