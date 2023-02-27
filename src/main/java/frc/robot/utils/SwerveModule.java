@@ -296,4 +296,9 @@ public class SwerveModule {
         driveMotor.set(0);
         turnMotor.set(0);
     }
+
+    public void setIdleMode(IdleMode idleMode) {
+        driveMotor.setIdleMode(idleMode);
+        turnMotor.setIdleMode(idleMode);
+    }
 }
