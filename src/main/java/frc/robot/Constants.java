@@ -56,7 +56,7 @@ public final class Constants {
 
     public static final class Pneumatics {
         public static final int[] PINCERS = { RobotBase.isReal() ? 13 : 0, RobotBase.isReal() ? 12 : 1 };
-        public static final int[] WRIST = { RobotBase.isReal() ? 11 : 2, RobotBase.isReal() ? 10 : 3 };
+        public static final int[] WRIST = { RobotBase.isReal() ? 10 : 2, RobotBase.isReal() ? 11 : 3 };
         public static final int[] INTAKE = { RobotBase.isReal() ? 14 : 4, RobotBase.isReal() ? 15 : 5 };
         public static final int[] PASSOVER = { RobotBase.isReal() ? 8 : 6, RobotBase.isReal() ? 9 : 7 };
     }
@@ -164,16 +164,16 @@ public final class Constants {
         }
 
         public static final class Elevator {
+            public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new TunableNumber("Elevator",
+                    "Max Velocity", 2.6); // untested
+            public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elevator",
+                    "Max Acceleration", 15); // untested
             // public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new
             // TunableNumber("Elevator",
-            // "Max Velocity", 2.6); // untested
+            // "Max Velocity", 1.5); // untested
             // public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED
             // = new TunableNumber("Elevator",
-            // "Max Acceleration", 32.5); // untested
-            public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new TunableNumber("Elevator",
-                    "Max Velocity", 1.5); // untested
-            public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elevator",
-                    "Max Acceleration", 1); // untested
+            // "Max Acceleration", 1); // untested
             public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND_STOW = new TunableNumber("Elevator",
                     "Max Velocity Stow", 1.3); // untested
             public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED_STOW = new TunableNumber(

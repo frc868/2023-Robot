@@ -40,14 +40,14 @@ public class Scoring {
                         Commands.select(
                                 Map.of(
                                         GamePiece.CONE,
-                                        Commands.waitSeconds(1)
+                                        Commands.waitSeconds(0.5)
                                                 .andThen(elbow.setDesiredPositionCommand(
                                                         ElbowPosition.HIGH,
                                                         elevator).andThen(
                                                                 manipulator.setWristUpCommand(elevator))),
 
                                         GamePiece.CUBE,
-                                        Commands.waitSeconds(1)
+                                        Commands.waitSeconds(0.5)
                                                 .andThen(elbow.setDesiredPositionCommand(
                                                         ElbowPosition.HIGH,
                                                         elevator))),
@@ -96,17 +96,19 @@ public class Scoring {
                                                                         .setPincersReleasedCommand(gamePieceSupplier),
                                                                 elbow.setDesiredPositionCommand(ElbowPosition.LOW,
                                                                         elevator),
-                                                                manipulator.setWristDownCommand(),
                                                                 elevator.setDesiredPositionDeltaCommand(-0.2, intake,
                                                                         elbow),
                                                                 Commands.either(
-                                                                        driveDeltaCommand(-0.08, drivetrain),
+                                                                        driveDeltaCommand(-0.095, drivetrain),
                                                                         Commands.none(),
                                                                         () -> driveBackwards)),
+
                                                         Commands.either(
                                                                 Commands.parallel(
+                                                                        manipulator.setWristDownCommand(),
                                                                         elbow.setDesiredPositionCommand(
-                                                                                ElbowPosition.HIGH, elevator),
+                                                                                ElbowPosition.HIGH, elevator)
+                                                                                .withTimeout(.5),
                                                                         driveDeltaCommand(-0.4,
                                                                                 drivetrain)),
                                                                 Commands.none(),

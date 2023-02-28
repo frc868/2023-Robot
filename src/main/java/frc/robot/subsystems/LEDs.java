@@ -164,11 +164,11 @@ public class LEDs extends SubsystemBase {
          */
         private static void uninitialized() {
             timeStep++; // 50 timesteps is one second
-            timeStep %= 20; // every 0.4 seconds it will roll over
+            timeStep %= 50; // every 0.4 seconds it will roll over
             for (int i = 0; i < buffer.getLength(); i++) {
                 // every 0.2 seconds it will switch from off to on
-                if (timeStep / 10 == 1) {
-                    buffer.setHSV(i, 15, 255, v);
+                if (timeStep / 25 == 1) {
+                    buffer.setHSV(i, 10, 255, v);
                 } else {
                     buffer.setHSV(i, 0, 0, 0);
                 }

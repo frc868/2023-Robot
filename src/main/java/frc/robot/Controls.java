@@ -183,7 +183,6 @@ public class Controls {
                                 (b) -> setOutput.accept(OperatorControls.GAME_PIECE_DROP, b),
                                 drivetrain, gridInterface, intake, manipulator,
                                 elevator, elbow)
-                        .andThen(Commands.waitSeconds(0.5))
                         .andThen(RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow))
                         .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.SCORE,
                                 true)))
