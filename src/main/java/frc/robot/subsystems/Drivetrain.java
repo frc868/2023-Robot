@@ -19,7 +19,6 @@ import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
 import com.techhounds.houndutil.houndlog.logitems.DoubleLogItem;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -39,7 +38,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
@@ -96,13 +94,14 @@ public class Drivetrain extends SubsystemBase {
      */
     private SwerveDrivePoseEstimator poseEstimator;
 
-    /**
-     * The internal register for the automatic 90° turns, so that the driver is able
-     * to press the button multiple times.
-     */
-    private double turnRegister = 0;
-    /** The initial position of the gyro, for the automatic 90° turns. */
-    private double startingGyroAngle = 0;
+    // /**
+    // * The internal register for the automatic 90° turns, so that the driver is
+    // able
+    // * to press the button multiple times.
+    // */
+    // private double turnRegister = 0;
+    // /** The initial position of the gyro, for the automatic 90° turns. */
+    // private double startingGyroAngle = 0;
 
     /** Whether to override the inputs of the driver for the automatic 90° turns. */
     private boolean isTurningEnabled = false;
@@ -193,6 +192,7 @@ public class Drivetrain extends SubsystemBase {
                 new Pose2d(1.84, 5.06, new Rotation2d()));
 
         turnController.setTolerance(0.05);
+        turnController.enableContinuousInput(0, 2 * Math.PI);
 
         LoggingManager.getInstance().addGroup("Drivetrain", new LogGroup(
                 new DeviceLogger<Pigeon2>(pigeon, "Pigeon 2",
@@ -483,12 +483,6 @@ public class Drivetrain extends SubsystemBase {
      * @return its current state
      */
     public boolean getTurnControllerEnabled() {
-        if (isTurningEnabled) {
-            if (turnController.atGoal()) {
-                isTurningEnabled = false;
-                turnRegister = 0;
-            }
-        }
         return isTurningEnabled;
     }
 
@@ -573,17 +567,15 @@ public class Drivetrain extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase turnWhileMovingCommand(boolean counterClockwise) {
-        return new InstantCommand(() -> {
+    public CommandBase turnWhileMovingCommand(double angle) {
+        return Commands.startEnd(() -> {
             if (!isTurningEnabled) {
-                startingGyroAngle = getGyroAngleRad();
-                turnController.reset(startingGyroAngle);
-                turnRegister = 0;
+                turnController.reset(getGyroAngleRad());
             }
             isTurningEnabled = true;
-            turnRegister += counterClockwise ? Math.PI / 2.0 : -Math.PI / 2.0;
-
-            turnController.setGoal(startingGyroAngle + turnRegister);
+            turnController.setGoal(angle);
+        }, () -> {
+            isTurningEnabled = false;
         }).withName("Turn While Moving");
     }
 
@@ -652,7 +644,7 @@ public class Drivetrain extends SubsystemBase {
                 new PIDController(Constants.Gains.Trajectories.xkP, 0, 0),
                 new PIDController(Constants.Gains.Trajectories.ykP, 0, 0),
                 new PIDController(Constants.Gains.Trajectories.thetakP, 0, 0),
-                (s) -> this.setModuleStates(s, true, true),
+                (s) -> this.setModuleStates(s, true, true), // TODO: change to closed loop
                 this);
     }
 
@@ -709,37 +701,17 @@ public class Drivetrain extends SubsystemBase {
      * @return the command
      */
     public CommandBase chargeStationBalanceCommand() {
-        BangBangController controller = new BangBangController(1);
-        return new FunctionalCommand(
-                () -> {
-                },
-                () -> {
-                    double setpoint = 0.0;
-                    if (Math.abs(pigeon.getRoll()) > 1) {
-                        setpoint = pigeon.getRoll() > 0 ? 0.1 : -0.1;
-                    }
-                    drive(setpoint, 0, 0,
-                            DriveMode.ROBOT_RELATIVE);
-                },
-                (d) -> this.stop(),
-                controller::atSetpoint, this).finallyDo((d) -> this.stop());
-    }
-
-    /**
-     * Creates a command that supplies SwerveModuleStates to follow a
-     * PathPlannerTrajectory, but the holonomic rotation is overridden to always be
-     * π rad/s.
-     * 
-     * @return the command
-     */
-    public CommandBase chargeStationBalancePIDCommand() {
-        PIDController controller = new PIDController(0.1, 0, 0);
+        PIDController controller = new PIDController(0.05, 0, 0.01);
         controller.setTolerance(1);
         return new PIDCommand(
                 controller,
-                pigeon::getRoll,
+                () -> (-pigeon.getRoll()),
                 0,
-                (d) -> drive(d > 0.2 ? 0.2 : d, 0, 0, DriveMode.ROBOT_RELATIVE),
+                (d) -> drive(
+                        d > 1
+                                ? (d > 0 ? 1 : -1)
+                                : d,
+                        0, 0, DriveMode.ROBOT_RELATIVE),
                 this).finallyDo((d) -> this.stop());
     }
 
