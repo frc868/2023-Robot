@@ -15,6 +15,9 @@ import com.techhounds.houndutil.houndlib.Rectangle2d;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -195,6 +198,23 @@ public class RobotStates {
     //////////////////////////////
 
     /**
+     * Positive distances are towards the grid.
+     * 
+     * @param distance
+     * @param drivetrain
+     * @return
+     */
+    protected static CommandBase driveDeltaCommand(double distance, Drivetrain drivetrain) {
+        return drivetrain.moveDeltaPathFollowingCommand(
+                new Transform2d(
+                        new Translation2d(distance, 0),
+                        new Rotation2d(Math.PI)),
+                new PathConstraints(3,
+                        1))
+                .withTimeout(2);
+    }
+
+    /**
      * Creates a command to intake a game piece.
      * 
      * Runs this sequence:
@@ -254,8 +274,7 @@ public class RobotStates {
                                                         .repeatedly())
                                                 .andThen(Commands.waitUntil(secondaryButton::getAsBoolean)),
                                         Commands.deadline(
-                                                Commands.waitUntil(secondaryButton::getAsBoolean)
-                                                        .andThen(Commands.waitSeconds(0.5)),
+                                                Commands.waitUntil(secondaryButton::getAsBoolean),
                                                 intake.runPassoverMotorsCommand(),
                                                 manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow())
                                                         .repeatedly()),
@@ -281,14 +300,15 @@ public class RobotStates {
         return intakeGamePiece(true, true, () -> true, intake, manipulator, elevator, elbow, leds);
     }
 
-    public static CommandBase humanPlayerPickup(
+    public static CommandBase humanPlayerExtendElevatorCommand(
             GamePiece gamePiece,
-            GridInterface gridInterface,
             Intake intake,
             Manipulator manipulator,
             Elevator elevator,
-            Elbow elbow) {
+            Elbow elbow,
+            LEDs leds) {
         return Commands.sequence(
+                setIntakeModeCommand(gamePiece, leds),
                 Commands.parallel(
                         elevator.setDesiredPositionCommand(ElevatorPosition.CUBE_MID, intake, elbow),
                         Commands.sequence(
@@ -298,6 +318,32 @@ public class RobotStates {
                                         elevator))),
                 manipulator.setPincersReleasedCommand(() -> gamePiece),
                 Commands.waitSeconds(0.5)).withName("Score Game Piece");
+    }
+
+    public static CommandBase humanPlayerPickupCommand(
+            BooleanSupplier secondaryButton,
+            BooleanConsumer secondaryButtonLED,
+            GamePiece gamePiece,
+            Drivetrain drivetrain,
+            Intake intake,
+            Manipulator manipulator,
+            Elevator elevator,
+            Elbow elbow,
+            LEDs leds) {
+        return Commands.sequence(
+                humanPlayerExtendElevatorCommand(gamePiece, intake, manipulator, elevator, elbow, leds),
+                Commands.deadline(
+                        Commands.waitUntil(secondaryButton::getAsBoolean),
+                        Commands.sequence(
+                                Commands.runOnce(() -> secondaryButtonLED.accept(true)),
+                                Commands.waitSeconds(0.5),
+                                Commands.runOnce(() -> secondaryButtonLED.accept(false)),
+                                Commands.waitSeconds(0.5)).repeatedly()
+                                .finallyDo((d) -> secondaryButtonLED.accept(false))),
+                driveDeltaCommand(-0.095, drivetrain),
+                stowElevatorHPStation(intake, manipulator, elevator, elbow, leds),
+                clearIntakeModeCommand(leds))
+                .withName("Score Game Piece");
     }
 
     /**
@@ -326,7 +372,7 @@ public class RobotStates {
         return Commands.sequence(
                 manipulator.setWristDownCommand(),
                 manipulator.setPincersClosedCommand(),
-                elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator).andThen(
+                elbow.setDesiredPositionCommand(ElbowPosition.MID_STOW, elevator).andThen(
                         elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow)
                                 .deadlineWith(elbow.lockPosition())),
                 RobotStates.setCurrentStateCommand(RobotState.SEEKING))
@@ -357,12 +403,15 @@ public class RobotStates {
             Elevator elevator,
             Elbow elbow,
             LEDs leds) {
-        return Commands.sequence(
-                manipulator.setPincersPincingCommand(() -> manipulator.getPincers() ? GamePiece.CONE : GamePiece.CUBE),
-                elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
-                elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow),
-                elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator),
-                RobotStates.setCurrentStateCommand(RobotState.SCORING))
+        return Commands.either(
+                Commands.sequence(
+                        manipulator.setPincersPincingCommand(() -> intakeMode.orElseThrow()),
+                        elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
+                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow),
+                        elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator),
+                        RobotStates.setCurrentStateCommand(RobotState.SCORING)),
+                singularErrorCommand(() -> "Intake mode not present"),
+                () -> intakeMode.isPresent())
                 .withName("Stow Elevator");
     }
 
@@ -502,7 +551,8 @@ public class RobotStates {
         // this is a proxy command because we have to do things with the trajectory
         // every time before passing it into the `drivetrain.pathFollowingCommand`
         // method.
-        return new ProxyCommand(pathFollowingCommandSupplier).finallyDo((d) -> drivetrain.stop())
+        return new ProxyCommand(pathFollowingCommandSupplier).beforeStarting(Commands.print("8"))
+                .finallyDo((d) -> drivetrain.stop())
                 .withName("Auto Drive");
     }
 
