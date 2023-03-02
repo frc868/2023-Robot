@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.GamePieceLocation.Level;
 import frc.robot.GridInterface;
@@ -54,23 +55,6 @@ public class Scoring {
                                 gamePieceSupplier::get)));
     }
 
-    /**
-     * Positve distances are towards the grid.
-     * 
-     * @param distance
-     * @param drivetrain
-     * @return
-     */
-    private static CommandBase driveDeltaCommand(double distance, Drivetrain drivetrain) {
-        return drivetrain.moveDeltaPathFollowingCommand(
-                new Transform2d(
-                        new Translation2d(distance, 0),
-                        new Rotation2d(Math.PI)),
-                new PathConstraints(3,
-                        1))
-                .withTimeout(2);
-    }
-
     private static CommandBase placePieceCommand(
             boolean driveBackwards,
             BooleanSupplier secondaryButton,
@@ -83,12 +67,20 @@ public class Scoring {
             Elevator elevator,
             Elbow elbow) {
         return Commands.sequence(
+                new ProxyCommand(() -> Commands
+                        .print(gamePieceSupplier.get().toString())),
                 Commands.select(
                         Map.of(
                                 GamePiece.CONE,
                                 Commands.deadline(
                                         Commands.waitUntil(
-                                                () -> (manipulator.isPoleDetected() || secondaryButton.getAsBoolean())))
+                                                () -> (manipulator.isPoleDetected() || secondaryButton.getAsBoolean())),
+                                        Commands.sequence(
+                                                Commands.runOnce(() -> secondaryButtonLED.accept(true)),
+                                                Commands.waitSeconds(0.5),
+                                                Commands.runOnce(() -> secondaryButtonLED.accept(false)),
+                                                Commands.waitSeconds(0.5)).repeatedly()
+                                                .finallyDo((d) -> secondaryButtonLED.accept(false)))
                                         .andThen(
                                                 Commands.sequence(
                                                         Commands.parallel(
@@ -99,37 +91,27 @@ public class Scoring {
                                                                 elevator.setDesiredPositionDeltaCommand(-0.2, intake,
                                                                         elbow),
                                                                 Commands.either(
-                                                                        driveDeltaCommand(-0.095, drivetrain),
+                                                                        RobotStates.driveDeltaCommand(-0.095,
+                                                                                drivetrain),
                                                                         Commands.none(),
                                                                         () -> driveBackwards)),
-
-                                                        Commands.either(
-                                                                Commands.parallel(
-                                                                        manipulator.setWristDownCommand(),
-                                                                        elbow.setDesiredPositionCommand(
-                                                                                ElbowPosition.HIGH, elevator)
-                                                                                .withTimeout(.5),
-                                                                        driveDeltaCommand(-0.4,
-                                                                                drivetrain)),
-                                                                Commands.none(),
-                                                                () -> driveBackwards
-                                                                        && levelSupplier.get() == Level.HIGH
-                                                                        && gamePieceSupplier.get() == GamePiece.CONE))),
+                                                        Commands.parallel(
+                                                                manipulator.setWristDownCommand(),
+                                                                elbow.setDesiredPositionCommand(
+                                                                        ElbowPosition.HIGH, elevator)
+                                                                        .withTimeout(.5)))),
                                 GamePiece.CUBE,
                                 Commands.deadline(
-                                        Commands.waitUntil(() -> secondaryButton.getAsBoolean()),
+                                        Commands.waitUntil(() -> true),
                                         Commands.sequence(
                                                 Commands.runOnce(() -> secondaryButtonLED.accept(true)),
                                                 Commands.waitSeconds(0.5),
                                                 Commands.runOnce(() -> secondaryButtonLED.accept(false)),
                                                 Commands.waitSeconds(0.5)).repeatedly()
                                                 .finallyDo((d) -> secondaryButtonLED.accept(false)))
-                                        .andThen(Commands.sequence(
-                                                manipulator.setPincersReleasedCommand(gamePieceSupplier),
-                                                Commands.either(
-                                                        driveDeltaCommand(-0.25, drivetrain),
-                                                        Commands.none(),
-                                                        () -> driveBackwards)))),
+                                        .andThen(
+                                                Commands.sequence(
+                                                        manipulator.setPincersReleasedCommand(gamePieceSupplier)))),
                         gamePieceSupplier::get));
     }
 
@@ -150,7 +132,7 @@ public class Scoring {
                                         Commands.waitUntil(manipulator::isPoleDetected)
                                                 .deadlineWith(
                                                         Commands.parallel(
-                                                                driveDeltaCommand(0.6, drivetrain),
+                                                                RobotStates.driveDeltaCommand(0.6, drivetrain),
                                                                 drivetrain.setCoastCommand())),
                                         Commands.parallel(
                                                 manipulator
@@ -159,12 +141,12 @@ public class Scoring {
                                                         elevator),
                                                 elevator.setDesiredPositionDeltaCommand(-0.2, intake,
                                                         elbow),
-                                                driveDeltaCommand(-0.08, drivetrain)),
+                                                RobotStates.driveDeltaCommand(-0.08, drivetrain)),
                                         Commands.either(
                                                 Commands.parallel(
                                                         elbow.setDesiredPositionCommand(
                                                                 ElbowPosition.HIGH, elevator),
-                                                        driveDeltaCommand(-0.4, drivetrain)),
+                                                        RobotStates.driveDeltaCommand(-0.4, drivetrain)),
                                                 Commands.none(),
                                                 () -> levelSupplier.get() == Level.HIGH
                                                         && gamePieceSupplier
@@ -178,7 +160,7 @@ public class Scoring {
                                                 1))
                                         .andThen(Commands.sequence(
                                                 manipulator.setPincersReleasedCommand(gamePieceSupplier),
-                                                driveDeltaCommand(-0.18, drivetrain)))),
+                                                RobotStates.driveDeltaCommand(-0.18, drivetrain)))),
                         gamePieceSupplier::get));
     }
 
