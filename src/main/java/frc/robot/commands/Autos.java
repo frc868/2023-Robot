@@ -107,6 +107,25 @@ public class Autos {
      * @param drivetrain the drivetrain
      * @return the command
      */
+    public static Supplier<AutoTrajectoryCommand> preloadChargeStationCube(AutoPath autoPath, Drivetrain drivetrain,
+            Intake intake,
+            Manipulator manipulator, Elevator elevator, Elbow elbow, LEDs leds) {
+        return () -> new AutoTrajectoryCommand(autoPath,
+                Commands.sequence(
+                        fullAutoScoreWithMovement(GamePieceLocation.E1, drivetrain, intake, manipulator, elevator,
+                                elbow),
+                        drivetrain.pathFollowingCommand(
+                                autoPath.getTrajectories().get(0)).asProxy(),
+                        drivetrain.chargeStationBalanceCommand().asProxy()));
+    }
+
+    /**
+     * Creates the 2 Piece N trajectory command.
+     * 
+     * @param autoPath   the {@link AutoPath} containing the Figure 8 trajectory.
+     * @param drivetrain the drivetrain
+     * @return the command
+     */
     public static Supplier<AutoTrajectoryCommand> twoPieceN(AutoPath autoPath, Drivetrain drivetrain, Intake intake,
             Manipulator manipulator, Elevator elevator, Elbow elbow, LEDs leds) {
         return () -> new AutoTrajectoryCommand(autoPath,
@@ -195,4 +214,5 @@ public class Autos {
                         fullAutoScoreWithMovement(GamePieceLocation.C1, drivetrain, intake, manipulator, elevator,
                                 elbow)));
     }
+
 }
