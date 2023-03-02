@@ -50,7 +50,8 @@ import frc.robot.commands.RobotStates;
 public class Elbow extends ProfiledPIDSubsystem {
     public static enum ElbowPosition {
         LOW(-0.31),
-        MID(0),
+        MID_STOW(-0.1),
+        MID(0.07),
         HIGH(0.7);
 
         public final double value;
@@ -294,6 +295,8 @@ public class Elbow extends ProfiledPIDSubsystem {
                     }
                     break;
                 case MID:
+                    break;
+                case MID_STOW:
                     break;
                 case LOW:
                     if (elevator.getMeasurement() < 0.1) {
