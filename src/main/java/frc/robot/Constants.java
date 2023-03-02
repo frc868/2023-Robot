@@ -224,23 +224,26 @@ public final class Constants {
                 "OV9281-01",
                 "OV9281-02"
         };
+
+        // front-left, front-right, back-left, back-right
         public static final Transform3d[] ROBOT_TO_CAMS = new Transform3d[] {
                 new Transform3d(
-                        new Translation3d(Units.inchesToMeters(10.125), -Units.inchesToMeters(7.75),
+                        new Translation3d(Units.inchesToMeters(10.226), -Units.inchesToMeters(5.476),
                                 Units.inchesToMeters(21.75)),
-                        new Rotation3d(0, 0, 0)),
+                        new Rotation3d(0, 0, Math.PI / 4.0)),
                 new Transform3d(
-                        new Translation3d(-Units.inchesToMeters(11), -Units.inchesToMeters(5.5),
+                        new Translation3d(-Units.inchesToMeters(10.226), -Units.inchesToMeters(7.774),
                                 Units.inchesToMeters(26.8)),
-                        new Rotation3d(0, 0, -Math.PI / 2.0)),
+                        new Rotation3d(0, 0, -Math.PI / 4.0)),
+
                 new Transform3d(
-                        new Translation3d(-Units.inchesToMeters(12.625), -Units.inchesToMeters(6.25),
+                        new Translation3d(-Units.inchesToMeters(12.524), -Units.inchesToMeters(5.476),
                                 Units.inchesToMeters(26.3)),
-                        new Rotation3d(0, 0, Math.PI)),
+                        new Rotation3d(0, 0, 3.0 * Math.PI / 4.0)),
                 new Transform3d(
-                        new Translation3d(-Units.inchesToMeters(11), -Units.inchesToMeters(8),
+                        new Translation3d(-Units.inchesToMeters(12.524), -Units.inchesToMeters(7.774),
                                 Units.inchesToMeters(26.8)),
-                        new Rotation3d(0, 0, Math.PI / 2.0)),
+                        new Rotation3d(0, 0, -3.0 * Math.PI / 4.0)),
         };
     }
 }
