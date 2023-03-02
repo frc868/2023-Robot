@@ -27,6 +27,8 @@ import frc.robot.subsystems.Manipulator;
 import frc.robot.subsystems.Drivetrain.DriveMode;
 
 public class Controls {
+    public static boolean isTwistLimited = false;
+
     public enum OperatorControls {
         LEFT_GRID(1, 1),
         MIDDLE_GRID(1, 2),
@@ -87,14 +89,16 @@ public class Controls {
                 drivetrain.teleopDriveCommand(
                         () -> -joystick.getY(),
                         () -> -joystick.getX(),
-                        () -> -MathUtil.applyDeadband(joystick.getTwist(), 0.05),
-                        () -> 1 - joystick.getRawAxis(5)));
+                        () -> -MathUtil.applyDeadband(joystick.getTwist() * (isTwistLimited ? 0.25 : 1), 0.05),
+                        () -> 1 - (joystick.getRawAxis(5) * 0.7)));
 
         joystick.button(13).onTrue(drivetrain.zeroGyroCommand());
 
-        joystick.button(2).onTrue(drivetrain.setSpeedModeCommand(Drivetrain.SpeedMode.ULTRA));
-        joystick.button(3).onTrue(drivetrain.setDriveModeCommand(DriveMode.ROBOT_RELATIVE))
-                .onFalse(drivetrain.setDriveModeCommand(DriveMode.FIELD_ORIENTED));
+        joystick.button(3)
+                .onTrue(drivetrain.setDriveModeCommand(DriveMode.ROBOT_RELATIVE)
+                        .andThen(Commands.runOnce(() -> isTwistLimited = true)))
+                .onFalse(drivetrain.setDriveModeCommand(DriveMode.FIELD_ORIENTED)
+                        .andThen(Commands.runOnce(() -> isTwistLimited = false)));
 
         joystick.pov(0, 0, CommandScheduler.getInstance().getDefaultButtonLoop())
                 .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(0)));
