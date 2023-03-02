@@ -483,7 +483,6 @@ public class RobotStates {
         }
         Pose2d last;
         try {
-
             last = intermediaryPoses[intermediaryPoses.length - 1];
         } catch (Exception e) {
             last = drivetrain.getPose();
