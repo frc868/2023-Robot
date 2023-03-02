@@ -423,7 +423,7 @@ public class RobotStates {
      * @param gridInterface
      * @return the trajectory
      */
-    private static PathPlannerTrajectory getAutoDriveTraj(Supplier<RobotState> currentState,
+    public static PathPlannerTrajectory getAutoDriveTraj(Supplier<RobotState> currentState,
             Supplier<GamePieceLocation> location,
             Drivetrain drivetrain) {
 
@@ -550,7 +550,7 @@ public class RobotStates {
         // this is a proxy command because we have to do things with the trajectory
         // every time before passing it into the `drivetrain.pathFollowingCommand`
         // method.
-        return new ProxyCommand(pathFollowingCommandSupplier).beforeStarting(Commands.print("8"))
+        return new ProxyCommand(pathFollowingCommandSupplier)
                 .finallyDo((d) -> drivetrain.stop())
                 .withName("Auto Drive");
     }

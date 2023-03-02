@@ -12,7 +12,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.GamePieceLocation.Level;
 import frc.robot.GridInterface;
@@ -36,23 +35,21 @@ public class Scoring {
                 elevator.setScoringPositionCommand(
                         gamePieceSupplier,
                         levelSupplier, intake, elbow),
-                Commands.sequence(
-                        elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
-                        Commands.select(
-                                Map.of(
-                                        GamePiece.CONE,
-                                        Commands.waitSeconds(0.5)
-                                                .andThen(elbow.setDesiredPositionCommand(
-                                                        ElbowPosition.HIGH,
-                                                        elevator).andThen(
-                                                                manipulator.setWristUpCommand(elevator))),
+                Commands.select(
+                        Map.of(
+                                GamePiece.CONE,
+                                Commands.waitSeconds(0.5)
+                                        .andThen(elbow.setDesiredPositionCommand(
+                                                ElbowPosition.HIGH,
+                                                elevator).andThen(
+                                                        manipulator.setWristUpCommand(elevator))),
 
-                                        GamePiece.CUBE,
-                                        Commands.waitSeconds(0.5)
-                                                .andThen(elbow.setDesiredPositionCommand(
-                                                        ElbowPosition.HIGH,
-                                                        elevator))),
-                                gamePieceSupplier::get)));
+                                GamePiece.CUBE,
+                                Commands.waitSeconds(0.5)
+                                        .andThen(elbow.setDesiredPositionCommand(
+                                                ElbowPosition.HIGH,
+                                                elevator))),
+                        gamePieceSupplier::get));
     }
 
     private static CommandBase placePieceCommand(
@@ -67,8 +64,6 @@ public class Scoring {
             Elevator elevator,
             Elbow elbow) {
         return Commands.sequence(
-                new ProxyCommand(() -> Commands
-                        .print(gamePieceSupplier.get().toString())),
                 Commands.select(
                         Map.of(
                                 GamePiece.CONE,

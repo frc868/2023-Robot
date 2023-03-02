@@ -58,9 +58,9 @@ public class RobotContainer {
     private final Misc misc = new Misc();
 
     private final GridInterface gridInterface = new GridInterface();
-    // private final AutoGenerator autoGenerator = new AutoGenerator(drivetrain,
-    // intake, manipulator, elevator, elbow,
-    // leds);
+    private final AutoGenerator autoGenerator = new AutoGenerator(drivetrain,
+            intake, manipulator, elevator, elbow,
+            leds);
 
     /**
      * Constructs the robot container.
@@ -141,9 +141,9 @@ public class RobotContainer {
                 new AutoRoutine("1 Piece Charge M",
                         Autos.preloadChargeStationCube(TrajectoryLoader.getAutoPath("1 Piece Charge M"), drivetrain,
                                 intake, manipulator, elevator, elbow, leds)));
-        // AutoManager.getInstance().addRoutine(
-        // new AutoRoutine("AutoGenerator",
-        // autoGenerator.getAutoCommand()));
+        AutoManager.getInstance().addRoutine(
+                new AutoRoutine("AutoGenerator",
+                        autoGenerator.getAutoCommand()));
         // FieldConstants.displayAutoDriveOnField();
         // FieldConstants.displayItemsOnField();
     }
