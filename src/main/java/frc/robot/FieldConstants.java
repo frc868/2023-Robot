@@ -13,25 +13,25 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class FieldConstants {
-    public static double LENGTH_METERS = Units.inchesToMeters(651.25); // 16.54m
-    public static double WIDTH_METERS = Units.inchesToMeters(315.5); // 8.01m
+    public static double LENGTH_METERS = 16.54; // 16.54m
+    public static double WIDTH_METERS = 8.01; // 8.01m
 
     public static class Blue {
         public static class LeftGrid {
             public static final Pose2d CONE_1 = new Pose2d(
                     new Translation2d(
                             2.4,
-                            Units.inchesToMeters(20)),
+                            0.51),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CUBE_2 = new Pose2d(
                     new Translation2d(
                             2.4,
-                            Units.inchesToMeters(42.125)),
+                            1.07),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CONE_3 = new Pose2d(
                     new Translation2d(
                             2.4,
-                            Units.inchesToMeters(64)),
+                            1.63),
                     Rotation2d.fromDegrees(180));
         }
 
@@ -39,34 +39,34 @@ public class FieldConstants {
             public static final Pose2d CONE_4 = new Pose2d(
                     new Translation2d(
                             2.4,
-                            Units.inchesToMeters(86)),
+                            2.18),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CUBE_5 = new Pose2d(
                     new Translation2d(
                             2.4,
-                            Units.inchesToMeters(108.125)),
+                            2.75),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CONE_6 = new Pose2d(
                     new Translation2d(
                             2.4,
-                            Units.inchesToMeters(130)),
+                            3.3),
                     Rotation2d.fromDegrees(180));
         }
 
         public static class RightGrid {
             public static final Pose2d CONE_7 = new Pose2d(
                     new Translation2d(
-                            2.3,
-                            Units.inchesToMeters(156)),
+                            2.4,
+                            3.96),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CUBE_8 = new Pose2d(
                     new Translation2d(
-                            2.3,
-                            Units.inchesToMeters(174)),
+                            2.4,
+                            4.42),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CONE_9 = new Pose2d(
                     new Translation2d(
-                            2.3,
+                            2.4,
                             5.06),
                     Rotation2d.fromDegrees(180));
         }
@@ -74,31 +74,31 @@ public class FieldConstants {
         public static class GamePieces {
             public static final Pose2d ITEM_1 = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(278.05),
-                            Units.inchesToMeters(180.19)),
+                            7.06,
+                            4.58),
                     new Rotation2d());
             public static final Pose2d ITEM_2 = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(278.05),
-                            Units.inchesToMeters(132.19)),
+                            7.06,
+                            3.36),
                     new Rotation2d());
             public static final Pose2d ITEM_3 = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(278.05),
-                            Units.inchesToMeters(84.19)),
+                            7.06,
+                            2.14),
                     new Rotation2d());
             public static final Pose2d ITEM_4 = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(278.05),
-                            Units.inchesToMeters(36.19)),
+                            7.06,
+                            0.19),
                     new Rotation2d());
         }
 
         public static class ChargeStation {
-            public static final double LENGTH_METERS = Units.inchesToMeters(97.25);
-            public static final double WIDTH_METERS = Units.inchesToMeters(48.5);
+            public static final double LENGTH_METERS = 2.47;
+            public static final double WIDTH_METERS = 1.23;
             public static final Pose2d CENTER = new Pose2d(
-                    new Translation2d(Units.inchesToMeters(150.8), Units.inchesToMeters(108.015)), new Rotation2d());
+                    new Translation2d(3.83, 2.74), new Rotation2d());
             public static final Pose2d UPPER_LEFT = CENTER
                     .plus(new Transform2d(new Translation2d(-WIDTH_METERS / 2, LENGTH_METERS / 2), new Rotation2d()));
             public static final Pose2d UPPER_RIGHT = CENTER
@@ -112,13 +112,13 @@ public class FieldConstants {
         public static class Substations {
             public static final Pose2d DOUBLE_SUBSTATION_N = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(14.275) + Constants.ROBOT_SIDE_LENGTH / 2,
-                            Units.inchesToMeters(282.97 + 7)),
+                            0.36 + Constants.ROBOT_SIDE_LENGTH / 2,
+                            7.37),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d DOUBLE_SUBSTATION_S = new Pose2d(
                     new Translation2d(
-                            Units.inchesToMeters(14.275) + Constants.ROBOT_SIDE_LENGTH / 2,
-                            Units.inchesToMeters(248.2 - 7)),
+                            0.36 + Constants.ROBOT_SIDE_LENGTH / 2,
+                            6.13),
                     Rotation2d.fromDegrees(180));
 
             public static final Pose2d SINGLE_SUBSTATION = new Pose2d(
@@ -156,8 +156,8 @@ public class FieldConstants {
         }
 
         public static class ChargeStation {
-            public static final double LENGTH_METERS = Units.inchesToMeters(97.25);
-            public static final double WIDTH_METERS = Units.inchesToMeters(48.5);
+            public static final double LENGTH_METERS = Blue.ChargeStation.LENGTH_METERS;
+            public static final double WIDTH_METERS = Blue.ChargeStation.WIDTH_METERS;
             public static final Pose2d CENTER = reflectBlueToRed(Blue.ChargeStation.CENTER);
             public static final Pose2d UPPER_LEFT = reflectBlueToRed(Blue.ChargeStation.UPPER_LEFT);
             public static final Pose2d UPPER_RIGHT = reflectBlueToRed(Blue.ChargeStation.UPPER_RIGHT);
