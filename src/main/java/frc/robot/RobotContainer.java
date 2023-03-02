@@ -58,6 +58,9 @@ public class RobotContainer {
     private final Misc misc = new Misc();
 
     private final GridInterface gridInterface = new GridInterface();
+    // private final AutoGenerator autoGenerator = new AutoGenerator(drivetrain,
+    // intake, manipulator, elevator, elbow,
+    // leds);
 
     /**
      * Constructs the robot container.
@@ -98,6 +101,7 @@ public class RobotContainer {
                 new TrajectorySettings("3 Piece N").withMaxVelocity(2).withMaxAcceleration(2),
                 new TrajectorySettings("2 Piece S").withMaxVelocity(2).withMaxAcceleration(2),
                 new TrajectorySettings("3 Piece S").withMaxVelocity(2).withMaxAcceleration(2),
+                new TrajectorySettings("1 Piece Charge M").withMaxVelocity(2).withMaxAcceleration(2),
                 new TrajectorySettings("Charge Station N").withMaxVelocity(3).withMaxAcceleration(2));
         TrajectoryLoader.loadAutoPaths();
 
@@ -105,12 +109,13 @@ public class RobotContainer {
                 RobotStates.intakeGamePieceAutoCommand(intake, manipulator, elevator, elbow, leds));
 
         AutoManager.getInstance().addRoutine(
-                new AutoRoutine("Charge Station N",
-                        Autos.pathPlannerTrajectory(TrajectoryLoader.getAutoPath("Charge Station N"), drivetrain)));
-
-        AutoManager.getInstance().addRoutine(
                 new AutoRoutine("2 Piece N",
                         Autos.twoPieceN(TrajectoryLoader.getAutoPath("2 Piece N"), drivetrain, intake, manipulator,
+                                elevator, elbow, leds)));
+        AutoManager.getInstance().addRoutine(
+                new AutoRoutine("2 Piece Charge N",
+                        Autos.twoPieceChargeN(TrajectoryLoader.getAutoPath("2 Piece Charge N"), drivetrain, intake,
+                                manipulator,
                                 elevator, elbow, leds)));
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("3 Piece N",
@@ -122,9 +127,23 @@ public class RobotContainer {
                         Autos.twoPieceS(TrajectoryLoader.getAutoPath("2 Piece S"), drivetrain, intake, manipulator,
                                 elevator, elbow, leds)));
         AutoManager.getInstance().addRoutine(
+                new AutoRoutine("2 Piece Charge S",
+                        Autos.twoPieceChargeS(TrajectoryLoader.getAutoPath("2 Piece Charge S"), drivetrain, intake,
+                                manipulator,
+                                elevator, elbow, leds)));
+
+        AutoManager.getInstance().addRoutine(
                 new AutoRoutine("3 Piece S",
                         Autos.threePieceS(TrajectoryLoader.getAutoPath("3 Piece S"), drivetrain, intake, manipulator,
                                 elevator, elbow, leds)));
+
+        AutoManager.getInstance().addRoutine(
+                new AutoRoutine("1 Piece Charge M",
+                        Autos.preloadChargeStationCube(TrajectoryLoader.getAutoPath("1 Piece Charge M"), drivetrain,
+                                intake, manipulator, elevator, elbow, leds)));
+        // AutoManager.getInstance().addRoutine(
+        // new AutoRoutine("AutoGenerator",
+        // autoGenerator.getAutoCommand()));
         // FieldConstants.displayAutoDriveOnField();
         // FieldConstants.displayItemsOnField();
     }
