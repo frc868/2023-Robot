@@ -24,6 +24,7 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Manipulator;
+import frc.robot.subsystems.Drivetrain.DriveMode;
 
 public class Controls {
     public enum OperatorControls {
@@ -92,7 +93,17 @@ public class Controls {
         joystick.button(13).onTrue(drivetrain.zeroGyroCommand());
 
         joystick.button(2).onTrue(drivetrain.setSpeedModeCommand(Drivetrain.SpeedMode.ULTRA));
-        joystick.button(3).and(joystick.button(5)).onTrue(drivetrain.setSpeedModeCommand(Drivetrain.SpeedMode.FAST));
+        joystick.button(3).onTrue(drivetrain.setDriveModeCommand(DriveMode.ROBOT_RELATIVE))
+                .onFalse(drivetrain.setDriveModeCommand(DriveMode.FIELD_ORIENTED));
+
+        joystick.pov(0, 0, CommandScheduler.getInstance().getDefaultButtonLoop())
+                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(0)));
+        joystick.pov(0, 90, CommandScheduler.getInstance().getDefaultButtonLoop())
+                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(270)));
+        joystick.pov(0, 180, CommandScheduler.getInstance().getDefaultButtonLoop())
+                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(180)));
+        joystick.pov(0, 270, CommandScheduler.getInstance().getDefaultButtonLoop())
+                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(90)));
 
         joystick.pov(2, 270, CommandScheduler.getInstance().getDefaultButtonLoop())
                 .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CONE, leds).ignoringDisable(true));
@@ -102,7 +113,7 @@ public class Controls {
         joystick.button(14)
                 .onTrue(RobotStates.intakeGamePiece(
                         false,
-                        true,
+                        false,
                         () -> joystick.getHID().getRawButton(6),
                         intake, manipulator, elevator, elbow, leds));
 
@@ -183,7 +194,6 @@ public class Controls {
                                 (b) -> setOutput.accept(OperatorControls.GAME_PIECE_DROP, b),
                                 drivetrain, gridInterface, intake, manipulator,
                                 elevator, elbow)
-                        .andThen(RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow))
                         .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.SCORE,
                                 true)))
                         .finallyDo(safeStop))
@@ -209,9 +219,14 @@ public class Controls {
 
         getButton.apply(OperatorControls.HP_CONE)
                 .whileTrue(
-                        RobotStates.humanPlayerPickup(GamePiece.CONE, gridInterface, intake,
+                        RobotStates.humanPlayerPickupCommand(
+                                () -> hids[OperatorControls.GAME_PIECE_DROP.hid].getHID()
+                                        .getRawButton(OperatorControls.GAME_PIECE_DROP.button),
+                                (b) -> setOutput.accept(OperatorControls.GAME_PIECE_DROP, b),
+                                GamePiece.CONE,
+                                drivetrain, intake,
                                 manipulator, elevator,
-                                elbow)
+                                elbow, leds)
                                 .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_CONE,
                                         true)))
                                 .finallyDo(safeStop))
@@ -219,9 +234,14 @@ public class Controls {
                         false)));
 
         getButton.apply(OperatorControls.HP_CUBE)
-                .whileTrue(RobotStates.humanPlayerPickup(GamePiece.CUBE, gridInterface,
-                        intake, manipulator, elevator,
-                        elbow).andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_CONE, true)))
+                .whileTrue(RobotStates
+                        .humanPlayerPickupCommand(() -> hids[OperatorControls.GAME_PIECE_DROP.hid].getHID()
+                                .getRawButton(OperatorControls.GAME_PIECE_DROP.button),
+                                (b) -> setOutput.accept(OperatorControls.GAME_PIECE_DROP, b), GamePiece.CUBE,
+                                drivetrain,
+                                intake, manipulator, elevator,
+                                elbow, leds)
+                        .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_CONE, true)))
                         .finallyDo(safeStop))
                 .onFalse(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_CUBE,
                         false)));
