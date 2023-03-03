@@ -25,9 +25,9 @@ public class Watchtower extends SubsystemBase {
             new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[1],
                     Constants.Vision.ROBOT_TO_CAMS[1]),
             new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[2],
-                    Constants.Vision.ROBOT_TO_CAMS[2])
+                    Constants.Vision.ROBOT_TO_CAMS[2]),
             new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[3],
-            Constants.Vision.ROBOT_TO_CAMS[3])
+                    Constants.Vision.ROBOT_TO_CAMS[3])
     };
 
     public Watchtower() {
