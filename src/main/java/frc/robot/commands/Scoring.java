@@ -86,8 +86,8 @@ public class Scoring {
                                                                 elevator.setDesiredPositionDeltaCommand(-0.2, intake,
                                                                         elbow),
                                                                 Commands.either(
-                                                                        RobotStates.driveDeltaCommand(-0.095,
-                                                                                drivetrain),
+                                                                        RobotStates.driveDeltaCommand(-0.012,
+                                                                                drivetrain, new PathConstraints(4, 9)),
                                                                         Commands.none(),
                                                                         () -> driveBackwards)),
                                                         Commands.parallel(
@@ -97,7 +97,7 @@ public class Scoring {
                                                                         .withTimeout(.5)))),
                                 GamePiece.CUBE,
                                 Commands.deadline(
-                                        Commands.waitUntil(() -> true),
+                                        Commands.waitUntil(secondaryButton::getAsBoolean),
                                         Commands.sequence(
                                                 Commands.runOnce(() -> secondaryButtonLED.accept(true)),
                                                 Commands.waitSeconds(0.5),
@@ -127,7 +127,7 @@ public class Scoring {
                                         Commands.waitUntil(manipulator::isPoleDetected)
                                                 .deadlineWith(
                                                         Commands.parallel(
-                                                                RobotStates.driveDeltaCommand(0.6, drivetrain),
+                                                                RobotStates.driveDeltaCommand(0.8, drivetrain),
                                                                 drivetrain.setCoastCommand())),
                                         Commands.parallel(
                                                 manipulator
@@ -149,9 +149,9 @@ public class Scoring {
                                 GamePiece.CUBE,
                                 drivetrain.moveDeltaPathFollowingCommand(
                                         new Transform2d(
-                                                new Translation2d(0.4, 0),
+                                                new Translation2d(0.5, 0),
                                                 new Rotation2d()),
-                                        new PathConstraints(1,
+                                        new PathConstraints(2,
                                                 1))
                                         .andThen(Commands.sequence(
                                                 manipulator.setPincersReleasedCommand(gamePieceSupplier),
