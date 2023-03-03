@@ -51,7 +51,7 @@ public class Elbow extends ProfiledPIDSubsystem {
     public static enum ElbowPosition {
         LOW(-0.31),
         MID_STOW(-0.1),
-        MID(0.07),
+        MID(-0.01),
         HIGH(0.7);
 
         public final double value;
@@ -364,7 +364,7 @@ public class Elbow extends ProfiledPIDSubsystem {
                 Commands.sequence(
                         runOnce(() -> setGoal(positionSupplier.get().value)),
                         runOnce(this::enable),
-                        Commands.waitUntil(this::isAtGoal).withTimeout(0.5)),
+                        Commands.waitUntil(this::isAtGoal).withTimeout(1)),
                 RobotStates.singularErrorCommand(() -> getIfSafeToMove(positionSupplier.get(), elevator).getSecond()),
                 () -> getIfSafeToMove(positionSupplier.get(), elevator).getFirst());
     }
