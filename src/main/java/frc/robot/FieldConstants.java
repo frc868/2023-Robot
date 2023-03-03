@@ -212,12 +212,12 @@ public class FieldConstants {
         public static final Translation2d TOP_LEFT_INTERMEDIARY = new Translation2d(4.16, 6.50);
         public static final Translation2d TOP_RIGHT_INTERMEDIARY = new Translation2d(12.38, 6.50);
 
-        public static final Translation2d UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY = new Translation2d(2.35, 4.67);
-        public static final Translation2d UPPER_MIDDLE_BLUE_CENTER_INTERMEDIARY = new Translation2d(4.16, 4.67);
-        public static final Translation2d UPPER_MIDDLE_BLUE_RIGHT_INTERMEDIARY = new Translation2d(5.65, 4.67);
-        public static final Translation2d UPPER_MIDDLE_RED_LEFT_INTERMEDIARY = new Translation2d(10.89, 4.67);
-        public static final Translation2d UPPER_MIDDLE_RED_CENTER_INTERMEDIARY = new Translation2d(12.38, 4.67);
-        public static final Translation2d UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY = new Translation2d(14.19, 4.67);
+        public static final Translation2d UPPER_MIDDLE_BLUE_LEFT_INTERMEDIARY = new Translation2d(2.35, 4.63);
+        public static final Translation2d UPPER_MIDDLE_BLUE_CENTER_INTERMEDIARY = new Translation2d(4.16, 4.63);
+        public static final Translation2d UPPER_MIDDLE_BLUE_RIGHT_INTERMEDIARY = new Translation2d(5.65, 4.63);
+        public static final Translation2d UPPER_MIDDLE_RED_LEFT_INTERMEDIARY = new Translation2d(10.89, 4.63);
+        public static final Translation2d UPPER_MIDDLE_RED_CENTER_INTERMEDIARY = new Translation2d(12.38, 4.63);
+        public static final Translation2d UPPER_MIDDLE_RED_RIGHT_INTERMEDIARY = new Translation2d(14.19, 4.63);
 
         public static final Translation2d LOWER_MIDDLE_BLUE_LEFT_INTERMEDIARY = new Translation2d(2.35, 2.715);
         public static final Translation2d LOWER_MIDDLE_BLUE_RIGHT_INTERMEDIARY = new Translation2d(5.65, 2.715);
