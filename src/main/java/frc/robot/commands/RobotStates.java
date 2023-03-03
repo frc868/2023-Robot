@@ -37,6 +37,10 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Manipulator;
 
 public class RobotStates {
+    //////////////////////////////
+    ///////// RobotStates ////////
+    //////////////////////////////
+
     public enum RobotState {
         SEEKING,
         SCORING;
@@ -57,7 +61,9 @@ public class RobotStates {
         return Commands.runOnce(() -> currentState = robotState);
     }
 
-    // Intake Mode
+    //////////////////////////////
+    ///////// Intake Mode ////////
+    //////////////////////////////
 
     /**
      * The current mode of the robot for intaking a game piece. Set by the driver.
@@ -113,7 +119,9 @@ public class RobotStates {
         return Commands.runOnce(RobotStates::clearIntakeMode);
     }
 
-    // Initialization
+    //////////////////////////////
+    /////// Initialization ///////
+    //////////////////////////////
 
     /**
      * Used to make sure that no mechanisms move until the elevator has been
@@ -142,7 +150,9 @@ public class RobotStates {
                 elevator.zeroEncoderCommand()).withName("Initialize Mechanisms");
     }
 
-    // Error States
+    //////////////////////////////
+    //////// Error States ////////
+    //////////////////////////////
 
     private static Optional<String> currentDiscreteError = Optional.empty();
     private static Optional<String> currentContinuousError = Optional.empty();
