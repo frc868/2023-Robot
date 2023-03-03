@@ -22,7 +22,6 @@ import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Manipulator;
 import frc.robot.subsystems.Drivetrain.DriveMode;
 
@@ -82,7 +81,7 @@ public class Controls {
 
     public static void configureDriverControls(int port, Drivetrain drivetrain, GridInterface gridInterface,
             Intake intake,
-            Manipulator manipulator, Elevator elevator, Elbow elbow, LEDs leds) {
+            Manipulator manipulator, Elevator elevator, Elbow elbow) {
         CommandJoystick joystick = new CommandJoystick(port);
 
         drivetrain.setDefaultCommand(
@@ -110,16 +109,16 @@ public class Controls {
                 .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(90)));
 
         joystick.pov(2, 270, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CONE, leds).ignoringDisable(true));
+                .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CONE).ignoringDisable(true));
         joystick.pov(2, 90, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CUBE, leds).ignoringDisable(true));
+                .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CUBE).ignoringDisable(true));
 
-        joystick.button(14)
+        joystick.button(9)
                 .onTrue(RobotStates.intakeGamePiece(
                         false,
                         false,
-                        () -> joystick.getHID().getRawButton(6),
-                        intake, manipulator, elevator, elbow, leds));
+                        () -> joystick.getHID().getRawButton(14),
+                        intake, manipulator, elevator, elbow));
 
         joystick.button(8)
                 .whileTrue(drivetrain.chargeStationBalanceCommand());
@@ -129,7 +128,7 @@ public class Controls {
 
     public static void configureOperatorControls(int port1, int port2, Drivetrain drivetrain,
             GridInterface gridInterface, Intake intake,
-            Manipulator manipulator, Elevator elevator, Elbow elbow, LEDs leds) {
+            Manipulator manipulator, Elevator elevator, Elbow elbow) {
 
         BooleanConsumer safeStop = (d) -> {
             if (d) {
@@ -214,7 +213,7 @@ public class Controls {
 
         getButton.apply(OperatorControls.HP_STOW)
                 .whileTrue(RobotStates.stowElevatorHPStation(intake, manipulator, elevator,
-                        elbow, leds)
+                        elbow)
                         .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_STOW,
                                 true)))
                         .finallyDo(safeStop))
@@ -230,7 +229,7 @@ public class Controls {
                                 GamePiece.CONE,
                                 drivetrain, intake,
                                 manipulator, elevator,
-                                elbow, leds)
+                                elbow)
                                 .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_CONE,
                                         true)))
                                 .finallyDo(safeStop))
@@ -244,7 +243,7 @@ public class Controls {
                                 (b) -> setOutput.accept(OperatorControls.GAME_PIECE_DROP, b), GamePiece.CUBE,
                                 drivetrain,
                                 intake, manipulator, elevator,
-                                elbow, leds)
+                                elbow)
                         .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_CONE, true)))
                         .finallyDo(safeStop))
                 .onFalse(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_CUBE,
@@ -252,7 +251,7 @@ public class Controls {
 
         getButton.apply(OperatorControls.INITIALIZE)
                 .whileTrue(RobotStates.initializeMechanisms(intake, manipulator, elevator,
-                        elbow, leds)
+                        elbow)
                         .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.INITIALIZE,
                                 true))));
 
@@ -260,7 +259,7 @@ public class Controls {
 
     public static void configureBackupOperatorControls(int port, GridInterface gridInterface, Intake intake,
             Manipulator manipulator,
-            Elevator elevator, Elbow elbow, LEDs leds) {
+            Elevator elevator, Elbow elbow) {
         CommandXboxController xbox = new CommandXboxController(port);
 
         elevator.setDefaultCommand(
@@ -282,7 +281,7 @@ public class Controls {
     }
 
     public static void configureOverridesControls(int port1, int port2, Drivetrain drivetrain, Intake intake,
-            Manipulator manipulator, Elevator elevator, Elbow elbow, LEDs leds) {
+            Manipulator manipulator, Elevator elevator, Elbow elbow) {
         CommandGenericHID hid1 = new CommandGenericHID(port1);
         CommandGenericHID hid2 = new CommandGenericHID(port2);
 
