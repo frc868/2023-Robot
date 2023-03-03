@@ -80,10 +80,10 @@ public class SimManager {
                             gridInterface.setLocationCommand(GamePiece.HYBRID, GridPosition.RIGHT, Level.LOW)
                                     .withName("Right Low Location")),
                     new SendableLogger("Select Intake Mode Cone",
-                            RobotStates.setIntakeModeCommand(GamePiece.CONE, leds).withName("Intake Mode Cone")
+                            RobotStates.setIntakeModeCommand(GamePiece.CONE).withName("Intake Mode Cone")
                                     .repeatedly()),
                     new SendableLogger("Select Intake Mode Cube",
-                            RobotStates.setIntakeModeCommand(GamePiece.CUBE, leds).withName("Intake Mode Cube")
+                            RobotStates.setIntakeModeCommand(GamePiece.CUBE).withName("Intake Mode Cube")
                                     .repeatedly()),
                     new SendableLogger("Reset",
                             Commands.runOnce(() -> gridInterface.reset()).withName("Reset")),
@@ -136,14 +136,13 @@ public class SimManager {
                                     elevator, elbow).withName("Full Auto Score")),
                     new SendableLogger("Full Auto Intake with movement",
                             Autos.fullAutoIntakeWithMovement(GamePiece.CONE, drivetrain, intake, manipulator,
-                                    elevator, elbow, leds).withName("Full Auto Intake")),
+                                    elevator, elbow).withName("Full Auto Intake")),
                     new SendableLogger("EVERYTHING",
                             Commands.sequence(
                                     Commands.print("1"),
                                     RobotStates.autoDriveCommand(drivetrain, gridInterface),
                                     Commands.print("2"),
-                                    RobotStates.intakeGamePieceAutoCommand(intake, manipulator, elevator, elbow,
-                                            leds),
+                                    RobotStates.intakeGamePieceAutoCommand(intake, manipulator, elevator, elbow),
                                     Commands.print("3"),
                                     RobotStates.autoDriveCommand(drivetrain, gridInterface),
                                     Commands.print("4"),
@@ -156,12 +155,10 @@ public class SimManager {
                                     Commands.print("6"))
                                     .withName("Sicko Mode").repeatedly()),
                     new SendableLogger("Initialize Mechanisms",
-                            RobotStates.initializeMechanisms(intake, manipulator, elevator, elbow,
-                                    leds)),
+                            RobotStates.initializeMechanisms(intake, manipulator, elevator, elbow)),
                     new SendableLogger("Intake Game Piece",
                             RobotStates.intakeGamePiece(true, true, () -> true, intake, manipulator,
-                                    elevator, elbow,
-                                    leds)),
+                                    elevator, elbow)),
                     new SendableLogger("Score Game Piece",
                             Scoring.scoreGamePieceCommand(true, () -> true, d -> {
                             },
