@@ -25,9 +25,9 @@ public class Watchtower extends SubsystemBase {
             new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[1],
                     Constants.Vision.ROBOT_TO_CAMS[1]),
             new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[2],
-                    Constants.Vision.ROBOT_TO_CAMS[2]),
+                    Constants.Vision.ROBOT_TO_CAMS[2])
             new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[3],
-                    Constants.Vision.ROBOT_TO_CAMS[3])
+            Constants.Vision.ROBOT_TO_CAMS[3])
     };
 
     public Watchtower() {
@@ -39,25 +39,24 @@ public class Watchtower extends SubsystemBase {
             if (poseEstimator != null) {
                 Pose2d estimatedPosition = poseEstimator.getEstimatedPosition();
                 Field2d field = AutoManager.getInstance().getField();
-                if (Constants.IS_USING_CAMERAS) {
-                    for (int i = 0; i < photonCameras.length; i++) {
-                        Optional<EstimatedRobotPose> result = photonCameras[i]
-                                .getEstimatedGlobalPose(estimatedPosition);
+                for (int i = 0; i < photonCameras.length; i++) {
+                    Optional<EstimatedRobotPose> result = photonCameras[i]
+                            .getEstimatedGlobalPose(estimatedPosition);
 
-                        FieldObject2d fieldObject = field.getObject("apriltag_cam" + i +
-                                "_est_pose");
-                        if (result.isPresent()) {
-                            EstimatedRobotPose camPose = result.get();
-                            poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(),
-                                    camPose.timestampSeconds);
-                            fieldObject.setPose(camPose.estimatedPose.toPose2d());
-                        } else {
-                            // move it way off the screen to make it disappear
-                            fieldObject.setPose(new Pose2d(-100, -100, new Rotation2d()));
-                        }
+                    FieldObject2d fieldObject = field.getObject("apriltag_cam" + i +
+                            "_est_pose");
+                    if (result.isPresent()) {
+                        EstimatedRobotPose camPose = result.get();
+                        poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(),
+                                camPose.timestampSeconds);
+                        fieldObject.setPose(camPose.estimatedPose.toPose2d());
+                    } else {
+                        // move it way off the screen to make it disappear
+                        fieldObject.setPose(new Pose2d(-100, -100, new Rotation2d()));
                     }
                 }
             }
+
         }
     }
 
