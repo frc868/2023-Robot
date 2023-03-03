@@ -85,13 +85,13 @@ public class RobotContainer {
 
     private void configureButtonBindings() {
         Controls.configureDriverControls(0, drivetrain, gridInterface, intake, manipulator,
-                elevator, elbow, leds);
+                elevator, elbow);
         Controls.configureOperatorControls(1, 2, drivetrain, gridInterface, intake, manipulator,
-                elevator, elbow, leds);
+                elevator, elbow);
         Controls.configureBackupOperatorControls(3, gridInterface, intake, manipulator, elevator,
-                elbow, leds);
+                elbow);
         Controls.configureOverridesControls(4, 5, drivetrain, intake, manipulator,
-                elevator, elbow, leds);
+                elevator, elbow);
     }
 
     private void configureAuto() {
@@ -106,41 +106,51 @@ public class RobotContainer {
         TrajectoryLoader.loadAutoPaths();
 
         AutoManager.getInstance().addEvent("intakeGamePiece",
-                RobotStates.intakeGamePieceAutoCommand(intake, manipulator, elevator, elbow, leds));
+                RobotStates.intakeGamePieceAutoCommand(intake, manipulator, elevator, elbow));
 
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("2 Piece N",
                         Autos.twoPieceN(TrajectoryLoader.getAutoPath("2 Piece N"), drivetrain, intake, manipulator,
-                                elevator, elbow, leds)));
+                                elevator, elbow)));
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("2 Piece Charge N",
                         Autos.twoPieceChargeN(TrajectoryLoader.getAutoPath("2 Piece Charge N"), drivetrain, intake,
                                 manipulator,
-                                elevator, elbow, leds)));
+                                elevator, elbow)));
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("3 Piece N",
                         Autos.threePieceN(TrajectoryLoader.getAutoPath("3 Piece N"), drivetrain, intake, manipulator,
-                                elevator, elbow, leds)));
+                                elevator, elbow)));
 
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("2 Piece S",
                         Autos.twoPieceS(TrajectoryLoader.getAutoPath("2 Piece S"), drivetrain, intake, manipulator,
-                                elevator, elbow, leds)));
+                                elevator, elbow)));
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("2 Piece Charge S",
                         Autos.twoPieceChargeS(TrajectoryLoader.getAutoPath("2 Piece Charge S"), drivetrain, intake,
                                 manipulator,
-                                elevator, elbow, leds)));
+                                elevator, elbow)));
 
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("3 Piece S",
                         Autos.threePieceS(TrajectoryLoader.getAutoPath("3 Piece S"), drivetrain, intake, manipulator,
-                                elevator, elbow, leds)));
+                                elevator, elbow)));
 
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("1 Piece Charge M",
-                        Autos.preloadChargeStationCube(TrajectoryLoader.getAutoPath("1 Piece Charge M"), drivetrain,
-                                intake, manipulator, elevator, elbow, leds)));
+                        Autos.onePieceM(
+                                TrajectoryLoader.getAutoPath("1 Piece Charge M"),
+                                drivetrain, intake, manipulator, elevator, elbow)));
+        AutoManager.getInstance().addRoutine(
+                new AutoRoutine("1 Piece N",
+                        Autos.onePieceN(drivetrain, intake, manipulator, elevator, elbow)));
+        AutoManager.getInstance().addRoutine(
+                new AutoRoutine("1 Piece S",
+                        Autos.onePieceS(drivetrain, intake, manipulator, elevator, elbow)));
+        AutoManager.getInstance().addRoutine(
+                new AutoRoutine("Do Nothing",
+                        Autos.doNothing()));
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("AutoGenerator",
                         autoGenerator.getAutoCommand()));
