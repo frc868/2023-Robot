@@ -28,7 +28,7 @@ public final class Constants {
 
     public static final double ROBOT_SIDE_LENGTH = Units.inchesToMeters(34.75);
 
-    public static final boolean IS_USING_CAMERAS = false;
+    public static final boolean IS_USING_CAMERAS = true;
     public static boolean IS_NT_COMMANDS_ENABLED = RobotBase.isSimulation();
     public static boolean IS_VIRTUAL_BUTTON_PANEL_ENABLED = RobotBase.isSimulation();
 
@@ -99,7 +99,7 @@ public final class Constants {
         }
 
         public static final class Elevator {
-            public static final TunableNumber kP = new TunableNumber("Elevator", "kP", 40);
+            public static final TunableNumber kP = new TunableNumber("Elevator", "kP", 80);
             public static final TunableNumber kI = new TunableNumber("Elevator", "kI", 0);
             public static final TunableNumber kD = new TunableNumber("Elevator", "kD", 0);
             public static final TunableNumber TOLERANCE = new TunableNumber("Elevator", "Tolerance", 0.005);
@@ -110,10 +110,10 @@ public final class Constants {
         }
 
         public static final class Elbow {
-            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 10);
+            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 17);
             public static final TunableNumber kI = new TunableNumber("Elbow", "kI", 0);
             public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0.5);
-            public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 0.3);
+            public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 0.05);
             public static final double kS = 0.31;
             public static final double kG = 0.54038;
             public static final double kV = 0.85;
@@ -175,10 +175,10 @@ public final class Constants {
             // = new TunableNumber("Elevator",
             // "Max Acceleration", 1); // untested
             public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND_STOW = new TunableNumber("Elevator",
-                    "Max Velocity Stow", 1.3); // untested
+                    "Max Velocity Stow", 2); // untested
             public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED_STOW = new TunableNumber(
                     "Elevator",
-                    "Max Acceleration Stow", 1.5); // untested
+                    "Max Acceleration Stow", 2); // untested
 
             public static final double GEARING = 1.0 / 4.0; // untested
             public static final double DRUM_RADIUS_METERS = Units.inchesToMeters(1.2); // untested // 0.0305
@@ -219,30 +219,30 @@ public final class Constants {
 
     public static final class Vision {
         public static final String[] CAMERA_NAMES = new String[] {
+                // "OV9281-02",
                 "OV9281-03",
-                "OV9281-04",
                 "OV9281-01",
-                "OV9281-02"
+                "OV9281-04"
         };
 
         // front-left, front-right, back-left, back-right
         public static final Transform3d[] ROBOT_TO_CAMS = new Transform3d[] {
-                new Transform3d(
-                        new Translation3d(Units.inchesToMeters(10.226), -Units.inchesToMeters(5.476),
-                                Units.inchesToMeters(21.75)),
-                        new Rotation3d(0, 0, Math.PI / 4.0)),
+                // new Transform3d(
+                // new Translation3d(Units.inchesToMeters(10.226), -Units.inchesToMeters(5.476),
+                // 0.71),
+                // new Rotation3d(0, 0, Math.PI / 4.0)),
                 new Transform3d(
                         new Translation3d(-Units.inchesToMeters(10.226), -Units.inchesToMeters(7.774),
-                                Units.inchesToMeters(26.8)),
+                                0.71),
                         new Rotation3d(0, 0, -Math.PI / 4.0)),
 
                 new Transform3d(
                         new Translation3d(-Units.inchesToMeters(12.524), -Units.inchesToMeters(5.476),
-                                Units.inchesToMeters(26.3)),
+                                0.71),
                         new Rotation3d(0, 0, 3.0 * Math.PI / 4.0)),
                 new Transform3d(
                         new Translation3d(-Units.inchesToMeters(12.524), -Units.inchesToMeters(7.774),
-                                Units.inchesToMeters(26.8)),
+                                0.71),
                         new Rotation3d(0, 0, -3.0 * Math.PI / 4.0)),
         };
     }
