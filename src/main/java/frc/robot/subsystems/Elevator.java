@@ -35,6 +35,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Overrides;
 import frc.robot.GamePieceLocation.GamePiece;
@@ -51,12 +52,12 @@ import frc.robot.commands.RobotStates;
 public class Elevator extends ProfiledPIDSubsystem {
     public static enum ElevatorPosition {
         BOTTOM(0),
-        CONE_LOW(Units.inchesToMeters(10)),
-        CONE_MID(1.22),
+        CONE_LOW(0.25),
+        CONE_MID(1.21),
         CONE_HIGH(1.74),
-        CUBE_LOW(Units.inchesToMeters(10)),
-        CUBE_MID(1.18482), // untested
-        CUBE_HIGH(1.65220 + 0.05), // untested
+        CUBE_LOW(0.25),
+        CUBE_MID(1.18482),
+        CUBE_HIGH(1.70220),
         HUMAN_PLAYER(0),
         TOP(1.40);
         // 1.72 meters max
@@ -200,11 +201,10 @@ public class Elevator extends ProfiledPIDSubsystem {
             bottomHallEffectSim.setValue(false);
             topHallEffectSim = new DIOSim(topHallEffect);
             topHallEffectSim.setValue(false);
-            RobotStates.enableInitialized();
+            // RobotStates.enableInitialized();
         }
 
-        // new
-        // Trigger(bottomHallEffect::get).whileTrue(Commands.runOnce(this::resetEncoders).repeatedly());
+        new Trigger(bottomHallEffect::get).onTrue(Commands.runOnce(this::resetEncoders));
     }
 
     /**
