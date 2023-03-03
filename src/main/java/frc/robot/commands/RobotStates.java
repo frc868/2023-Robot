@@ -33,9 +33,7 @@ import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Elbow.ElbowPosition;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Elevator.ElevatorPosition;
-import frc.robot.subsystems.LEDs.LEDState;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.Manipulator;
 
 public class RobotStates {
@@ -92,10 +90,10 @@ public class RobotStates {
      * @param intakeMode the new mode to set the intake mechanism to
      * @return the command
      */
-    public static CommandBase setIntakeModeCommand(GamePiece intakeMode, LEDs leds) {
+    public static CommandBase setIntakeModeCommand(GamePiece intakeMode) {
         return Commands.runOnce(() -> {
             setIntakeMode(intakeMode);
-        }).andThen(leds.setLEDStateCommand(intakeMode == GamePiece.CONE ? LEDState.ConePickup : LEDState.CubePickup));
+        });
     }
 
     /**
@@ -111,8 +109,8 @@ public class RobotStates {
      * 
      * @return the command
      */
-    public static CommandBase clearIntakeModeCommand(LEDs leds) {
-        return Commands.runOnce(RobotStates::clearIntakeMode).andThen(leds.setLEDStateCommand(LEDState.TechHOUNDS));
+    public static CommandBase clearIntakeModeCommand() {
+        return Commands.runOnce(RobotStates::clearIntakeMode);
     }
 
     // Initialization
@@ -121,7 +119,7 @@ public class RobotStates {
      * Used to make sure that no mechanisms move until the elevator has been
      * zeroed.
      */
-    private static boolean isInitialized = true;
+    private static boolean isInitialized = false;
 
     public static void enableInitialized() {
         isInitialized = true;
@@ -135,14 +133,13 @@ public class RobotStates {
             Intake intake,
             Manipulator manipulator,
             Elevator elevator,
-            Elbow elbow,
-            LEDs leds) {
+            Elbow elbow) {
         return Commands.sequence(
+                Commands.runOnce(elevator::disable),
                 intake.setPassoversRetractedCommand(elevator),
                 manipulator.setWristDownCommand(),
                 elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
-                elevator.zeroEncoderCommand(),
-                leds.setLEDStateCommand(LEDState.TechHOUNDS)).withName("Initialize Mechanisms");
+                elevator.zeroEncoderCommand()).withName("Initialize Mechanisms");
     }
 
     // Error States
@@ -215,6 +212,23 @@ public class RobotStates {
     }
 
     /**
+     * Positive distances are towards the grid.
+     * 
+     * @param distance
+     * @param drivetrain
+     * @return
+     */
+    protected static CommandBase driveDeltaCommand(double distance, Drivetrain drivetrain,
+            PathConstraints constraints) {
+        return drivetrain.moveDeltaPathFollowingCommand(
+                new Transform2d(
+                        new Translation2d(distance, 0),
+                        new Rotation2d(Math.PI)),
+                constraints)
+                .withTimeout(2);
+    }
+
+    /**
      * Creates a command to intake a game piece.
      * 
      * Runs this sequence:
@@ -239,7 +253,6 @@ public class RobotStates {
      * @param manipulator
      * @param elevator
      * @param elbow
-     * @param leds
      * @return the command
      */
     public static CommandBase intakeGamePiece(
@@ -249,8 +262,7 @@ public class RobotStates {
             Intake intake,
             Manipulator manipulator,
             Elevator elevator,
-            Elbow elbow,
-            LEDs leds) {
+            Elbow elbow) {
         return Commands.either(
                 Commands.sequence(
                         elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow).withTimeout(0.5),
@@ -283,10 +295,10 @@ public class RobotStates {
                         manipulator.setPincersPincingCommand(() -> intakeMode.orElseThrow()),
                         intake.setPassoversRetractedCommand(elevator),
                         intake.setIntakeUpCommand(elevator),
-                        RobotStates.setCurrentStateCommand(RobotState.SCORING),
                         Commands.waitSeconds(1)
                                 .andThen(elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator)),
-                        RobotStates.clearIntakeModeCommand(leds)),
+                        RobotStates.setCurrentStateCommand(RobotState.SCORING),
+                        RobotStates.clearIntakeModeCommand()),
                 singularErrorCommand(() -> "Intake mode not present"),
                 () -> intakeMode.isPresent()).withName("Intake Game Piece");
     }
@@ -295,9 +307,8 @@ public class RobotStates {
             Intake intake,
             Manipulator manipulator,
             Elevator elevator,
-            Elbow elbow,
-            LEDs leds) {
-        return intakeGamePiece(true, true, () -> true, intake, manipulator, elevator, elbow, leds);
+            Elbow elbow) {
+        return intakeGamePiece(true, true, () -> true, intake, manipulator, elevator, elbow);
     }
 
     public static CommandBase humanPlayerExtendElevatorCommand(
@@ -305,10 +316,9 @@ public class RobotStates {
             Intake intake,
             Manipulator manipulator,
             Elevator elevator,
-            Elbow elbow,
-            LEDs leds) {
+            Elbow elbow) {
         return Commands.sequence(
-                setIntakeModeCommand(gamePiece, leds),
+                setIntakeModeCommand(gamePiece),
                 Commands.parallel(
                         elevator.setDesiredPositionCommand(ElevatorPosition.CUBE_MID, intake, elbow),
                         Commands.sequence(
@@ -328,10 +338,10 @@ public class RobotStates {
             Intake intake,
             Manipulator manipulator,
             Elevator elevator,
-            Elbow elbow,
-            LEDs leds) {
+            Elbow elbow) {
         return Commands.sequence(
-                humanPlayerExtendElevatorCommand(gamePiece, intake, manipulator, elevator, elbow, leds),
+                humanPlayerExtendElevatorCommand(gamePiece, intake, manipulator, elevator, elbow),
+                driveDeltaCommand(0.13, drivetrain),
                 Commands.deadline(
                         Commands.waitUntil(secondaryButton::getAsBoolean),
                         Commands.sequence(
@@ -340,9 +350,8 @@ public class RobotStates {
                                 Commands.runOnce(() -> secondaryButtonLED.accept(false)),
                                 Commands.waitSeconds(0.5)).repeatedly()
                                 .finallyDo((d) -> secondaryButtonLED.accept(false))),
-                driveDeltaCommand(-0.095, drivetrain),
-                stowElevatorHPStation(intake, manipulator, elevator, elbow, leds),
-                clearIntakeModeCommand(leds))
+                manipulator.setPincersPincingCommand(() -> gamePiece),
+                clearIntakeModeCommand())
                 .withName("Score Game Piece");
     }
 
@@ -361,7 +370,6 @@ public class RobotStates {
      * @param manipulator
      * @param elevator
      * @param elbow
-     * @param leds
      * @return
      */
     public static CommandBase stowElevatorCommand(
@@ -372,9 +380,10 @@ public class RobotStates {
         return Commands.sequence(
                 manipulator.setWristDownCommand(),
                 manipulator.setPincersClosedCommand(),
-                elbow.setDesiredPositionCommand(ElbowPosition.MID_STOW, elevator).andThen(
-                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow)
-                                .deadlineWith(elbow.lockPosition())),
+                elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator),
+                elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow)
+                        .deadlineWith(elbow.lockPosition()),
+                elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
                 RobotStates.setCurrentStateCommand(RobotState.SEEKING))
                 .withName("Stow Elevator");
     }
@@ -394,24 +403,17 @@ public class RobotStates {
      * @param manipulator
      * @param elevator
      * @param elbow
-     * @param leds
      * @return
      */
     public static CommandBase stowElevatorHPStation(
             Intake intake,
             Manipulator manipulator,
             Elevator elevator,
-            Elbow elbow,
-            LEDs leds) {
-        return Commands.either(
-                Commands.sequence(
-                        manipulator.setPincersPincingCommand(() -> intakeMode.orElseThrow()),
-                        elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
-                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow),
-                        elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator),
-                        RobotStates.setCurrentStateCommand(RobotState.SCORING)),
-                singularErrorCommand(() -> "Intake mode not present"),
-                () -> intakeMode.isPresent())
+            Elbow elbow) {
+        return Commands.sequence(
+                elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow),
+                elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator),
+                RobotStates.setCurrentStateCommand(RobotState.SCORING))
                 .withName("Stow Elevator");
     }
 
@@ -424,6 +426,12 @@ public class RobotStates {
      * @return the trajectory
      */
     public static PathPlannerTrajectory getAutoDriveTraj(Supplier<RobotState> currentState,
+            Supplier<GamePieceLocation> location,
+            Drivetrain drivetrain) {
+        return getAutoDriveTraj(new PathConstraints(3, 2), currentState, location, drivetrain);
+    }
+
+    public static PathPlannerTrajectory getAutoDriveTraj(PathConstraints constraints, Supplier<RobotState> currentState,
             Supplier<GamePieceLocation> location,
             Drivetrain drivetrain) {
 
@@ -508,7 +516,6 @@ public class RobotStates {
      * 
      * @param drivetrain
      * @param gridInterface
-     * @param leds
      * @return the command
      */
     public static CommandBase autoDriveCommand(Drivetrain drivetrain, GridInterface gridInterface) {
@@ -537,15 +544,22 @@ public class RobotStates {
      * 
      * @param drivetrain
      * @param gridInterface
-     * @param leds
      * @return the command
      */
     public static CommandBase autoDriveCommand(
             Supplier<RobotState> state,
             Supplier<GamePieceLocation> location,
             Drivetrain drivetrain) {
+        return autoDriveCommand(new PathConstraints(3, 2), state, location, drivetrain);
+    }
+
+    public static CommandBase autoDriveCommand(
+            PathConstraints constraints,
+            Supplier<RobotState> state,
+            Supplier<GamePieceLocation> location,
+            Drivetrain drivetrain) {
         Supplier<Command> pathFollowingCommandSupplier = () -> drivetrain
-                .pathFollowingCommand(getAutoDriveTraj(state, location, drivetrain));
+                .pathFollowingCommand(getAutoDriveTraj(constraints, state, location, drivetrain));
 
         // this is a proxy command because we have to do things with the trajectory
         // every time before passing it into the `drivetrain.pathFollowingCommand`

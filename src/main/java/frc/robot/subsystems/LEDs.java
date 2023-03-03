@@ -8,11 +8,12 @@ import com.techhounds.houndutil.houndlog.logitems.StringLogItem;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
+import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.commands.RobotStates;
 
 /**
@@ -111,7 +112,7 @@ public class LEDs extends SubsystemBase {
                     buffer.setHSV(i, 109, 240, v); // blue
                 }
             }
-            timeStep++;
+            timeStep += 1;
         }
 
         /**
@@ -168,7 +169,7 @@ public class LEDs extends SubsystemBase {
             for (int i = 0; i < buffer.getLength(); i++) {
                 // every 0.2 seconds it will switch from off to on
                 if (timeStep / 25 == 1) {
-                    buffer.setHSV(i, 10, 255, v);
+                    buffer.setHSV(i, 6, 255, v);
                 } else {
                     buffer.setHSV(i, 0, 0, 0);
                 }
@@ -183,14 +184,6 @@ public class LEDs extends SubsystemBase {
         leds.setLength(50);
         leds.setData(state.getBuffer());
         leds.start();
-
-        new Trigger(() -> RobotStates.getCurrentDiscreteError().isPresent())
-                .onTrue(setLEDStateCommand(LEDState.Error))
-                .onFalse(setPreviousLEDStateCommand());
-
-        new Trigger(() -> RobotStates.getCurrentContinuousError().isPresent())
-                .onTrue(setLEDStateCommand(LEDState.TemporaryError))
-                .onFalse(setPreviousLEDStateCommand());
 
         LoggingManager.getInstance().addGroup("LEDs",
                 new LogGroup(
@@ -247,12 +240,42 @@ public class LEDs extends SubsystemBase {
         return Commands.runOnce(() -> this.setLEDState(previousState));
     }
 
+    public void updateStateMachine() {
+        if (DriverStation.isDisabled()) {
+            setLEDState(LEDState.Rainbow);
+        }
+
+        if (RobotStates.getIntakeMode().isPresent()) {
+            if (RobotStates.getIntakeMode().get() == GamePiece.CONE) {
+                setLEDState(LEDState.ConePickup);
+            } else if (RobotStates.getIntakeMode().get() == GamePiece.CUBE) {
+                setLEDState(LEDState.CubePickup);
+            }
+        } else {
+            setLEDState(LEDState.TechHOUNDS);
+        }
+
+        // System.out.println(RobotStates.isInitialized());
+
+        if (!RobotStates.isInitialized()) {
+            setLEDState(LEDState.Uninitialized);
+        }
+
+        if (RobotStates.getCurrentDiscreteError().isPresent()) {
+            setLEDState(LEDState.Error);
+        }
+        if (RobotStates.getCurrentContinuousError().isPresent()) {
+            setLEDState(LEDState.TemporaryError);
+        }
+    }
+
     /**
      * Sets the LEDs to the current state of the buffer.
      */
     @Override
     public void periodic() {
         super.periodic();
+        updateStateMachine();
         leds.setData(state.getBuffer());
     }
 }
