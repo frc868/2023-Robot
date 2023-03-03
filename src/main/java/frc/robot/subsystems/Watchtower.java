@@ -37,16 +37,23 @@ public class Watchtower extends SubsystemBase {
     public void updatePoseEstimator() {
         if (Constants.IS_USING_CAMERAS) {
             if (poseEstimator != null) {
-                Pose2d estimatedPosition = poseEstimator.getEstimatedPosition();
+                Pose2d prevEstimatedRobotPose = poseEstimator.getEstimatedPosition();
                 Field2d field = AutoManager.getInstance().getField();
                 for (int i = 0; i < photonCameras.length; i++) {
                     Optional<EstimatedRobotPose> result = photonCameras[i]
-                            .getEstimatedGlobalPose(estimatedPosition);
+                            .getEstimatedGlobalPose(prevEstimatedRobotPose);
 
                     FieldObject2d fieldObject = field.getObject("apriltag_cam" + i +
                             "_est_pose");
                     if (result.isPresent()) {
                         EstimatedRobotPose camPose = result.get();
+
+                        if (camPose.estimatedPose.toPose2d().getTranslation()
+                                .getDistance(prevEstimatedRobotPose.getTranslation()) > 1.5) {
+                            fieldObject.setPose(new Pose2d(-100, -100, new Rotation2d()));
+                            continue;
+                        }
+
                         poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(),
                                 camPose.timestampSeconds);
                         fieldObject.setPose(camPose.estimatedPose.toPose2d());
