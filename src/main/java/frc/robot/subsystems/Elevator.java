@@ -204,7 +204,8 @@ public class Elevator extends ProfiledPIDSubsystem {
             // RobotStates.enableInitialized();
         }
 
-        new Trigger(bottomHallEffect::get).whileTrue(Commands.runOnce(this::resetEncoders));
+        new Trigger(bottomHallEffect::get).whileTrue(
+                Commands.runOnce(this::resetEncoders).alongWith(Commands.runOnce(RobotStates::enableInitialized)));
     }
 
     /**
