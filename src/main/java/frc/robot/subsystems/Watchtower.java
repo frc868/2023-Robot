@@ -20,8 +20,8 @@ public class Watchtower extends SubsystemBase {
 
     /** The PhotonVision cameras, used to detect the AprilTags. */
     private AprilTagPhotonCamera[] photonCameras = new AprilTagPhotonCamera[] {
-            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[0],
-                    Constants.Vision.ROBOT_TO_CAMS[0]),
+            // new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[0],
+            // Constants.Vision.ROBOT_TO_CAMS[0]),
             new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[1],
                     Constants.Vision.ROBOT_TO_CAMS[1]),
             new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[2],
