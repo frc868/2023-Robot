@@ -53,8 +53,8 @@ public class Elevator extends ProfiledPIDSubsystem {
     public static enum ElevatorPosition {
         BOTTOM(0),
         CONE_LOW(0.25),
-        CONE_MID(1.21),
-        CONE_HIGH(1.74),
+        CONE_MID(1.14),
+        CONE_HIGH(1.64),
         CUBE_LOW(0.25),
         CUBE_MID(1.18482),
         CUBE_HIGH(1.70220),
