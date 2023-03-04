@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix.sensors.Pigeon2;
@@ -519,7 +520,7 @@ public class Drivetrain extends SubsystemBase {
      * @return the command
      */
     public CommandBase teleopDriveCommand(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
-            DoubleSupplier thetaSpeedSupplier, DoubleSupplier brakeSupplier) {
+            DoubleSupplier thetaSpeedSupplier, DoubleSupplier brakeSupplier, BooleanSupplier isInputCubed) {
         SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
         SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
         SlewRateLimiter thetaSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
@@ -532,6 +533,12 @@ public class Drivetrain extends SubsystemBase {
             xSpeed = MathUtil.applyDeadband(xSpeed, 0.05);
             ySpeed = MathUtil.applyDeadband(ySpeed, 0.05);
             thetaSpeed = MathUtil.applyDeadband(thetaSpeed, 0.05);
+
+            if (isInputCubed.getAsBoolean()) {
+                xSpeed = Math.pow(xSpeed, 3);
+                ySpeed = Math.pow(ySpeed, 3);
+                thetaSpeed = Math.pow(thetaSpeed, 3);
+            }
 
             if (Constants.Teleop.IS_JOYSTICK_INPUT_RATE_LIMITED) {
                 xSpeed = xSpeedLimiter.calculate(xSpeed);

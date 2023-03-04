@@ -28,6 +28,7 @@ import frc.robot.subsystems.Elbow.ElbowPosition;
 
 public class Controls {
     public static boolean isTwistLimited = false;
+    public static boolean isInputCubed = false;
 
     public enum OperatorControls {
         LEFT_GRID(1, 1),
@@ -90,15 +91,20 @@ public class Controls {
                         () -> -joystick.getY(),
                         () -> -joystick.getX(),
                         () -> -MathUtil.applyDeadband(joystick.getTwist() * (isTwistLimited ? 0.25 : 1), 0.05),
-                        () -> 1 - (joystick.getRawAxis(5) * 0.7)));
+                        () -> 1 - (joystick.getRawAxis(5) * 0.7),
+                        () -> isInputCubed));
 
         joystick.button(13).onTrue(drivetrain.zeroGyroCommand());
 
         joystick.button(3)
-                .onTrue(drivetrain.setDriveModeCommand(DriveMode.ROBOT_RELATIVE)
-                        .andThen(Commands.runOnce(() -> isTwistLimited = true)))
-                .onFalse(drivetrain.setDriveModeCommand(DriveMode.FIELD_ORIENTED)
-                        .andThen(Commands.runOnce(() -> isTwistLimited = false)));
+                .onTrue(Commands.parallel(
+                        drivetrain.setDriveModeCommand(DriveMode.ROBOT_RELATIVE),
+                        Commands.runOnce(() -> isTwistLimited = true),
+                        Commands.runOnce(() -> isInputCubed = true)))
+                .onFalse(Commands.parallel(
+                        drivetrain.setDriveModeCommand(DriveMode.FIELD_ORIENTED),
+                        Commands.runOnce(() -> isTwistLimited = false),
+                        Commands.runOnce(() -> isInputCubed = false)));
 
         joystick.pov(0, 0, CommandScheduler.getInstance().getDefaultButtonLoop())
                 .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(0)));
