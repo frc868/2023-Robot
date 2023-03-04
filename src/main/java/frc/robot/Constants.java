@@ -169,10 +169,10 @@ public final class Constants {
             public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elevator",
                     "Max Acceleration", 15); // untested
             public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND_STOW = new TunableNumber("Elevator",
-                    "Max Velocity Stow", 2); // untested
+                    "Max Velocity Stow", 2.6); // untested
             public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED_STOW = new TunableNumber(
                     "Elevator",
-                    "Max Acceleration Stow", 2); // untested
+                    "Max Acceleration Stow", 4); // untested
 
             public static final double GEARING = 1.0 / 4.0; // untested
             public static final double DRUM_RADIUS_METERS = Units.inchesToMeters(1.2); // untested // 0.0305
