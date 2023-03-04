@@ -184,9 +184,9 @@ public final class Constants {
         public static final class Elbow {
             public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new TunableNumber("Elbow",
                     "Max Velocity",
-                    15 * Math.PI); // untested
+                    18 * Math.PI); // untested
             public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elbow",
-                    "Max Acceleration", 14 * Math.PI); // untested
+                    "Max Acceleration", 18 * Math.PI); // untested
         }
     }
 
