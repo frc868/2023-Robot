@@ -24,6 +24,7 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Manipulator;
 import frc.robot.subsystems.Drivetrain.DriveMode;
+import frc.robot.subsystems.Elbow.ElbowPosition;
 
 public class Controls {
     public static boolean isTwistLimited = false;
@@ -278,6 +279,10 @@ public class Controls {
         xbox.povDown().onTrue(manipulator.setWristDownCommand());
         xbox.rightBumper().whileTrue(intake.runPassoverMotorsCommand());
         xbox.leftBumper().whileTrue(intake.reversePassoverMotorsCommand());
+
+        xbox.leftStick().and(xbox.povUp()).onTrue(elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator));
+        xbox.leftStick().and(xbox.povLeft()).onTrue(elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator));
+        xbox.leftStick().and(xbox.povDown()).onTrue(elbow.setDesiredPositionCommand(ElbowPosition.LOW, elevator));
     }
 
     public static void configureOverridesControls(int port1, int port2, Drivetrain drivetrain, Intake intake,
