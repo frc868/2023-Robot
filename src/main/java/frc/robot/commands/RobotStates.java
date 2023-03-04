@@ -146,7 +146,6 @@ public class RobotStates {
                 Commands.runOnce(elevator::disable),
                 intake.setPassoversRetractedCommand(elevator),
                 manipulator.setWristDownCommand(),
-                elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
                 elevator.zeroEncoderCommand()).withName("Initialize Mechanisms");
     }
 
