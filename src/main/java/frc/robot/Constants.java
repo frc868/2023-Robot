@@ -219,7 +219,7 @@ public final class Constants {
 
     public static final class Vision {
         public static final String[] CAMERA_NAMES = new String[] {
-                // "OV9281-02",
+                "OV9281-02",
                 "OV9281-03",
                 "OV9281-01",
                 "OV9281-04"
@@ -227,10 +227,10 @@ public final class Constants {
 
         // front-left, front-right, back-left, back-right
         public static final Transform3d[] ROBOT_TO_CAMS = new Transform3d[] {
-                // new Transform3d(
-                // new Translation3d(Units.inchesToMeters(10.226), -Units.inchesToMeters(5.476),
-                // 0.71),
-                // new Rotation3d(0, 0, Math.PI / 4.0)),
+                new Transform3d(
+                        new Translation3d(Units.inchesToMeters(10.226), -Units.inchesToMeters(5.476),
+                                0.71),
+                        new Rotation3d(0, 0, Math.PI / 4.0)),
                 new Transform3d(
                         new Translation3d(-Units.inchesToMeters(10.226), -Units.inchesToMeters(7.774),
                                 0.71),
