@@ -119,8 +119,8 @@ public class Drivetrain extends SubsystemBase {
     private ProfiledPIDController turnController = new ProfiledPIDController(Constants.Gains.TurnToAngle.kP,
             Constants.Gains.TurnToAngle.kI,
             Constants.Gains.TurnToAngle.kD,
-            new TrapezoidProfile.Constraints(2 * Math.PI,
-                    2 * Math.PI));
+            new TrapezoidProfile.Constraints(10 * Math.PI,
+                    10 * Math.PI));
 
     /** An enum describing the two types of drive modes. */
     public enum DriveMode {
