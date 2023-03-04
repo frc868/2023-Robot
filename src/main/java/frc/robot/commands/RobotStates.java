@@ -143,6 +143,7 @@ public class RobotStates {
             Elevator elevator,
             Elbow elbow) {
         return Commands.sequence(
+                elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
                 Commands.runOnce(elevator::disable),
                 intake.setPassoversRetractedCommand(elevator),
                 manipulator.setWristDownCommand(),
