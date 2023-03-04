@@ -275,7 +275,7 @@ public class RobotStates {
             Elbow elbow) {
         return Commands.either(
                 Commands.sequence(
-                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow).withTimeout(0.5),
+                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow).withTimeout(0.75),
                         elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
                         intake.setIntakeDownCommand(elevator),
                         manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow()),
