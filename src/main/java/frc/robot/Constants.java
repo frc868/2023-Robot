@@ -168,12 +168,6 @@ public final class Constants {
                     "Max Velocity", 2.6); // untested
             public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elevator",
                     "Max Acceleration", 15); // untested
-            // public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new
-            // TunableNumber("Elevator",
-            // "Max Velocity", 1.5); // untested
-            // public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED
-            // = new TunableNumber("Elevator",
-            // "Max Acceleration", 1); // untested
             public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND_STOW = new TunableNumber("Elevator",
                     "Max Velocity Stow", 2); // untested
             public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED_STOW = new TunableNumber(
