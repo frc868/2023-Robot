@@ -90,7 +90,7 @@ public class Controls {
                 drivetrain.teleopDriveCommand(
                         () -> -joystick.getY(),
                         () -> -joystick.getX(),
-                        () -> -MathUtil.applyDeadband(joystick.getTwist() * (isTwistLimited ? 0.25 : 1), 0.05),
+                        () -> -MathUtil.applyDeadband(joystick.getTwist() * (isTwistLimited ? 0.7 : 1), 0.05),
                         () -> 1 - (joystick.getRawAxis(5) * 0.7),
                         () -> isInputCubed));
 
