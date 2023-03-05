@@ -90,11 +90,7 @@ public class Scoring {
                                                                                 drivetrain, new PathConstraints(4, 9)),
                                                                         Commands.none(),
                                                                         () -> driveBackwards)),
-                                                        Commands.parallel(
-                                                                manipulator.setWristDownCommand(),
-                                                                elbow.setDesiredPositionCommand(
-                                                                        ElbowPosition.HIGH, elevator)
-                                                                        .withTimeout(.5)))),
+                                                        manipulator.setWristDownCommand())),
                                 GamePiece.CUBE,
                                 Commands.deadline(
                                         Commands.waitUntil(secondaryButton::getAsBoolean),
