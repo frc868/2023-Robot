@@ -309,8 +309,8 @@ public class Controls {
 
         hid1.button(1).onTrue(Overrides.MANUAL_MECH_CONTROL_MODE.enableC())
                 .onFalse(Overrides.MANUAL_MECH_CONTROL_MODE.disableC());
-        hid1.button(3).onTrue(drivetrain.setDriveCurrentLimitCommand(60))
-                .onFalse(drivetrain.setDriveCurrentLimitCommand(40));
+        hid1.button(3).onTrue(drivetrain.setDriveCurrentLimitCommand(80))
+                .onFalse(drivetrain.setDriveCurrentLimitCommand(60));
 
         // hid1.button(15).onTrue(
         // Commands.parallel(

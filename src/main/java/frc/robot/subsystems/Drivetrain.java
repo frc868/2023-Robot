@@ -708,7 +708,7 @@ public class Drivetrain extends SubsystemBase {
      * @return the command
      */
     public CommandBase chargeStationBalanceCommand() {
-        PIDController controller = new PIDController(0.05, 0, 0.01);
+        PIDController controller = new PIDController(0.04, 0, 0.01);
         controller.setTolerance(1);
         return new PIDCommand(
                 controller,
