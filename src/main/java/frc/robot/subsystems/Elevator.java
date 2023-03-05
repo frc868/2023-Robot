@@ -54,7 +54,7 @@ public class Elevator extends ProfiledPIDSubsystem {
         BOTTOM(0),
         CONE_LOW(0.25),
         CONE_MID(1.14),
-        CONE_HIGH(1.64),
+        CONE_HIGH(1.7),
         CUBE_LOW(0.25),
         CUBE_MID(1.18482),
         CUBE_HIGH(1.70220),
