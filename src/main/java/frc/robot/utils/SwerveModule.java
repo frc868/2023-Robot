@@ -301,4 +301,8 @@ public class SwerveModule {
         driveMotor.setIdleMode(idleMode);
         turnMotor.setIdleMode(idleMode);
     }
+
+    public void setDriveCurrentLimit(int currentLimit) {
+        driveMotor.setSmartCurrentLimit(currentLimit);
+    }
 }
