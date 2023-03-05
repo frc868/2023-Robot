@@ -52,7 +52,7 @@ public class Elbow extends ProfiledPIDSubsystem {
         LOW(-0.31),
         MID_STOW(-0.1),
         MID(0.05),
-        HIGH(0.7);
+        HIGH(0.75);
 
         public final double value;
 
