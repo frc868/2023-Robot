@@ -279,25 +279,41 @@ public class RobotStates {
                         elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
                         intake.setIntakeDownCommand(elevator),
                         manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow()),
-                        intake.setPassoversExtendedCommand(elevator),
+                        Commands.select(
+                                Map.of(
+                                        GamePiece.CONE, Commands.none(),
+                                        GamePiece.CUBE, intake.setPassoversExtendedCommand(elevator)),
+                                () -> intakeMode.orElseThrow()),
                         Commands.either(
                                 Commands.deadline(
                                         Commands.waitUntil(intake::isGamePieceDetected)
                                                 .andThen(Commands.waitSeconds(1)),
-                                        intake.runPassoverMotorsCommand()),
+                                        Commands.select(
+                                                Map.of(
+                                                        GamePiece.CONE, Commands.none(),
+                                                        GamePiece.CUBE, intake.runPassoverMotorsCommand()),
+                                                () -> intakeMode.orElseThrow())),
                                 Commands.either(
                                         Commands.deadline(
                                                 Commands.race(
                                                         Commands.waitUntil(intake::isGamePieceDetected)
                                                                 .andThen(Commands.waitSeconds(0.5)),
                                                         Commands.waitUntil(secondaryButton::getAsBoolean)),
-                                                intake.runPassoverMotorsCommand(),
+                                                Commands.select(
+                                                        Map.of(
+                                                                GamePiece.CONE, Commands.none(),
+                                                                GamePiece.CUBE, intake.runPassoverMotorsCommand()),
+                                                        () -> intakeMode.orElseThrow()),
                                                 manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow())
                                                         .repeatedly())
                                                 .andThen(Commands.waitUntil(secondaryButton::getAsBoolean)),
                                         Commands.deadline(
                                                 Commands.waitUntil(secondaryButton::getAsBoolean),
-                                                intake.runPassoverMotorsCommand(),
+                                                Commands.select(
+                                                        Map.of(
+                                                                GamePiece.CONE, Commands.none(),
+                                                                GamePiece.CUBE, intake.runPassoverMotorsCommand()),
+                                                        () -> intakeMode.orElseThrow()),
                                                 manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow())
                                                         .repeatedly()),
                                         () -> usingBeamBreak),
