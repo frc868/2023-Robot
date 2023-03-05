@@ -96,13 +96,21 @@ public class Controls {
 
         joystick.button(13).onTrue(drivetrain.zeroGyroCommand());
 
-        joystick.button(3)
+        joystick.button(3).and(joystick.button(2).negate())
                 .onTrue(Commands.parallel(
                         drivetrain.setDriveModeCommand(DriveMode.ROBOT_RELATIVE),
                         Commands.runOnce(() -> isTwistLimited = true),
                         Commands.runOnce(() -> isInputCubed = true)))
                 .onFalse(Commands.parallel(
                         drivetrain.setDriveModeCommand(DriveMode.FIELD_ORIENTED),
+                        Commands.runOnce(() -> isTwistLimited = false),
+                        Commands.runOnce(() -> isInputCubed = false)));
+        joystick.button(2).and(joystick.button(3))
+                .onTrue(Commands.parallel(
+                        drivetrain.setDriveModeCommand(DriveMode.FIELD_ORIENTED),
+                        Commands.runOnce(() -> isTwistLimited = true),
+                        Commands.runOnce(() -> isInputCubed = true)))
+                .onFalse(Commands.parallel(
                         Commands.runOnce(() -> isTwistLimited = false),
                         Commands.runOnce(() -> isInputCubed = false)));
 
@@ -301,6 +309,8 @@ public class Controls {
 
         hid1.button(1).onTrue(Overrides.MANUAL_MECH_CONTROL_MODE.enableC())
                 .onFalse(Overrides.MANUAL_MECH_CONTROL_MODE.disableC());
+        hid1.button(3).onTrue(drivetrain.setDriveCurrentLimitCommand(60))
+                .onFalse(drivetrain.setDriveCurrentLimitCommand(40));
 
         // hid1.button(15).onTrue(
         // Commands.parallel(

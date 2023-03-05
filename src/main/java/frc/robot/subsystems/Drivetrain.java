@@ -753,4 +753,14 @@ public class Drivetrain extends SubsystemBase {
             backRight.setIdleMode(IdleMode.kBrake);
         });
     }
+
+    public CommandBase setDriveCurrentLimitCommand(int currentLimit) {
+        return Commands.runOnce(() -> {
+            frontLeft.setDriveCurrentLimit(currentLimit);
+            frontRight.setDriveCurrentLimit(currentLimit);
+            backLeft.setDriveCurrentLimit(currentLimit);
+            backRight.setDriveCurrentLimit(currentLimit);
+        });
+    }
+
 }
