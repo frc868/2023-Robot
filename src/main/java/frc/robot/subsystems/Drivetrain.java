@@ -709,7 +709,7 @@ public class Drivetrain extends SubsystemBase {
      */
     public CommandBase chargeStationBalanceCommand() {
         PIDController controller = new PIDController(0.04, 0, 0.008);
-        controller.setTolerance(1);
+        controller.setTolerance(2);
         return new PIDCommand(
                 controller,
                 () -> (-pigeon.getRoll()),
