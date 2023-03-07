@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/frc868/2023-Robot/actions/workflows/main.yml/badge.svg)](https://github.com/frc868/2023-Robot/actions/workflows/main.yml)
 
+Won the Innovation in Control Award at the FIN District Mishawaka Event 2023.
+
 ## Installation
 
 In order to get this repository fully situated on your computer, please first download the latest version of the 2023 WPILib tools, open the WPILib version of VS Code, and clone this repository. Using GitHub Desktop to clone the repository is recommended, or install Git and use the command-line.
