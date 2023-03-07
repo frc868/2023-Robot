@@ -10,9 +10,13 @@ import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.enums.LogLevel;
 import com.techhounds.houndutil.houndlog.logitems.StringLogItem;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Controls.OperatorControls;
+import frc.robot.GamePieceLocation.Grid;
+import frc.robot.GamePieceLocation.GridPosition;
 
 public class GridInterface {
     private Optional<GamePieceLocation.Grid> setGrid = Optional.empty();
@@ -75,8 +79,35 @@ public class GridInterface {
             return false;
         }
 
-        this.setLocation = Optional
-                .of(GamePieceLocation.from(gamePiece, level, setGrid.get(), gridPosition));
+        Grid grid = setGrid.orElseThrow();
+
+        if (DriverStation.getAlliance() == Alliance.Blue) {
+            GridPosition invertedGridPosition;
+            if (gridPosition == GamePieceLocation.GridPosition.LEFT) {
+                invertedGridPosition = GamePieceLocation.GridPosition.RIGHT;
+            } else if (gridPosition == GamePieceLocation.GridPosition.RIGHT) {
+                invertedGridPosition = GamePieceLocation.GridPosition.LEFT;
+            } else {
+                invertedGridPosition = gridPosition;
+            }
+
+            Grid invertedGrid;
+            if (grid == GamePieceLocation.Grid.LEFT) {
+                invertedGrid = GamePieceLocation.Grid.RIGHT;
+            } else if (grid == GamePieceLocation.Grid.RIGHT) {
+                invertedGrid = GamePieceLocation.Grid.LEFT;
+            } else {
+                invertedGrid = grid;
+            }
+
+            System.out.println(invertedGrid);
+            System.out.println(invertedGridPosition);
+            this.setLocation = Optional
+                    .of(GamePieceLocation.from(gamePiece, level, invertedGrid, invertedGridPosition));
+        } else {
+            this.setLocation = Optional
+                    .of(GamePieceLocation.from(gamePiece, level, grid, gridPosition));
+        }
 
         if (hids.isPresent()) {
             switch (gridPosition) {

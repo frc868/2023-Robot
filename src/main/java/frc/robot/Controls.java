@@ -24,9 +24,11 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Manipulator;
 import frc.robot.subsystems.Drivetrain.DriveMode;
+import frc.robot.subsystems.Elbow.ElbowPosition;
 
 public class Controls {
     public static boolean isTwistLimited = false;
+    public static boolean isInputCubed = false;
 
     public enum OperatorControls {
         LEFT_GRID(1, 1),
@@ -88,16 +90,29 @@ public class Controls {
                 drivetrain.teleopDriveCommand(
                         () -> -joystick.getY(),
                         () -> -joystick.getX(),
-                        () -> -MathUtil.applyDeadband(joystick.getTwist() * (isTwistLimited ? 0.25 : 1), 0.05),
-                        () -> 1 - (joystick.getRawAxis(5) * 0.7)));
+                        () -> -MathUtil.applyDeadband(joystick.getTwist() * (isTwistLimited ? 0.7 : 1), 0.05),
+                        () -> 1 - (joystick.getRawAxis(5) * 0.7),
+                        () -> isInputCubed));
 
         joystick.button(13).onTrue(drivetrain.zeroGyroCommand());
 
-        joystick.button(3)
-                .onTrue(drivetrain.setDriveModeCommand(DriveMode.ROBOT_RELATIVE)
-                        .andThen(Commands.runOnce(() -> isTwistLimited = true)))
-                .onFalse(drivetrain.setDriveModeCommand(DriveMode.FIELD_ORIENTED)
-                        .andThen(Commands.runOnce(() -> isTwistLimited = false)));
+        joystick.button(3).and(joystick.button(2).negate())
+                .onTrue(Commands.parallel(
+                        drivetrain.setDriveModeCommand(DriveMode.ROBOT_RELATIVE),
+                        Commands.runOnce(() -> isTwistLimited = true),
+                        Commands.runOnce(() -> isInputCubed = true)))
+                .onFalse(Commands.parallel(
+                        drivetrain.setDriveModeCommand(DriveMode.FIELD_ORIENTED),
+                        Commands.runOnce(() -> isTwistLimited = false),
+                        Commands.runOnce(() -> isInputCubed = false)));
+        joystick.button(2).and(joystick.button(3))
+                .onTrue(Commands.parallel(
+                        drivetrain.setDriveModeCommand(DriveMode.FIELD_ORIENTED),
+                        Commands.runOnce(() -> isTwistLimited = true),
+                        Commands.runOnce(() -> isInputCubed = true)))
+                .onFalse(Commands.parallel(
+                        Commands.runOnce(() -> isTwistLimited = false),
+                        Commands.runOnce(() -> isInputCubed = false)));
 
         joystick.pov(0, 0, CommandScheduler.getInstance().getDefaultButtonLoop())
                 .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(0)));
@@ -278,6 +293,10 @@ public class Controls {
         xbox.povDown().onTrue(manipulator.setWristDownCommand());
         xbox.rightBumper().whileTrue(intake.runPassoverMotorsCommand());
         xbox.leftBumper().whileTrue(intake.reversePassoverMotorsCommand());
+
+        xbox.leftStick().and(xbox.povUp()).onTrue(elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator));
+        xbox.leftStick().and(xbox.povLeft()).onTrue(elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator));
+        xbox.leftStick().and(xbox.povDown()).onTrue(elbow.setDesiredPositionCommand(ElbowPosition.LOW, elevator));
     }
 
     public static void configureOverridesControls(int port1, int port2, Drivetrain drivetrain, Intake intake,
@@ -290,6 +309,8 @@ public class Controls {
 
         hid1.button(1).onTrue(Overrides.MANUAL_MECH_CONTROL_MODE.enableC())
                 .onFalse(Overrides.MANUAL_MECH_CONTROL_MODE.disableC());
+        hid1.button(3).onTrue(drivetrain.setDriveCurrentLimitCommand(80))
+                .onFalse(drivetrain.setDriveCurrentLimitCommand(60));
 
         // hid1.button(15).onTrue(
         // Commands.parallel(

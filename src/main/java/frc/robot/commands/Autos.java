@@ -143,7 +143,8 @@ public class Autos {
         return () -> new AutoTrajectoryCommand(
                 getStartingPose(FieldConstants.Blue.MiddleGrid.CUBE_5), autoPath,
                 Commands.sequence(
-                        RobotStates.initializeMechanisms(intake, manipulator, elevator, elbow).withTimeout(2),
+                        // RobotStates.initializeMechanisms(intake, manipulator, elevator,
+                        // elbow).withTimeout(2),
                         fullAutoScoreWithMovement(GamePieceLocation.E1, drivetrain, intake, manipulator, elevator,
                                 elbow),
                         drivetrain.pathFollowingCommand(

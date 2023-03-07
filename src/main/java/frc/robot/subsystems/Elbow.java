@@ -51,8 +51,8 @@ public class Elbow extends ProfiledPIDSubsystem {
     public static enum ElbowPosition {
         LOW(-0.31),
         MID_STOW(-0.1),
-        MID(-0.01),
-        HIGH(0.7);
+        MID(0.05),
+        HIGH(0.75);
 
         public final double value;
 
@@ -168,6 +168,7 @@ public class Elbow extends ProfiledPIDSubsystem {
         motor.getEncoder().setPositionConversionFactor(2 * Math.PI / 100.0);
         motor.getEncoder().setVelocityConversionFactor(2 * Math.PI / 100.0 / 60.0);
         motor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 20);
+        motor.setSmartCurrentLimit(20);
 
         encoder.setInverted(true);
         encoder.setPositionConversionFactor(2 * Math.PI);

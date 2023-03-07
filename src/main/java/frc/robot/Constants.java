@@ -110,7 +110,7 @@ public final class Constants {
         }
 
         public static final class Elbow {
-            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 17);
+            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 15);
             public static final TunableNumber kI = new TunableNumber("Elbow", "kI", 0);
             public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0.5);
             public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 0.05);
@@ -168,17 +168,11 @@ public final class Constants {
                     "Max Velocity", 2.6); // untested
             public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elevator",
                     "Max Acceleration", 15); // untested
-            // public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new
-            // TunableNumber("Elevator",
-            // "Max Velocity", 1.5); // untested
-            // public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED
-            // = new TunableNumber("Elevator",
-            // "Max Acceleration", 1); // untested
             public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND_STOW = new TunableNumber("Elevator",
-                    "Max Velocity Stow", 2); // untested
+                    "Max Velocity Stow", 2.6); // untested
             public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED_STOW = new TunableNumber(
                     "Elevator",
-                    "Max Acceleration Stow", 2); // untested
+                    "Max Acceleration Stow", 4); // untested
 
             public static final double GEARING = 1.0 / 4.0; // untested
             public static final double DRUM_RADIUS_METERS = Units.inchesToMeters(1.2); // untested // 0.0305
@@ -190,9 +184,9 @@ public final class Constants {
         public static final class Elbow {
             public static final TunableNumber MAX_VELOCITY_METERS_PER_SECOND = new TunableNumber("Elbow",
                     "Max Velocity",
-                    15 * Math.PI); // untested
+                    18 * Math.PI); // untested
             public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elbow",
-                    "Max Acceleration", 14 * Math.PI); // untested
+                    "Max Acceleration", 18 * Math.PI); // untested
         }
     }
 
@@ -219,7 +213,7 @@ public final class Constants {
 
     public static final class Vision {
         public static final String[] CAMERA_NAMES = new String[] {
-                // "OV9281-02",
+                "OV9281-02",
                 "OV9281-03",
                 "OV9281-01",
                 "OV9281-04"
@@ -227,10 +221,10 @@ public final class Constants {
 
         // front-left, front-right, back-left, back-right
         public static final Transform3d[] ROBOT_TO_CAMS = new Transform3d[] {
-                // new Transform3d(
-                // new Translation3d(Units.inchesToMeters(10.226), -Units.inchesToMeters(5.476),
-                // 0.71),
-                // new Rotation3d(0, 0, Math.PI / 4.0)),
+                new Transform3d(
+                        new Translation3d(Units.inchesToMeters(10.226), -Units.inchesToMeters(5.476),
+                                0.71),
+                        new Rotation3d(0, 0, Math.PI / 4.0)),
                 new Transform3d(
                         new Translation3d(-Units.inchesToMeters(10.226), -Units.inchesToMeters(7.774),
                                 0.71),

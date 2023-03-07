@@ -53,8 +53,8 @@ public class Elevator extends ProfiledPIDSubsystem {
     public static enum ElevatorPosition {
         BOTTOM(0),
         CONE_LOW(0.25),
-        CONE_MID(1.21),
-        CONE_HIGH(1.74),
+        CONE_MID(1.14),
+        CONE_HIGH(1.7),
         CUBE_LOW(0.25),
         CUBE_MID(1.18482),
         CUBE_HIGH(1.70220),
@@ -204,7 +204,10 @@ public class Elevator extends ProfiledPIDSubsystem {
             // RobotStates.enableInitialized();
         }
 
-        new Trigger(bottomHallEffect::get).onTrue(Commands.runOnce(this::resetEncoders));
+        new Trigger(bottomHallEffect::get).whileTrue(
+                Commands.parallel(
+                        Commands.runOnce(this::resetEncoders).ignoringDisable(true),
+                        Commands.runOnce(RobotStates::enableInitialized)).ignoringDisable(true));
     }
 
     /**

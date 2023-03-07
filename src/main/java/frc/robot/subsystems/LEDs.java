@@ -169,7 +169,7 @@ public class LEDs extends SubsystemBase {
             for (int i = 0; i < buffer.getLength(); i++) {
                 // every 0.2 seconds it will switch from off to on
                 if (timeStep / 25 == 1) {
-                    buffer.setHSV(i, 6, 255, v);
+                    buffer.setHSV(i, 4, 255, v);
                 } else {
                     buffer.setHSV(i, 0, 0, 0);
                 }

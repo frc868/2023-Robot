@@ -101,7 +101,7 @@ public class SwerveModule {
         SparkMaxConfigurator.configure(driveMotor)
                 .withIdleMode(IdleMode.kBrake)
                 .withInverted(driveMotorInverted)
-                .withCurrentLimit(40)
+                .withCurrentLimit(60)
                 .withPositionConversionFactor(Constants.Geometries.Drivetrain.ENCODER_DISTANCE_TO_METERS,
                         true)
                 .burnFlash();
@@ -300,5 +300,9 @@ public class SwerveModule {
     public void setIdleMode(IdleMode idleMode) {
         driveMotor.setIdleMode(idleMode);
         turnMotor.setIdleMode(idleMode);
+    }
+
+    public void setDriveCurrentLimit(int currentLimit) {
+        driveMotor.setSmartCurrentLimit(currentLimit);
     }
 }

@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix.sensors.Pigeon2;
@@ -119,8 +120,8 @@ public class Drivetrain extends SubsystemBase {
     private ProfiledPIDController turnController = new ProfiledPIDController(Constants.Gains.TurnToAngle.kP,
             Constants.Gains.TurnToAngle.kI,
             Constants.Gains.TurnToAngle.kD,
-            new TrapezoidProfile.Constraints(2 * Math.PI,
-                    2 * Math.PI));
+            new TrapezoidProfile.Constraints(10 * Math.PI,
+                    10 * Math.PI));
 
     /** An enum describing the two types of drive modes. */
     public enum DriveMode {
@@ -519,7 +520,7 @@ public class Drivetrain extends SubsystemBase {
      * @return the command
      */
     public CommandBase teleopDriveCommand(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
-            DoubleSupplier thetaSpeedSupplier, DoubleSupplier brakeSupplier) {
+            DoubleSupplier thetaSpeedSupplier, DoubleSupplier brakeSupplier, BooleanSupplier isInputCubed) {
         SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
         SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
         SlewRateLimiter thetaSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
@@ -532,6 +533,12 @@ public class Drivetrain extends SubsystemBase {
             xSpeed = MathUtil.applyDeadband(xSpeed, 0.05);
             ySpeed = MathUtil.applyDeadband(ySpeed, 0.05);
             thetaSpeed = MathUtil.applyDeadband(thetaSpeed, 0.05);
+
+            if (isInputCubed.getAsBoolean()) {
+                xSpeed = Math.pow(xSpeed, 3);
+                ySpeed = Math.pow(ySpeed, 3);
+                thetaSpeed = Math.pow(thetaSpeed, 3);
+            }
 
             if (Constants.Teleop.IS_JOYSTICK_INPUT_RATE_LIMITED) {
                 xSpeed = xSpeedLimiter.calculate(xSpeed);
@@ -701,15 +708,15 @@ public class Drivetrain extends SubsystemBase {
      * @return the command
      */
     public CommandBase chargeStationBalanceCommand() {
-        PIDController controller = new PIDController(0.05, 0, 0.01);
-        controller.setTolerance(1);
+        PIDController controller = new PIDController(0.04, 0, 0.008);
+        controller.setTolerance(2);
         return new PIDCommand(
                 controller,
                 () -> (-pigeon.getRoll()),
                 0,
                 (d) -> drive(
-                        d > 1
-                                ? (d > 0 ? 1 : -1)
+                        d > 0.84
+                                ? (d > 0 ? 0.84 : -0.84)
                                 : d,
                         0, 0, DriveMode.ROBOT_RELATIVE),
                 this).finallyDo((d) -> this.stop());
@@ -746,4 +753,14 @@ public class Drivetrain extends SubsystemBase {
             backRight.setIdleMode(IdleMode.kBrake);
         });
     }
+
+    public CommandBase setDriveCurrentLimitCommand(int currentLimit) {
+        return Commands.runOnce(() -> {
+            frontLeft.setDriveCurrentLimit(currentLimit);
+            frontRight.setDriveCurrentLimit(currentLimit);
+            backLeft.setDriveCurrentLimit(currentLimit);
+            backRight.setDriveCurrentLimit(currentLimit);
+        });
+    }
+
 }
