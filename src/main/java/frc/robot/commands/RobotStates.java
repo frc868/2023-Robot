@@ -296,8 +296,7 @@ public class RobotStates {
                                 Commands.either(
                                         Commands.deadline(
                                                 Commands.race(
-                                                        Commands.waitUntil(intake::isGamePieceDetected)
-                                                                .andThen(Commands.waitSeconds(0.5)),
+                                                        Commands.waitUntil(intake::isGamePieceDetected),
                                                         Commands.waitUntil(secondaryButton::getAsBoolean)),
                                                 Commands.select(
                                                         Map.of(
@@ -346,12 +345,8 @@ public class RobotStates {
         return Commands.sequence(
                 setIntakeModeCommand(gamePiece),
                 Commands.parallel(
-                        elevator.setDesiredPositionCommand(ElevatorPosition.CUBE_MID, intake, elbow),
-                        Commands.sequence(
-                                elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
-                                Commands.waitSeconds(0.75),
-                                elbow.setDesiredPositionCommand(ElbowPosition.HIGH,
-                                        elevator))),
+                        elevator.setDesiredPositionCommand(ElevatorPosition.DOUBLE_SUBSTATION_PICKUP, intake, elbow),
+                        elbow.setDesiredPositionCommand(ElbowPosition.DOUBLE_SUBSTATION_PICKUP, elevator)),
                 manipulator.setPincersReleasedCommand(() -> gamePiece),
                 Commands.waitSeconds(0.5)).withName("Score Game Piece");
     }
@@ -367,14 +362,13 @@ public class RobotStates {
             Elbow elbow) {
         return Commands.sequence(
                 humanPlayerExtendElevatorCommand(gamePiece, intake, manipulator, elevator, elbow),
-                driveDeltaCommand(0.13, drivetrain),
                 Commands.deadline(
                         Commands.waitUntil(secondaryButton::getAsBoolean),
                         Commands.sequence(
                                 Commands.runOnce(() -> secondaryButtonLED.accept(true)),
-                                Commands.waitSeconds(0.5),
+                                Commands.waitSeconds(0.25),
                                 Commands.runOnce(() -> secondaryButtonLED.accept(false)),
-                                Commands.waitSeconds(0.5)).repeatedly()
+                                Commands.waitSeconds(0.25)).repeatedly()
                                 .finallyDo((d) -> secondaryButtonLED.accept(false))),
                 manipulator.setPincersPincingCommand(() -> gamePiece),
                 clearIntakeModeCommand())
@@ -406,10 +400,8 @@ public class RobotStates {
         return Commands.sequence(
                 manipulator.setWristDownCommand(),
                 manipulator.setPincersClosedCommand(),
-                elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator),
                 elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow)
                         .deadlineWith(elbow.lockPosition()),
-                elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
                 RobotStates.setCurrentStateCommand(RobotState.SEEKING))
                 .withName("Stow Elevator");
     }
