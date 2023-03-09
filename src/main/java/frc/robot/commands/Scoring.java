@@ -83,14 +83,17 @@ public class Scoring {
                                                                         .setPincersReleasedCommand(gamePieceSupplier),
                                                                 elbow.setDesiredPositionCommand(ElbowPosition.LOW,
                                                                         elevator),
-                                                                elevator.setDesiredPositionDeltaCommand(-0.2, intake,
+                                                                elevator.setDesiredPositionDeltaCommand(-0.15, intake,
                                                                         elbow),
                                                                 Commands.either(
                                                                         RobotStates.driveDeltaCommand(-0.012,
                                                                                 drivetrain, new PathConstraints(4, 9)),
                                                                         Commands.none(),
                                                                         () -> driveBackwards)),
-                                                        manipulator.setWristDownCommand())),
+                                                        manipulator.setWristDownCommand(),
+                                                        manipulator.setPincersOpenCommand(),
+                                                        elbow.setDesiredPositionCommand(ElbowPosition.MID_CONE_HIGH,
+                                                                elevator))),
                                 GamePiece.CUBE,
                                 Commands.deadline(
                                         Commands.waitUntil(secondaryButton::getAsBoolean),
@@ -125,23 +128,20 @@ public class Scoring {
                                                         Commands.parallel(
                                                                 RobotStates.driveDeltaCommand(0.8, drivetrain),
                                                                 drivetrain.setCoastCommand())),
-                                        Commands.parallel(
-                                                manipulator
-                                                        .setPincersReleasedCommand(gamePieceSupplier),
-                                                elbow.setDesiredPositionCommand(ElbowPosition.LOW,
-                                                        elevator),
-                                                elevator.setDesiredPositionDeltaCommand(-0.2, intake,
-                                                        elbow),
-                                                RobotStates.driveDeltaCommand(-0.08, drivetrain)),
-                                        Commands.either(
+                                        Commands.sequence(
                                                 Commands.parallel(
-                                                        elbow.setDesiredPositionCommand(
-                                                                ElbowPosition.HIGH, elevator),
-                                                        RobotStates.driveDeltaCommand(-0.4, drivetrain)),
-                                                Commands.none(),
-                                                () -> levelSupplier.get() == Level.HIGH
-                                                        && gamePieceSupplier
-                                                                .get() == GamePiece.CONE)),
+                                                        manipulator
+                                                                .setPincersReleasedCommand(gamePieceSupplier),
+                                                        elbow.setDesiredPositionCommand(ElbowPosition.LOW,
+                                                                elevator),
+                                                        elevator.setDesiredPositionDeltaCommand(-0.15, intake,
+                                                                elbow),
+                                                        RobotStates.driveDeltaCommand(-0.012,
+                                                                drivetrain, new PathConstraints(4, 9))),
+                                                manipulator.setWristDownCommand(),
+                                                manipulator.setPincersOpenCommand(),
+                                                elbow.setDesiredPositionCommand(ElbowPosition.MID_CONE_HIGH,
+                                                        elevator))),
                                 GamePiece.CUBE,
                                 drivetrain.moveDeltaPathFollowingCommand(
                                         new Transform2d(
