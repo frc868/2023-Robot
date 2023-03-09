@@ -99,25 +99,25 @@ public final class Constants {
         }
 
         public static final class Elevator {
-            public static final TunableNumber kP = new TunableNumber("Elevator", "kP", 80);
+            public static final TunableNumber kP = new TunableNumber("Elevator", "kP", 60);
             public static final TunableNumber kI = new TunableNumber("Elevator", "kI", 0);
             public static final TunableNumber kD = new TunableNumber("Elevator", "kD", 0);
             public static final TunableNumber TOLERANCE = new TunableNumber("Elevator", "Tolerance", 0.005);
             public static final double kS = 0.25696;
-            public static final double kG = 0.24912;
-            public static final double kV = 2.2476;
-            public static final double kA = 0.19229;
+            public static final double kG = 0.20167;
+            public static final double kV = 2.3833;
+            public static final double kA = 0.29009;
         }
 
         public static final class Elbow {
-            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 15);
+            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 5);
             public static final TunableNumber kI = new TunableNumber("Elbow", "kI", 0);
-            public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0.5);
+            public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0);
             public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 0.05);
-            public static final double kS = 0.31;
-            public static final double kG = 0.54038;
-            public static final double kV = 0.85;
-            public static final double kA = 0.041;
+            public static final double kS = 0.33055;
+            public static final double kG = 0.54418;
+            public static final double kV = 0.74458;
+            public static final double kA = 0.044339;
         }
 
     }
@@ -212,6 +212,7 @@ public final class Constants {
     }
 
     public static final class Vision {
+        // front-left, front-right, back-left, back-right
         public static final String[] CAMERA_NAMES = new String[] {
                 "OV9281-02",
                 "OV9281-03",
@@ -219,10 +220,9 @@ public final class Constants {
                 "OV9281-04"
         };
 
-        // front-left, front-right, back-left, back-right
         public static final Transform3d[] ROBOT_TO_CAMS = new Transform3d[] {
                 new Transform3d(
-                        new Translation3d(Units.inchesToMeters(10.226), -Units.inchesToMeters(5.476),
+                        new Translation3d(-Units.inchesToMeters(10.226), -Units.inchesToMeters(5.476),
                                 0.71),
                         new Rotation3d(0, 0, Math.PI / 4.0)),
                 new Transform3d(
