@@ -52,6 +52,8 @@ public class Elbow extends ProfiledPIDSubsystem {
         LOW(-0.31),
         MID_STOW(-0.1),
         MID(0.05),
+        MID_CONE_HIGH(0.3),
+        DOUBLE_SUBSTATION_PICKUP(0.54668),
         HIGH(0.75);
 
         public final double value;
@@ -179,12 +181,13 @@ public class Elbow extends ProfiledPIDSubsystem {
         LoggingManager.getInstance().addGroup("Elbow", new LogGroup(
                 new BooleanLogItem("Bottom Hall Effect", bottomHallEffect::get, LogLevel.MAIN),
                 new BooleanLogItem("Top Hall Effect", topHallEffect::get, LogLevel.MAIN),
-                new DoubleLogItem("Actual Position", () -> encoder.getPosition(), LogLevel.MAIN),
-                new DoubleLogItem("Actual Velocity", () -> encoder.getVelocity(), LogLevel.MAIN),
-                new DoubleLogItem("Setpoint Position", () -> setpointPosition, LogLevel.MAIN),
-                new DoubleLogItem("Setpoint Velocity", () -> setpointVelocity, LogLevel.MAIN),
-                new DoubleLogItem("Feedforward", () -> feedforward, LogLevel.MAIN),
-                new DoubleLogItem("PID Output", () -> pidOutput, LogLevel.MAIN),
+                new DoubleLogItem("Control/Actual Position", () -> encoder.getPosition(), LogLevel.MAIN),
+                new DoubleLogItem("Control/Actual Velocity", () -> encoder.getVelocity(), LogLevel.MAIN),
+                new DoubleLogItem("Control/Setpoint Position", () -> setpointPosition, LogLevel.MAIN),
+                new DoubleLogItem("Control/Setpoint Velocity", () -> setpointVelocity, LogLevel.MAIN),
+                new DoubleLogItem("Control/Feedforward Output", () -> feedforward, LogLevel.MAIN),
+                new DoubleLogItem("Control/PID Output", () -> pidOutput, LogLevel.MAIN),
+                new DoubleLogItem("Control/Total Output", () -> pidOutput + feedforward, LogLevel.MAIN),
                 new DeviceLogger<CANSparkMax>(motor, "Elbow Motor",
                         LogProfileBuilder.buildCANSparkMaxLogItems(motor))));
 
@@ -241,7 +244,7 @@ public class Elbow extends ProfiledPIDSubsystem {
         setpointVelocity = setpoint.velocity;
         feedforward = feedforwardController.calculate(setpoint.position, setpoint.velocity);
         pidOutput = output;
-        setVoltage(output + feedforwardController.calculate(setpoint.position, setpoint.velocity));
+        setVoltage(output + feedforward);
     }
 
     /**
@@ -286,24 +289,6 @@ public class Elbow extends ProfiledPIDSubsystem {
             if (!RobotStates.isInitialized()) {
                 safe = false;
                 str = "Robot not initialized: cannot move elbow";
-            }
-
-            switch (targetPosition) {
-                case HIGH:
-                    if (elevator.getMeasurement() < 0.2) {
-                        safe = false;
-                        str = "Elbow not clear of intake: cannot move elbow to high position";
-                    }
-                    break;
-                case MID:
-                    break;
-                case MID_STOW:
-                    break;
-                case LOW:
-                    if (elevator.getMeasurement() < 0.1) {
-                        safe = false;
-                        str = "Elevator too low: cannot move elbow to low position";
-                    }
             }
         }
         return new Pair<Boolean, String>(safe, str);

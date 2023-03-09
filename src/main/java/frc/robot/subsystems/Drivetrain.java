@@ -17,6 +17,7 @@ import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.enums.LogLevel;
 import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
+import com.techhounds.houndutil.houndlog.logitems.DoubleArrayLogItem;
 import com.techhounds.houndutil.houndlog.logitems.DoubleLogItem;
 
 import edu.wpi.first.math.MathUtil;
@@ -55,7 +56,7 @@ import frc.robot.utils.SwerveModule;
  */
 public class Drivetrain extends SubsystemBase {
     /** The front left swerve module when looking at the bot from behind. */
-    private SwerveModule frontLeft = new SwerveModule("Drivetrain/Front Left Module",
+    private SwerveModule frontLeft = new SwerveModule("Drivetrain/Modules/Front Left",
             Constants.CAN.FRONT_LEFT_DRIVE_MOTOR,
             Constants.CAN.FRONT_LEFT_TURN_MOTOR,
             Constants.CAN.FRONT_LEFT_TURN_ENCODER,
@@ -63,7 +64,7 @@ public class Drivetrain extends SubsystemBase {
             Constants.Geometries.Drivetrain.Offsets.FRONT_LEFT);
 
     /** The front right swerve module when looking at the bot from behind. */
-    private SwerveModule frontRight = new SwerveModule("Drivetrain/Front Right Module",
+    private SwerveModule frontRight = new SwerveModule("Drivetrain/Modules/Front Right",
             Constants.CAN.FRONT_RIGHT_DRIVE_MOTOR,
             Constants.CAN.FRONT_RIGHT_TURN_MOTOR,
             Constants.CAN.FRONT_RIGHT_TURN_ENCODER,
@@ -71,7 +72,7 @@ public class Drivetrain extends SubsystemBase {
             Constants.Geometries.Drivetrain.Offsets.FRONT_RIGHT);
 
     /** The back left swerve module when looking at the bot from behind. */
-    private SwerveModule backLeft = new SwerveModule("Drivetrain/Back Left Module",
+    private SwerveModule backLeft = new SwerveModule("Drivetrain/Modules/Back Left",
             Constants.CAN.BACK_LEFT_DRIVE_MOTOR,
             Constants.CAN.BACK_LEFT_TURN_MOTOR,
             Constants.CAN.BACK_LEFT_TURN_ENCODER,
@@ -79,7 +80,7 @@ public class Drivetrain extends SubsystemBase {
             Constants.Geometries.Drivetrain.Offsets.BACK_LEFT);
 
     /** The back right swerve module when looking at the bot from behind. */
-    private SwerveModule backRight = new SwerveModule("Drivetrain/Back Right Module",
+    private SwerveModule backRight = new SwerveModule("Drivetrain/Modules/Back Right",
             Constants.CAN.BACK_RIGHT_DRIVE_MOTOR,
             Constants.CAN.BACK_RIGHT_TURN_MOTOR,
             Constants.CAN.BACK_RIGHT_TURN_ENCODER,
@@ -94,15 +95,6 @@ public class Drivetrain extends SubsystemBase {
      * AprilTag measurements to provide an absolute position on the field.
      */
     private SwerveDrivePoseEstimator poseEstimator;
-
-    // /**
-    // * The internal register for the automatic 90° turns, so that the driver is
-    // able
-    // * to press the button multiple times.
-    // */
-    // private double turnRegister = 0;
-    // /** The initial position of the gyro, for the automatic 90° turns. */
-    // private double startingGyroAngle = 0;
 
     /** Whether to override the inputs of the driver for the automatic 90° turns. */
     private boolean isTurningEnabled = false;
@@ -183,6 +175,11 @@ public class Drivetrain extends SubsystemBase {
     /** The speed that the robot is set to go at. */
     private SpeedMode speedMode = SpeedMode.ULTRA;
 
+    private double commandedX = 0.0;
+    private double commandedY = 0.0;
+    private double commandedTheta = 0.0;
+    private SwerveModuleState[] commandedStates = new SwerveModuleState[4];
+
     /** Initializes the drivetrain. */
     public Drivetrain() {
         zeroGyro();
@@ -196,13 +193,18 @@ public class Drivetrain extends SubsystemBase {
         turnController.enableContinuousInput(0, 2 * Math.PI);
 
         LoggingManager.getInstance().addGroup("Drivetrain", new LogGroup(
-                new DeviceLogger<Pigeon2>(pigeon, "Pigeon 2",
+                new DeviceLogger<Pigeon2>(pigeon, "Gyro",
                         LogProfileBuilder.buildPigeon2LogItems(pigeon)),
-                new DoubleLogItem("Slow Speed Limit", () -> SpeedMode.SLOW.getLimit(),
+                new DoubleLogItem("Control/Commanded X Velocity", () -> commandedX,
                         LogLevel.MAIN),
-                new DoubleLogItem("Fast Speed Limit", () -> SpeedMode.FAST.getLimit(),
+                new DoubleLogItem("Control/Commanded Y Velocity", () -> commandedY,
                         LogLevel.MAIN),
-                new DoubleLogItem("Ultra Fast Speed Limit", () -> SpeedMode.ULTRA.getLimit(),
+                new DoubleLogItem("Control/Commanded Theta Velocity", () -> commandedTheta,
+                        LogLevel.MAIN),
+                new DoubleArrayLogItem("Control/Commanded States", () -> convertStatesToAdvantageScope(commandedStates),
+                        LogLevel.MAIN),
+                new DoubleArrayLogItem("Control/Measured States",
+                        () -> convertStatesToAdvantageScope(getSwerveModuleStates()),
                         LogLevel.MAIN)));
 
         AutoManager.getInstance().setResetOdometryConsumer(this::resetPoseEstimator);
@@ -293,10 +295,17 @@ public class Drivetrain extends SubsystemBase {
 
                 break;
         }
+
+        commandedX = chassisSpeeds.vxMetersPerSecond;
+        commandedY = chassisSpeeds.vyMetersPerSecond;
+        commandedTheta = chassisSpeeds.omegaRadiansPerSecond;
+
         SwerveModuleState[] states = Constants.Geometries.Drivetrain.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states,
                 Constants.Geometries.Drivetrain.MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND);
+        commandedStates = states;
         setModuleStates(states, true, true);
+
     }
 
     /**
@@ -355,6 +364,19 @@ public class Drivetrain extends SubsystemBase {
         frontRight.setState(states[1], openLoop, optimize);
         backLeft.setState(states[2], openLoop, optimize);
         backRight.setState(states[3], openLoop, optimize);
+    }
+
+    public double[] convertStatesToAdvantageScope(SwerveModuleState[] states) {
+        if (states.length != 0 && states[0] != null) {
+            double[] output = new double[8];
+            for (int i = 0; i < 4; i++) {
+                output[i * 2] = states[i].angle.getRadians();
+                output[i * 2 + 1] = states[i].speedMetersPerSecond;
+            }
+            return output;
+        } else {
+            return new double[] {};
+        }
     }
 
     /**

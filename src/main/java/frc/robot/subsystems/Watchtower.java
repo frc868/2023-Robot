@@ -1,14 +1,19 @@
 package frc.robot.subsystems;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
-
 import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera;
+import com.techhounds.houndutil.houndlog.LogGroup;
+import com.techhounds.houndutil.houndlog.LoggingManager;
+import com.techhounds.houndutil.houndlog.enums.LogLevel;
+import com.techhounds.houndutil.houndlog.logitems.DoubleArrayLogItem;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
@@ -16,12 +21,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Watchtower extends SubsystemBase {
-    public SwerveDrivePoseEstimator poseEstimator = null;
+    private SwerveDrivePoseEstimator poseEstimator = null;
 
     /** The PhotonVision cameras, used to detect the AprilTags. */
     private AprilTagPhotonCamera[] photonCameras = new AprilTagPhotonCamera[] {
-            // new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[0],
-            // Constants.Vision.ROBOT_TO_CAMS[0]),
+            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[0],
+                    Constants.Vision.ROBOT_TO_CAMS[0]),
             new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[1],
                     Constants.Vision.ROBOT_TO_CAMS[1]),
             new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[2],
@@ -32,6 +37,24 @@ public class Watchtower extends SubsystemBase {
 
     public Watchtower() {
         AutoManager.getInstance().setPoseEstimatorCallback(this::updatePoseEstimator);
+
+        for (AprilTagPhotonCamera cam : photonCameras) {
+            LoggingManager.getInstance().addGroup(
+                    new LogGroup("Watchtower/" + cam.getName(),
+                            new DoubleArrayLogItem("Detected AprilTags",
+                                    () -> packPosesToAdvantageScope(cam.getCurrentlyDetectedAprilTags()),
+                                    LogLevel.MAIN),
+                            new DoubleArrayLogItem("Detected Robot Pose3d",
+                                    () -> packPosesToAdvantageScope(List.of(cam.getCurrentlyDetectedRobotPose())),
+                                    LogLevel.MAIN)));
+        }
+
+        // LoggingManager.getInstance().addGroup("Watchtower",
+        // new LogGroup(
+        // new DoubleArrayLogItem(, )));
+
+        // log the packed apriltag poses from each cam individually
+        // log the robot's pose3d from each cam
     }
 
     public void updatePoseEstimator() {
@@ -39,24 +62,19 @@ public class Watchtower extends SubsystemBase {
             if (poseEstimator != null) {
                 Pose2d prevEstimatedRobotPose = poseEstimator.getEstimatedPosition();
                 Field2d field = AutoManager.getInstance().getField();
-                for (int i = 0; i < photonCameras.length; i++) {
-                    Optional<EstimatedRobotPose> result = photonCameras[i]
+                for (AprilTagPhotonCamera photonCamera : photonCameras) {
+                    Optional<EstimatedRobotPose> result = photonCamera
                             .getEstimatedGlobalPose(prevEstimatedRobotPose);
 
-                    FieldObject2d fieldObject = field.getObject("apriltag_cam" + i +
+                    FieldObject2d fieldObject = field.getObject(getName() +
                             "_est_pose");
                     if (result.isPresent()) {
                         EstimatedRobotPose camPose = result.get();
 
-                        if (camPose.estimatedPose.toPose2d().getTranslation()
-                                .getDistance(prevEstimatedRobotPose.getTranslation()) > 1.5) {
-                            fieldObject.setPose(new Pose2d(-100, -100, new Rotation2d()));
-                            continue;
-                        }
-
                         poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(),
                                 camPose.timestampSeconds);
                         fieldObject.setPose(camPose.estimatedPose.toPose2d());
+
                     } else {
                         // move it way off the screen to make it disappear
                         fieldObject.setPose(new Pose2d(-100, -100, new Rotation2d()));
@@ -71,4 +89,17 @@ public class Watchtower extends SubsystemBase {
         this.poseEstimator = poseEstimator;
     }
 
+    private double[] packPosesToAdvantageScope(List<Pose3d> poses) {
+        double[] data = new double[poses.size() * 7];
+        for (int i = 0; i < poses.size(); i++) {
+            data[i * 7] = poses.get(i).getX();
+            data[i * 7 + 1] = poses.get(i).getY();
+            data[i * 7 + 2] = poses.get(i).getZ();
+            data[i * 7 + 3] = poses.get(i).getRotation().getQuaternion().getW();
+            data[i * 7 + 4] = poses.get(i).getRotation().getQuaternion().getX();
+            data[i * 7 + 5] = poses.get(i).getRotation().getQuaternion().getY();
+            data[i * 7 + 6] = poses.get(i).getRotation().getQuaternion().getZ();
+        }
+        return data;
+    }
 }

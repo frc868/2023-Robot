@@ -56,7 +56,7 @@ public class Manipulator extends SubsystemBase {
         LoggingManager.getInstance().addGroup("Manipulator", new LogGroup(
                 new DeviceLogger<DoubleSolenoid>(wrist, "Wrist",
                         LogProfileBuilder.buildDoubleSolenoidLogItems(wrist)),
-                new DeviceLogger<DoubleSolenoid>(pincers, "Pincer",
+                new DeviceLogger<DoubleSolenoid>(pincers, "Pincers",
                         LogProfileBuilder.buildDoubleSolenoidLogItems(pincers)),
                 new BooleanLogItem("Is Pole Detected", this::isPoleDetected, LogLevel.MAIN)));
 

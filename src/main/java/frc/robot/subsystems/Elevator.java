@@ -48,7 +48,6 @@ import frc.robot.commands.RobotStates;
  * @author hr
  * @author jt
  */
-
 public class Elevator extends ProfiledPIDSubsystem {
     public static enum ElevatorPosition {
         BOTTOM(0),
@@ -57,6 +56,7 @@ public class Elevator extends ProfiledPIDSubsystem {
         CONE_HIGH(1.7),
         CUBE_LOW(0.25),
         CUBE_MID(1.18482),
+        DOUBLE_SUBSTATION_PICKUP(1.664),
         CUBE_HIGH(1.70220),
         HUMAN_PLAYER(0),
         TOP(1.40);
@@ -185,11 +185,12 @@ public class Elevator extends ProfiledPIDSubsystem {
                 new Logger[] {
                         new BooleanLogItem("Bottom Hall Effect", bottomHallEffect::get, LogLevel.MAIN),
                         new BooleanLogItem("Top Hall Effect", topHallEffect::get, LogLevel.MAIN),
-                        new DoubleLogItem("Actual Position", () -> this.getMeasurement(), LogLevel.MAIN),
-                        new DoubleLogItem("Setpoint Position", () -> setpointPosition, LogLevel.MAIN),
-                        new DoubleLogItem("Setpoint Velocity", () -> setpointVelocity, LogLevel.MAIN),
-                        new DoubleLogItem("Feedforward", () -> feedforward, LogLevel.MAIN),
-                        new DoubleLogItem("PID Output", () -> pidOutput, LogLevel.MAIN),
+                        new DoubleLogItem("Control/Position", () -> this.getMeasurement(), LogLevel.MAIN),
+                        new DoubleLogItem("Control/Setpoint Position", () -> setpointPosition, LogLevel.MAIN),
+                        new DoubleLogItem("Control/Setpoint Velocity", () -> setpointVelocity, LogLevel.MAIN),
+                        new DoubleLogItem("Control/Feedforward", () -> feedforward, LogLevel.MAIN),
+                        new DoubleLogItem("Control/PID Output", () -> pidOutput, LogLevel.MAIN),
+                        new DoubleLogItem("Control/Total Output", () -> pidOutput + feedforward, LogLevel.MAIN),
                         new DeviceLogger<CANSparkMax>(leftMotor, "Primary Elevator Motor",
                                 LogProfileBuilder.buildCANSparkMaxLogItems(leftMotor)),
                         new DeviceLogger<CANSparkMax>(rightMotor, "Secondary Elevator Motor",

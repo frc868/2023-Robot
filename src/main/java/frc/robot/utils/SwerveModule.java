@@ -59,10 +59,11 @@ public class SwerveModule {
             Constants.Gains.DriveMotors.kV,
             Constants.Gains.DriveMotors.kA);
 
-    private double drivePIDControllerOutput = 0.0;
-    private double driveFFControllerOutput = 0.0;
-    private double driveMotorVel = 0.0;
-    private double driveMotorVelCF = 0.0;
+    private double setpointVelocity = 0.0;
+    private double setpointAngle = 0.0;
+    private double drivePidOutput = 0.0;
+    private double driveFeedforwardOutput = 0.0;
+    private double turnPidOutput = 0.0;
 
     private double simDriveEncoderPosition;
     private double simDriveEncoderVelocity;
@@ -101,7 +102,7 @@ public class SwerveModule {
         SparkMaxConfigurator.configure(driveMotor)
                 .withIdleMode(IdleMode.kBrake)
                 .withInverted(driveMotorInverted)
-                .withCurrentLimit(60)
+                .withCurrentLimit(40)
                 .withPositionConversionFactor(Constants.Geometries.Drivetrain.ENCODER_DISTANCE_TO_METERS,
                         true)
                 .burnFlash();
@@ -148,10 +149,15 @@ public class SwerveModule {
                                 LogProfileBuilder.buildCANCoderLogItems(turnCanCoder)),
                         new DoubleLogItem("Wheel Angle Degrees", () -> Units.radiansToDegrees(getWheelAngle()),
                                 LogLevel.MAIN),
-                        new DoubleLogItem("Drive PID", () -> this.drivePIDControllerOutput, LogLevel.MAIN),
-                        new DoubleLogItem("Drive FF", () -> this.driveFFControllerOutput, LogLevel.MAIN),
-                        new DoubleLogItem("Drive Motor Vel", () -> this.driveMotorVel, LogLevel.MAIN),
-                        new DoubleLogItem("Drive Motor Vel CF", () -> this.driveMotorVelCF, LogLevel.MAIN)
+                        new DoubleLogItem("Control/Setpoint Velocity", () -> this.setpointVelocity, LogLevel.MAIN),
+                        new DoubleLogItem("Control/Setpoint Angle", () -> this.setpointAngle, LogLevel.MAIN),
+                        new DoubleLogItem("Control/Drive PID Output", () -> this.drivePidOutput, LogLevel.MAIN),
+                        new DoubleLogItem("Control/Drive Feedforward Output", () -> this.driveFeedforwardOutput,
+                                LogLevel.MAIN),
+                        new DoubleLogItem("Control/Total Drive Output",
+                                () -> this.drivePidOutput + this.driveFeedforwardOutput, LogLevel.MAIN),
+                        new DoubleLogItem("Control/Turn PID Output", () -> this.turnPidOutput, LogLevel.MAIN),
+                        new DoubleLogItem("Control/Turn PID Output", () -> this.turnPidOutput, LogLevel.MAIN),
 
                 }));
 
@@ -248,17 +254,14 @@ public class SwerveModule {
             }
 
         } else {
-            this.drivePIDControllerOutput = drivePIDController.calculate(driveEncoder.getVelocity(),
+            this.drivePidOutput = drivePIDController.calculate(driveEncoder.getVelocity(),
                     state.speedMetersPerSecond);
-            this.driveFFControllerOutput = driveFeedforward.calculate(state.speedMetersPerSecond);
-            this.driveMotorVel = driveEncoder.getVelocity();
-            this.driveMotorVelCF = driveEncoder.getVelocityConversionFactor();
-
-            double turnOutput = turnPIDControllerSimple.calculate(getWheelAngle(),
+            this.driveFeedforwardOutput = driveFeedforward.calculate(state.speedMetersPerSecond);
+            this.turnPidOutput = turnPIDControllerSimple.calculate(getWheelAngle(),
                     state.angle.getRadians());
 
-            driveMotor.setVoltage(drivePIDControllerOutput + driveFFControllerOutput);
-            turnMotor.set(turnOutput);
+            driveMotor.setVoltage(drivePidOutput + driveFeedforwardOutput);
+            turnMotor.set(turnPidOutput);
         }
     }
 

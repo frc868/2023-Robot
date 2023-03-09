@@ -33,7 +33,6 @@ import frc.robot.commands.RobotStates;
  * 
  * @author bam
  */
-
 public class Intake extends SubsystemBase {
     /**
      * The motor that drives the left side of the passover.
@@ -97,8 +96,6 @@ public class Intake extends SubsystemBase {
                         new DeviceLogger<DoubleSolenoid>(passoverSolenoid, "Passover Solenoid",
                                 LogProfileBuilder.buildDoubleSolenoidLogItems(passoverSolenoid)),
                         new BooleanLogItem("Is Game Piece Detected", this::isGamePieceDetected, LogLevel.MAIN),
-                        new BooleanLogItem("Is Safe for Elevator", () -> this.isSafeForElevator().getFirst(),
-                                LogLevel.MAIN)
                 }));
         this.ligament = ligament;
 
