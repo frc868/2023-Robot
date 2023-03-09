@@ -4,6 +4,10 @@ import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndauto.AutoRoutine;
 import com.techhounds.houndutil.houndauto.trajectoryloader.TrajectoryLoader;
 import com.techhounds.houndutil.houndauto.trajectoryloader.TrajectorySettings;
+import com.techhounds.houndutil.houndlog.LogGroup;
+import com.techhounds.houndutil.houndlog.LoggingManager;
+import com.techhounds.houndutil.houndlog.loggers.SendableLogger;
+
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -11,8 +15,8 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.commands.Autos;
 import frc.robot.commands.RobotStates;
@@ -67,10 +71,21 @@ public class RobotContainer {
      */
     public RobotContainer() {
         watchtower.setPoseEstimator(drivetrain.getPoseEstimator());
-
-        SmartDashboard.putData("Mechanisms", mechanisms);
         DataLogManager.logNetworkTables(true);
+        DriverStation.startDataLog(DataLogManager.getLog());
         DataLogManager.start();
+
+        LoggingManager.getInstance().addGroup("Main",
+                new LogGroup(
+                        new SendableLogger("Mechanisms", mechanisms),
+                        new SendableLogger("Subsystems/Drivetrain", drivetrain),
+                        new SendableLogger("Subsystems/Elbow", elbow),
+                        new SendableLogger("Subsystems/Elevator", elevator),
+                        new SendableLogger("Subsystems/Intake", intake),
+                        new SendableLogger("Subsystems/Manipulator", manipulator),
+                        new SendableLogger("Subsystems/LEDs", leds),
+                        new SendableLogger("Subsystems/Misc", misc),
+                        new SendableLogger("CommandScheduler", CommandScheduler.getInstance())));
 
         LiveWindow.disableAllTelemetry(); // livewindow is basically deprecated. using houndlog instead.
         if (RobotBase.isSimulation()) {
