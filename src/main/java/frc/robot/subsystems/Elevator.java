@@ -403,7 +403,7 @@ public class Elevator extends ProfiledPIDSubsystem {
                         }),
                         runOnce(() -> setGoal(positionSupplier.get().value)),
                         runOnce(this::enable),
-                        Commands.waitUntil(this::isAtGoal).withTimeout(2)),
+                        Commands.waitUntil(this::isAtGoal).withTimeout(1.5)),
                 RobotStates.singularErrorCommand(() -> getIfSafeToMove(intake, elbow).getSecond()),
                 () -> getIfSafeToMove(intake, elbow).getFirst());
     }
