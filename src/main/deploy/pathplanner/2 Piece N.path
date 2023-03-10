@@ -24,16 +24,41 @@
     },
     {
       "anchorPoint": {
-        "x": 7.503539691107161,
-        "y": 4.620132979849293
+        "x": 5.268723497516439,
+        "y": 4.675982884951881
       },
       "prevControl": {
-        "x": 5.363913374396031,
-        "y": 4.620132979849293
+        "x": 4.495548817486524,
+        "y": 4.759194509708465
       },
       "nextControl": {
-        "x": 5.363913374396031,
-        "y": 4.620132979849293
+        "x": 6.075932932494511,
+        "y": 4.5891083269273345
+      },
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 7.082940867270623,
+        "y": 4.599012132052042
+      },
+      "prevControl": {
+        "x": 4.943314550559493,
+        "y": 4.599012132052042
+      },
+      "nextControl": {
+        "x": 4.943314550559493,
+        "y": 4.599012132052042
       },
       "holonomicAngle": 0,
       "isReversal": true,
@@ -71,14 +96,7 @@
     }
   ],
   "maxVelocity": 4.2,
-  "maxAcceleration": 8.0,
+  "maxAcceleration": 3.0,
   "isReversed": null,
-  "markers": [
-    {
-      "position": 0.7302556818181815,
-      "names": [
-        "intakeGamePiece"
-      ]
-    }
-  ]
+  "markers": []
 }
