@@ -186,6 +186,8 @@ public class Elevator extends ProfiledPIDSubsystem {
                         new BooleanLogItem("Bottom Hall Effect", bottomHallEffect::get, LogLevel.MAIN),
                         new BooleanLogItem("Top Hall Effect", topHallEffect::get, LogLevel.MAIN),
                         new DoubleLogItem("Control/Position", () -> this.getMeasurement(), LogLevel.MAIN),
+                        new DoubleLogItem("Control/Velocity", () -> leftMotor.getEncoder().getVelocity(),
+                                LogLevel.MAIN),
                         new DoubleLogItem("Control/Setpoint Position", () -> setpointPosition, LogLevel.MAIN),
                         new DoubleLogItem("Control/Setpoint Velocity", () -> setpointVelocity, LogLevel.MAIN),
                         new DoubleLogItem("Control/Feedforward", () -> feedforward, LogLevel.MAIN),
