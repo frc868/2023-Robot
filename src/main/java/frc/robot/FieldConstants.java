@@ -61,7 +61,7 @@ public class FieldConstants {
             public static final Pose2d CUBE_8 = new Pose2d(
                     new Translation2d(
                             2.4,
-                            4.42),
+                            4.38),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CONE_9 = new Pose2d(
                     new Translation2d(
