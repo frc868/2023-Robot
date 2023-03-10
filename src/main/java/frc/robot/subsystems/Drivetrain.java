@@ -9,6 +9,7 @@ import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPoint;
+import com.pathplanner.lib.commands.FollowPathWithEvents;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.techhounds.houndutil.houndauto.AutoManager;
@@ -675,6 +676,17 @@ public class Drivetrain extends SubsystemBase {
                 new PIDController(Constants.Gains.Trajectories.thetakP, 0, 0),
                 (s) -> this.setModuleStates(s, true, true), // TODO: change to closed loop
                 this);
+    }
+
+    /**
+     * Creates a command that supplies SwerveModuleStates to follow a
+     * PathPlannerTrajectory.
+     * 
+     * @return the command
+     */
+    public CommandBase pathFollowingWithEventsCommand(PathPlannerTrajectory path) {
+        return new FollowPathWithEvents(pathFollowingCommand(path), path.getMarkers(),
+                AutoManager.getInstance().getEventMap());
     }
 
     /**
