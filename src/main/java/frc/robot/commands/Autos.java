@@ -105,16 +105,21 @@ public class Autos {
                 Scoring.scoreGamePieceAutoCommand(() -> gamePieceLocation.gamePiece, () -> gamePieceLocation.level,
                         drivetrain, intake, manipulator,
                         elevator, elbow),
-                RobotStates.driveDeltaCommand(-0.5, drivetrain),
+                RobotStates.driveDeltaCommand(-0.4, drivetrain, new PathConstraints(4, 3)),
                 RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow));
     }
 
     public static CommandBase fullAutoIntakeWithMovement(
             GamePiece gamePiece,
-            Drivetrain drivetrain, Intake intake,
+            CommandBase drivetrainProxyCommand,
+            Intake intake,
             Manipulator manipulator, Elevator elevator, Elbow elbow) {
-        return RobotStates.setIntakeModeCommand(gamePiece).andThen(
-                RobotStates.intakeGamePieceAutoCommand(intake, manipulator, elevator, elbow));
+        return Commands.sequence(
+                Commands.deadline(
+                        drivetrainProxyCommand,
+                        RobotStates.runIntakingCommand(() -> gamePiece, intake, manipulator, elevator,
+                                elbow)),
+                RobotStates.endIntakingCommand(() -> gamePiece, intake, manipulator, elevator, elbow));
     }
 
     /**
@@ -135,13 +140,12 @@ public class Autos {
      * @param drivetrain the drivetrain
      * @return the command
      */
-    public static Supplier<AutoTrajectoryCommand> onePieceM(AutoPath autoPath, Drivetrain drivetrain,
+    public static Supplier<AutoTrajectoryCommand> onePieceChargeM(AutoPath autoPath, Drivetrain drivetrain,
             Intake intake,
             Manipulator manipulator, Elevator elevator, Elbow elbow) {
         return () -> new AutoTrajectoryCommand(
                 getStartingPose(FieldConstants.Blue.MiddleGrid.CUBE_5), autoPath,
                 Commands.sequence(
-                        // RobotStates.initializeMechanisms(intake, manipulator, elevator,
                         // elbow).withTimeout(2),
                         fullAutoScoreWithMovement(GamePieceLocation.E1, drivetrain, intake, manipulator, elevator,
                                 elbow),
@@ -157,12 +161,41 @@ public class Autos {
      * @param drivetrain the drivetrain
      * @return the command
      */
+    public static Supplier<AutoTrajectoryCommand> twoPieceChargeM(AutoPath autoPath, Drivetrain drivetrain,
+            Intake intake,
+            Manipulator manipulator, Elevator elevator, Elbow elbow) {
+        return () -> new AutoTrajectoryCommand(
+                getStartingPose(FieldConstants.Blue.MiddleGrid.CONE_6), autoPath,
+                Commands.sequence(
+                        fullAutoScoreWithMovement(GamePieceLocation.F1, drivetrain, intake, manipulator, elevator,
+                                elbow),
+                        fullAutoIntakeWithMovement(GamePiece.CUBE,
+                                drivetrain.pathFollowingCommand(
+                                        autoPath.getTrajectories().get(0)).asProxy(),
+                                intake, manipulator, elevator, elbow),
+                        drivetrain.pathFollowingCommand(
+                                autoPath.getTrajectories().get(1)).asProxy(),
+                        fullAutoScoreWithMovement(new PathConstraints(3, 2), GamePieceLocation.H1, drivetrain,
+                                intake,
+                                manipulator, elevator,
+                                elbow),
+                        drivetrain.pathFollowingCommand(
+                                autoPath.getTrajectories().get(2)).asProxy(),
+                        drivetrain.chargeStationBalanceCommand().asProxy()));
+    }
+
+    /**
+     * Creates the 2 Piece N trajectory command.
+     * 
+     * @param autoPath   the {@link AutoPath} containing the Figure 8 trajectory.
+     * @param drivetrain the drivetrain
+     * @return the command
+     */
     public static Supplier<AutoTrajectoryCommand> onePieceN(Drivetrain drivetrain, Intake intake,
             Manipulator manipulator, Elevator elevator, Elbow elbow) {
         return () -> new AutoTrajectoryCommand(getStartingPose(FieldConstants.Blue.RightGrid.CONE_9),
                 TrajectoryLoader.getAutoPath("2 Piece N"),
                 Commands.sequence(
-                        RobotStates.initializeMechanisms(intake, manipulator, elevator, elbow).withTimeout(1),
                         fullAutoScoreWithMovement(GamePieceLocation.I1, drivetrain, intake,
                                 manipulator, elevator,
                                 elbow),
@@ -182,7 +215,6 @@ public class Autos {
         return () -> new AutoTrajectoryCommand(getStartingPose(FieldConstants.Blue.LeftGrid.CONE_1),
                 TrajectoryLoader.getAutoPath("2 Piece S"),
                 Commands.sequence(
-                        RobotStates.initializeMechanisms(intake, manipulator, elevator, elbow).withTimeout(1),
                         fullAutoScoreWithMovement(GamePieceLocation.A1, drivetrain, intake,
                                 manipulator, elevator,
                                 elbow),
@@ -203,13 +235,13 @@ public class Autos {
                 Commands.sequence(
                         fullAutoScoreWithMovement(GamePieceLocation.I1, drivetrain, intake,
                                 manipulator, elevator,
-                                elbow),
-                        Commands.parallel(
+                                elbow).withName("Full auto score"),
+                        fullAutoIntakeWithMovement(GamePiece.CUBE,
                                 drivetrain.pathFollowingCommand(
                                         autoPath.getTrajectories().get(0)).asProxy(),
-                                fullAutoIntakeWithMovement(GamePiece.CUBE, drivetrain, intake, manipulator, elevator,
-                                        elbow)),
-                        fullAutoScoreWithMovement(new PathConstraints(1, 1), GamePieceLocation.H1, drivetrain, intake,
+                                intake, manipulator, elevator, elbow),
+                        fullAutoScoreWithMovement(new PathConstraints(0.5, 0.5), GamePieceLocation.H1, drivetrain,
+                                intake,
                                 manipulator, elevator,
                                 elbow)));
     }
@@ -226,12 +258,18 @@ public class Autos {
             Manipulator manipulator, Elevator elevator, Elbow elbow) {
         return () -> new AutoTrajectoryCommand(getStartingPose(FieldConstants.Blue.RightGrid.CONE_9), autoPath,
                 Commands.sequence(
-                        fullAutoScoreWithMovement(GamePieceLocation.I1, drivetrain, intake, manipulator, elevator,
+                        fullAutoScoreWithMovement(GamePieceLocation.I1, drivetrain, intake,
+                                manipulator, elevator,
                                 elbow),
+                        fullAutoIntakeWithMovement(GamePiece.CUBE,
+                                drivetrain.pathFollowingCommand(
+                                        autoPath.getTrajectories().get(0)).asProxy(),
+                                intake, manipulator, elevator, elbow),
                         drivetrain.pathFollowingCommand(
-                                autoPath.getTrajectories().get(0)).asProxy(),
-                        fullAutoIntakeWithMovement(GamePiece.CUBE, drivetrain, intake, manipulator, elevator, elbow),
-                        fullAutoScoreWithMovement(GamePieceLocation.H1, drivetrain, intake, manipulator, elevator,
+                                autoPath.getTrajectories().get(1)).asProxy(),
+                        fullAutoScoreWithMovement(new PathConstraints(4, 2), GamePieceLocation.H1, drivetrain,
+                                intake,
+                                manipulator, elevator,
                                 elbow),
                         drivetrain.pathFollowingCommand(
                                 autoPath.getTrajectories().get(2)).asProxy(),
@@ -251,14 +289,13 @@ public class Autos {
                 Commands.sequence(
                         fullAutoScoreWithMovement(GamePieceLocation.I1, drivetrain, intake, manipulator, elevator,
                                 elbow),
-                        drivetrain.pathFollowingCommand(
-                                autoPath.getTrajectories().get(0)).asProxy(),
-                        fullAutoIntakeWithMovement(GamePiece.CUBE, drivetrain, intake, manipulator, elevator, elbow),
+
+                        fullAutoIntakeWithMovement(GamePiece.CUBE, drivetrain.pathFollowingCommand(
+                                autoPath.getTrajectories().get(0)).asProxy(), intake, manipulator, elevator, elbow),
                         fullAutoScoreWithMovement(GamePieceLocation.H1, drivetrain, intake, manipulator, elevator,
                                 elbow),
-                        drivetrain.pathFollowingCommand(
-                                autoPath.getTrajectories().get(2)).asProxy(),
-                        fullAutoIntakeWithMovement(GamePiece.CONE, drivetrain, intake, manipulator, elevator, elbow),
+                        fullAutoIntakeWithMovement(GamePiece.CONE, drivetrain.pathFollowingCommand(
+                                autoPath.getTrajectories().get(2)).asProxy(), intake, manipulator, elevator, elbow),
                         fullAutoScoreWithMovement(GamePieceLocation.G1, drivetrain, intake, manipulator, elevator,
                                 elbow)));
     }
@@ -276,9 +313,8 @@ public class Autos {
                 Commands.sequence(
                         fullAutoScoreWithMovement(GamePieceLocation.A1, drivetrain, intake, manipulator, elevator,
                                 elbow),
-                        drivetrain.pathFollowingCommand(
-                                autoPath.getTrajectories().get(0)).asProxy(),
-                        fullAutoIntakeWithMovement(GamePiece.CUBE, drivetrain, intake, manipulator, elevator, elbow),
+                        fullAutoIntakeWithMovement(GamePiece.CUBE, drivetrain.pathFollowingCommand(
+                                autoPath.getTrajectories().get(0)).asProxy(), intake, manipulator, elevator, elbow),
                         fullAutoScoreWithMovement(GamePieceLocation.B1, drivetrain, intake, manipulator, elevator,
                                 elbow)));
     }
@@ -297,9 +333,9 @@ public class Autos {
                 Commands.sequence(
                         fullAutoScoreWithMovement(GamePieceLocation.A1, drivetrain, intake, manipulator, elevator,
                                 elbow),
-                        drivetrain.pathFollowingCommand(
-                                autoPath.getTrajectories().get(0)).asProxy(),
-                        fullAutoIntakeWithMovement(GamePiece.CUBE, drivetrain, intake, manipulator, elevator, elbow),
+
+                        fullAutoIntakeWithMovement(GamePiece.CUBE, drivetrain.pathFollowingCommand(
+                                autoPath.getTrajectories().get(0)).asProxy(), intake, manipulator, elevator, elbow),
                         fullAutoScoreWithMovement(GamePieceLocation.B1, drivetrain, intake, manipulator, elevator,
                                 elbow),
                         drivetrain.pathFollowingCommand(
@@ -320,14 +356,15 @@ public class Autos {
                 Commands.sequence(
                         fullAutoScoreWithMovement(GamePieceLocation.A1, drivetrain, intake, manipulator, elevator,
                                 elbow),
-                        drivetrain.pathFollowingCommand(
-                                autoPath.getTrajectories().get(0)).asProxy(),
-                        fullAutoIntakeWithMovement(GamePiece.CUBE, drivetrain, intake, manipulator, elevator, elbow),
+
+                        fullAutoIntakeWithMovement(GamePiece.CUBE, drivetrain.pathFollowingCommand(
+                                autoPath.getTrajectories().get(0)).asProxy(), intake, manipulator, elevator, elbow),
                         fullAutoScoreWithMovement(GamePieceLocation.B1, drivetrain, intake, manipulator, elevator,
                                 elbow),
                         drivetrain.pathFollowingCommand(
                                 autoPath.getTrajectories().get(2)).asProxy(),
-                        fullAutoIntakeWithMovement(GamePiece.CONE, drivetrain, intake, manipulator, elevator, elbow),
+                        fullAutoIntakeWithMovement(GamePiece.CONE, drivetrain.pathFollowingCommand(
+                                autoPath.getTrajectories().get(0)).asProxy(), intake, manipulator, elevator, elbow),
                         fullAutoScoreWithMovement(GamePieceLocation.C1, drivetrain, intake, manipulator, elevator,
                                 elbow)));
     }
