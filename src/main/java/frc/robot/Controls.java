@@ -130,8 +130,6 @@ public class Controls {
 
         joystick.button(9)
                 .onTrue(RobotStates.intakeGamePiece(
-                        false,
-                        false,
                         () -> joystick.getHID().getRawButton(14),
                         intake, manipulator, elevator, elbow));
 
@@ -227,7 +225,7 @@ public class Controls {
                         false)));
 
         getButton.apply(OperatorControls.HP_STOW)
-                .whileTrue(RobotStates.stowElevatorHPStation(intake, manipulator, elevator,
+                .whileTrue(RobotStates.stowElevatorHPStationCommand(intake, manipulator, elevator,
                         elbow)
                         .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_STOW,
                                 true)))
