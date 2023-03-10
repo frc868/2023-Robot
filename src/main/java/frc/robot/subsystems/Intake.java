@@ -231,6 +231,30 @@ public class Intake extends SubsystemBase {
 
     /**
      * Creates a StartEndCommand (requiring this subsystem) to run the passover
+     * motors.
+     * This will run the motors until the command is interrupted/cancelled.
+     * 
+     * @return the command
+     */
+    public CommandBase startPassoverMotorsCommand() {
+        return runOnce(() -> passoverMotors.setVoltage(6))
+                .withName("Start Passover Motors");
+    }
+
+    /**
+     * Creates a StartEndCommand (requiring this subsystem) to run the passover
+     * motors.
+     * This will run the motors until the command is interrupted/cancelled.
+     * 
+     * @return the command
+     */
+    public CommandBase stopPassoverMotorsCommand() {
+        return runOnce(() -> passoverMotors.setVoltage(0))
+                .withName("Stop Passover Motors");
+    }
+
+    /**
+     * Creates a StartEndCommand (requiring this subsystem) to run the passover
      * motors in reverse.
      * This will run the motors until the command is interrupted/cancelled.
      * 
