@@ -14,9 +14,6 @@ import com.techhounds.houndutil.houndlog.logitems.DoubleArrayLogItem;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -61,23 +58,15 @@ public class Watchtower extends SubsystemBase {
         if (Constants.IS_USING_CAMERAS) {
             if (poseEstimator != null) {
                 Pose2d prevEstimatedRobotPose = poseEstimator.getEstimatedPosition();
-                Field2d field = AutoManager.getInstance().getField();
                 for (AprilTagPhotonCamera photonCamera : photonCameras) {
                     Optional<EstimatedRobotPose> result = photonCamera
                             .getEstimatedGlobalPose(prevEstimatedRobotPose);
 
-                    FieldObject2d fieldObject = field.getObject(getName() +
-                            "_est_pose");
                     if (result.isPresent()) {
                         EstimatedRobotPose camPose = result.get();
 
                         poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(),
                                 camPose.timestampSeconds);
-                        fieldObject.setPose(camPose.estimatedPose.toPose2d());
-
-                    } else {
-                        // move it way off the screen to make it disappear
-                        fieldObject.setPose(new Pose2d(-100, -100, new Rotation2d()));
                     }
                 }
             }
