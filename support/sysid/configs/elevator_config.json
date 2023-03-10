@@ -8,7 +8,7 @@
   "encoder type": "Encoder Port",
   "encoding": false,
   "gearing denominator": 1.0,
-  "gearing numerator": 12.0,
+  "gearing numerator": 4.0,
   "gyro": "Analog Gyro",
   "gyro canivore name": "rio",
   "gyro ctor": "1",
