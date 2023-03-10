@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.commands.Autos;
-import frc.robot.commands.RobotStates;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Elevator;
@@ -112,7 +111,8 @@ public class RobotContainer {
     private void configureAuto() {
         TrajectoryLoader.addSettings(
                 new TrajectorySettings("1 Piece Hold N").withMaxVelocity(3).withMaxAcceleration(4),
-                new TrajectorySettings("2 Piece N").withMaxVelocity(2).withMaxAcceleration(2),
+                new TrajectorySettings("2 Piece N").withMaxVelocity(1).withMaxAcceleration(1),
+                new TrajectorySettings("2 Piece Charge N").withMaxVelocity(4).withMaxAcceleration(2),
                 new TrajectorySettings("3 Piece N").withMaxVelocity(2).withMaxAcceleration(2),
                 new TrajectorySettings("2 Piece S").withMaxVelocity(2).withMaxAcceleration(2),
                 new TrajectorySettings("3 Piece S").withMaxVelocity(2).withMaxAcceleration(2),
@@ -120,8 +120,18 @@ public class RobotContainer {
                 new TrajectorySettings("Charge Station N").withMaxVelocity(3).withMaxAcceleration(2));
         TrajectoryLoader.loadAutoPaths();
 
-        AutoManager.getInstance().addEvent("intakeGamePiece",
-                RobotStates.intakeGamePieceAutoCommand(intake, manipulator, elevator, elbow));
+        // AutoManager.getInstance().addEvent("startIntakingCone",
+        // RobotStates.startIntakingCommand(() -> GamePiece.CONE, intake, manipulator,
+        // elevator, elbow));
+        // AutoManager.getInstance().addEvent("startIntakingCube",
+        // RobotStates.startIntakingCommand(() -> GamePiece.CUBE, intake, manipulator,
+        // elevator, elbow));
+        // AutoManager.getInstance().addEvent("endIntakingCone",
+        // RobotStates.endIntakingCommand(() -> GamePiece.CUBE, intake, manipulator,
+        // elevator, elbow));
+        // AutoManager.getInstance().addEvent("endIntakingCube",
+        // RobotStates.endIntakingCommand(() -> GamePiece.CUBE, intake, manipulator,
+        // elevator, elbow));
 
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("2 Piece N",
@@ -154,8 +164,13 @@ public class RobotContainer {
 
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("1 Piece Charge M",
-                        Autos.onePieceM(
+                        Autos.onePieceChargeM(
                                 TrajectoryLoader.getAutoPath("1 Piece Charge M"),
+                                drivetrain, intake, manipulator, elevator, elbow)));
+        AutoManager.getInstance().addRoutine(
+                new AutoRoutine("2 Piece Charge M",
+                        Autos.twoPieceChargeM(
+                                TrajectoryLoader.getAutoPath("2 Piece Charge M"),
                                 drivetrain, intake, manipulator, elevator, elbow)));
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("1 Piece N",
