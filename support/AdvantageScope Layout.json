@@ -1,0 +1,247 @@
+{
+  "version": "2.2.2",
+  "layout": [
+    {
+      "type": 6,
+      "fields": [],
+      "listFields": [
+        [
+          {
+            "type": "Vision Target",
+            "key": "NT:/HoundLog/Watchtower/OV9281-01/Detected AprilTags",
+            "fieldTypeIndex": 0
+          },
+          {
+            "type": "Vision Target",
+            "key": "NT:/HoundLog/Watchtower/OV9281-02/Detected AprilTags",
+            "fieldTypeIndex": 0
+          },
+          {
+            "type": "Vision Target",
+            "key": "NT:/HoundLog/Watchtower/OV9281-03/Detected AprilTags",
+            "fieldTypeIndex": 0
+          },
+          {
+            "type": "Vision Target",
+            "key": "NT:/HoundLog/Watchtower/OV9281-04/Detected AprilTags",
+            "fieldTypeIndex": 0
+          },
+          {
+            "type": "Ghost",
+            "key": "NT:/HoundLog/Watchtower/OV9281-01/Detected Robot Pose3d",
+            "fieldTypeIndex": 0
+          },
+          {
+            "type": "Ghost",
+            "key": "NT:/HoundLog/Watchtower/OV9281-02/Detected Robot Pose3d",
+            "fieldTypeIndex": 0
+          },
+          {
+            "type": "Ghost",
+            "key": "NT:/HoundLog/Watchtower/OV9281-03/Detected Robot Pose3d",
+            "fieldTypeIndex": 0
+          },
+          {
+            "type": "Ghost",
+            "key": "NT:/HoundLog/Watchtower/OV9281-04/Detected Robot Pose3d",
+            "fieldTypeIndex": 0
+          }
+        ],
+        [
+          {
+            "type": "Robot",
+            "key": "NT:/HoundLog/Autonomous/Field/Robot",
+            "fieldTypeIndex": 0
+          },
+          {
+            "type": "Mechanism (Robot)",
+            "key": "NT:/HoundLog/Main/Mechanisms",
+            "fieldTypeIndex": 1
+          }
+        ]
+      ],
+      "options": {
+        "field": "2023",
+        "alliance": "blue",
+        "robot": "Wingdong",
+        "unitDistance": "meters",
+        "unitRotation": "degrees"
+      },
+      "title": "Field"
+    },
+    {
+      "type": 5,
+      "fields": [],
+      "listFields": [
+        [
+          {
+            "type": "Robot",
+            "key": "NT:/HoundLog/Autonomous/Field/Robot",
+            "fieldTypeIndex": 0
+          }
+        ]
+      ],
+      "options": {
+        "game": "2023",
+        "unitDistance": "meters",
+        "unitRotation": "degrees",
+        "origin": "right",
+        "size": 0.75,
+        "allianceBumpers": "auto",
+        "allianceOrigin": "blue",
+        "orientation": "blue left, red right"
+      },
+      "title": "Odometry"
+    },
+    {
+      "type": 1,
+      "legends": {
+        "left": {
+          "lockedRange": null,
+          "unitConversion": {
+            "type": null,
+            "factor": 1
+          },
+          "fields": [
+            {
+              "key": "NT:/HoundLog/Elevator/Control/Position",
+              "color": "#aacaee",
+              "show": true
+            },
+            {
+              "key": "NT:/HoundLog/Elevator/Control/Setpoint Position",
+              "color": "#3b875a",
+              "show": true
+            }
+          ]
+        },
+        "discrete": {
+          "fields": [
+            {
+              "key": "DS:enabled",
+              "color": "#e5b31b",
+              "show": true
+            },
+            {
+              "key": "DS:autonomous",
+              "color": "#2b66a2",
+              "show": true
+            },
+            {
+              "key": "NT:/HoundLog/Intake/DoubleSolenoid: Passover Solenoid/Position",
+              "color": "#af2437",
+              "show": true
+            },
+            {
+              "key": "NT:/HoundLog/Manipulator/DoubleSolenoid: Pincers/Position",
+              "color": "#80588e",
+              "show": true
+            },
+            {
+              "key": "NT:/HoundLog/Manipulator/DoubleSolenoid: Wrist/Position",
+              "color": "#e48b32",
+              "show": true
+            }
+          ]
+        },
+        "right": {
+          "lockedRange": null,
+          "unitConversion": {
+            "type": null,
+            "factor": 1
+          },
+          "fields": [
+            {
+              "key": "NT:/HoundLog/Elbow/Control/Actual Position",
+              "color": "#c0b487",
+              "show": true
+            },
+            {
+              "key": "NT:/HoundLog/Elbow/Control/Setpoint Position",
+              "color": "#858584",
+              "show": true
+            }
+          ]
+        }
+      },
+      "title": "Mechanisms"
+    },
+    {
+      "type": 10,
+      "fields": [
+        "NT:/HoundLog/Main/Mechanisms",
+        null,
+        null
+      ],
+      "listFields": [],
+      "options": {},
+      "title": "Mechanism Visualization"
+    },
+    {
+      "type": 1,
+      "legends": {
+        "left": {
+          "lockedRange": null,
+          "unitConversion": {
+            "type": null,
+            "factor": 1
+          },
+          "fields": [
+            {
+              "key": "NT:/HoundLog/Elevator/Control/Position",
+              "color": "#e48b32",
+              "show": true
+            },
+            {
+              "key": "NT:/HoundLog/Elevator/Control/Setpoint Position",
+              "color": "#2b66a2",
+              "show": true
+            }
+          ]
+        },
+        "discrete": {
+          "fields": [
+            {
+              "key": "NT:/HoundLog/Elevator/Bottom Hall Effect",
+              "color": "#e5b31b",
+              "show": true
+            }
+          ]
+        },
+        "right": {
+          "lockedRange": null,
+          "unitConversion": {
+            "type": null,
+            "factor": 1
+          },
+          "fields": [
+            {
+              "key": "NT:/HoundLog/Elevator/Control/Feedforward",
+              "color": "#80588e",
+              "show": true
+            }
+          ]
+        }
+      },
+      "title": "Elevator"
+    },
+    {
+      "type": 9,
+      "fields": [
+        "NT:/HoundLog/Drivetrain/Control/Commanded States",
+        "NT:/HoundLog/Drivetrain/Control/Measured States",
+        "NT:/HoundLog/Autonomous/Field/Robot/2"
+      ],
+      "listFields": [],
+      "options": {
+        "maxSpeed": 4.5,
+        "rotationUnits": "degrees",
+        "arrangement": "0,1,2,3",
+        "sizeLeftRight": 0.65,
+        "sizeFrontBack": 0.65,
+        "forwardDirection": "up"
+      },
+      "title": "Swerve"
+    }
+  ]
+}
