@@ -103,6 +103,18 @@ public class RobotStates {
     }
 
     /**
+     * Creates a command to set the current mode of the intake.
+     * 
+     * @param intakeMode the new mode to set the intake mechanism to
+     * @return the command
+     */
+    public static CommandBase setIntakeModeCommand(Supplier<GamePiece> intakeMode) {
+        return Commands.runOnce(() -> {
+            setIntakeMode(intakeMode.get());
+        });
+    }
+
+    /**
      * Clears the intake mode to a null state. Trying to set the pincers to released
      * or pincing will result in an error state.
      */
@@ -171,7 +183,7 @@ public class RobotStates {
                     System.out.println(error);
                     currentDiscreteError = Optional.of(error.get());
                 }),
-                Commands.waitSeconds(2)).finallyDo(d -> {
+                Commands.waitSeconds(1)).finallyDo(d -> {
                     currentDiscreteError = Optional.empty();
                 });
     }
@@ -218,7 +230,7 @@ public class RobotStates {
                         new Rotation2d(Math.PI)),
                 new PathConstraints(3,
                         1))
-                .withTimeout(2);
+                .withTimeout(2).withName("Drive Delta");
     }
 
     /**
@@ -235,7 +247,81 @@ public class RobotStates {
                         new Translation2d(distance, 0),
                         new Rotation2d(Math.PI)),
                 constraints)
-                .withTimeout(2);
+                .withTimeout(2).withName("Drive Delta");
+    }
+
+    protected static CommandBase flashButtonCommand(BooleanConsumer buttonLed) {
+        return Commands.sequence(
+                Commands.runOnce(() -> buttonLed.accept(true)),
+                Commands.waitSeconds(0.25),
+                Commands.runOnce(() -> buttonLed.accept(false)),
+                Commands.waitSeconds(0.25)).repeatedly()
+                .finallyDo((d) -> buttonLed.accept(false)).withName("Flash Button");
+    }
+
+    public static CommandBase runIntakingCommand(
+            Supplier<GamePiece> gamePieceSupplier,
+            Intake intake,
+            Manipulator manipulator,
+            Elevator elevator,
+            Elbow elbow) {
+        return Commands.sequence(
+                RobotStates.setIntakeModeCommand(() -> gamePieceSupplier.get()),
+                elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake,
+                        elbow).withTimeout(0.75),
+                elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
+                intake.setIntakeDownCommand(elevator),
+                manipulator.setPincersReleasedCommand(() -> gamePieceSupplier.get()),
+                Commands.parallel(
+                        Commands.select(
+                                Map.of(
+                                        GamePiece.CONE, Commands.none(),
+                                        GamePiece.CUBE, intake.setPassoversExtendedCommand(elevator)
+                                                .andThen(intake.runPassoverMotorsCommand())),
+                                () -> gamePieceSupplier.get()),
+                        manipulator.setPincersReleasedCommand(() -> gamePieceSupplier.get())
+                                .repeatedly())
+
+        );
+    }
+
+    public static CommandBase startIntakingCommand(
+            Supplier<GamePiece> gamePieceSupplier,
+            Intake intake,
+            Manipulator manipulator,
+            Elevator elevator,
+            Elbow elbow) {
+        return Commands.sequence(
+                RobotStates.setIntakeModeCommand(() -> gamePieceSupplier.get()),
+                elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow).withTimeout(0.75),
+                elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
+                intake.setIntakeDownCommand(elevator),
+                manipulator.setPincersReleasedCommand(() -> gamePieceSupplier.get()),
+                Commands.select(
+                        Map.of(
+                                GamePiece.CONE, Commands.none(),
+                                GamePiece.CUBE,
+                                intake.setPassoversExtendedCommand(elevator)
+                                        .andThen(intake.startPassoverMotorsCommand())),
+                        () -> gamePieceSupplier.get()),
+                manipulator.setPincersReleasedCommand(() -> gamePieceSupplier.get()));
+    }
+
+    public static CommandBase endIntakingCommand(
+            Supplier<GamePiece> gamePieceSupplier,
+            Intake intake,
+            Manipulator manipulator,
+            Elevator elevator,
+            Elbow elbow) {
+        return Commands.sequence(
+
+                manipulator.setPincersPincingCommand(() -> gamePieceSupplier.get()),
+                intake.setPassoversRetractedCommand(elevator),
+                intake.setIntakeUpCommand(elevator),
+                Commands.waitSeconds(0.2)
+                        .andThen(elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator)),
+                RobotStates.setCurrentStateCommand(RobotState.SCORING),
+                RobotStates.clearIntakeModeCommand());
     }
 
     /**
@@ -266,8 +352,6 @@ public class RobotStates {
      * @return the command
      */
     public static CommandBase intakeGamePiece(
-            boolean auto,
-            boolean usingBeamBreak,
             BooleanSupplier secondaryButton,
             Intake intake,
             Manipulator manipulator,
@@ -275,65 +359,13 @@ public class RobotStates {
             Elbow elbow) {
         return Commands.either(
                 Commands.sequence(
-                        elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow).withTimeout(0.75),
-                        elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
-                        intake.setIntakeDownCommand(elevator),
-                        manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow()),
-                        Commands.select(
-                                Map.of(
-                                        GamePiece.CONE, Commands.none(),
-                                        GamePiece.CUBE, intake.setPassoversExtendedCommand(elevator)),
-                                () -> intakeMode.orElseThrow()),
-                        Commands.either(
-                                Commands.deadline(
-                                        Commands.waitUntil(intake::isGamePieceDetected)
-                                                .andThen(Commands.waitSeconds(1)),
-                                        Commands.select(
-                                                Map.of(
-                                                        GamePiece.CONE, Commands.none(),
-                                                        GamePiece.CUBE, intake.runPassoverMotorsCommand()),
-                                                () -> intakeMode.orElseThrow())),
-                                Commands.either(
-                                        Commands.deadline(
-                                                Commands.race(
-                                                        Commands.waitUntil(intake::isGamePieceDetected),
-                                                        Commands.waitUntil(secondaryButton::getAsBoolean)),
-                                                Commands.select(
-                                                        Map.of(
-                                                                GamePiece.CONE, Commands.none(),
-                                                                GamePiece.CUBE, intake.runPassoverMotorsCommand()),
-                                                        () -> intakeMode.orElseThrow()),
-                                                manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow())
-                                                        .repeatedly())
-                                                .andThen(Commands.waitUntil(secondaryButton::getAsBoolean)),
-                                        Commands.deadline(
-                                                Commands.waitUntil(secondaryButton::getAsBoolean),
-                                                Commands.select(
-                                                        Map.of(
-                                                                GamePiece.CONE, Commands.none(),
-                                                                GamePiece.CUBE, intake.runPassoverMotorsCommand()),
-                                                        () -> intakeMode.orElseThrow()),
-                                                manipulator.setPincersReleasedCommand(() -> intakeMode.orElseThrow())
-                                                        .repeatedly()),
-                                        () -> usingBeamBreak),
-                                () -> auto),
-                        manipulator.setPincersPincingCommand(() -> intakeMode.orElseThrow()),
-                        intake.setPassoversRetractedCommand(elevator),
-                        intake.setIntakeUpCommand(elevator),
-                        Commands.waitSeconds(1)
-                                .andThen(elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator)),
-                        RobotStates.setCurrentStateCommand(RobotState.SCORING),
-                        RobotStates.clearIntakeModeCommand()),
+                        Commands.waitUntil(secondaryButton).deadlineWith(
+                                runIntakingCommand(() -> intakeMode.orElseThrow(), intake, manipulator, elevator,
+                                        elbow)),
+                        endIntakingCommand(() -> intakeMode.orElseThrow(), intake, manipulator, elevator,
+                                elbow)),
                 singularErrorCommand(() -> "Intake mode not present"),
                 () -> intakeMode.isPresent()).withName("Intake Game Piece");
-    }
-
-    public static CommandBase intakeGamePieceAutoCommand(
-            Intake intake,
-            Manipulator manipulator,
-            Elevator elevator,
-            Elbow elbow) {
-        return intakeGamePiece(true, true, () -> true, intake, manipulator, elevator, elbow);
     }
 
     public static CommandBase humanPlayerExtendElevatorCommand(
@@ -348,7 +380,7 @@ public class RobotStates {
                         elevator.setDesiredPositionCommand(ElevatorPosition.DOUBLE_SUBSTATION_PICKUP, intake, elbow),
                         elbow.setDesiredPositionCommand(ElbowPosition.DOUBLE_SUBSTATION_PICKUP, elevator)),
                 manipulator.setPincersReleasedCommand(() -> gamePiece),
-                Commands.waitSeconds(0.5)).withName("Score Game Piece");
+                Commands.waitSeconds(0.5));
     }
 
     public static CommandBase humanPlayerPickupCommand(
@@ -361,15 +393,15 @@ public class RobotStates {
             Elevator elevator,
             Elbow elbow) {
         return Commands.sequence(
-                humanPlayerExtendElevatorCommand(gamePiece, intake, manipulator, elevator, elbow),
+                setIntakeModeCommand(gamePiece),
+                Commands.parallel(
+                        elevator.setDesiredPositionCommand(ElevatorPosition.DOUBLE_SUBSTATION_PICKUP, intake, elbow),
+                        elbow.setDesiredPositionCommand(ElbowPosition.DOUBLE_SUBSTATION_PICKUP, elevator)),
+                manipulator.setPincersReleasedCommand(() -> gamePiece),
+                Commands.waitSeconds(0.5),
                 Commands.deadline(
                         Commands.waitUntil(secondaryButton::getAsBoolean),
-                        Commands.sequence(
-                                Commands.runOnce(() -> secondaryButtonLED.accept(true)),
-                                Commands.waitSeconds(0.25),
-                                Commands.runOnce(() -> secondaryButtonLED.accept(false)),
-                                Commands.waitSeconds(0.25)).repeatedly()
-                                .finallyDo((d) -> secondaryButtonLED.accept(false))),
+                        flashButtonCommand(secondaryButtonLED)),
                 manipulator.setPincersPincingCommand(() -> gamePiece),
                 clearIntakeModeCommand())
                 .withName("Score Game Piece");
@@ -400,8 +432,8 @@ public class RobotStates {
         return Commands.sequence(
                 manipulator.setWristDownCommand(),
                 manipulator.setPincersClosedCommand(),
-                elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow)
-                        .deadlineWith(elbow.lockPosition()),
+                elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake, elbow),
+                // .deadlineWith(elbow.lockPosition()),
                 RobotStates.setCurrentStateCommand(RobotState.SEEKING))
                 .withName("Stow Elevator");
     }
@@ -423,7 +455,7 @@ public class RobotStates {
      * @param elbow
      * @return
      */
-    public static CommandBase stowElevatorHPStation(
+    public static CommandBase stowElevatorHPStationCommand(
             Intake intake,
             Manipulator manipulator,
             Elevator elevator,
@@ -519,7 +551,7 @@ public class RobotStates {
                 targetPose.getRotation()));
 
         PathPlannerTrajectory traj = PathPlanner.generatePath(
-                new PathConstraints(3, 2),
+                constraints,
                 pathPoints);
 
         AutoManager.getInstance().getField().getObject("AutoDrive Trajectory").setTrajectory(traj);
