@@ -174,6 +174,10 @@ public class Autos {
                                 drivetrain.pathFollowingCommand(
                                         autoPath.getTrajectories().get(0)).asProxy(),
                                 Commands.sequence(
+                                        Commands.waitSeconds(0.5),
+                                        RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow)
+                                                .withTimeout(0.75),
+                                        // Commands.waitSeconds(0.5),
                                         RobotStates.runIntakingCommand(() -> GamePiece.CUBE, intake,
                                                 manipulator, elevator,
                                                 elbow))),
@@ -185,12 +189,12 @@ public class Autos {
                         RobotStates.autoDriveCommand(new PathConstraints(4, 4), () -> RobotState.SCORING,
                                 () -> GamePieceLocation.H1,
                                 drivetrain),
-                        Commands.waitSeconds(0.5), // to drop cube
                         Scoring.scoreGamePieceAutoCommand(() -> GamePieceLocation.H1.gamePiece,
                                 () -> GamePieceLocation.H1.level,
                                 drivetrain, intake, manipulator,
-                                elevator, elbow),
-                        RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow)));
+                                elevator, elbow)));
+        // RobotStates.driveDeltaCommand(-0.4, drivetrain, new PathConstraints(4,
+        // 3)),));
     }
 
     /**
@@ -283,9 +287,16 @@ public class Autos {
         return () -> new AutoTrajectoryCommand(
                 getStartingPose(FieldConstants.Blue.MiddleGrid.CUBE_5), autoPath,
                 Commands.sequence(
-                        // elbow).withTimeout(2),
-                        fullAutoScoreWithMovement(GamePieceLocation.E1, drivetrain, intake, manipulator, elevator,
-                                elbow),
+                        RobotStates.autoDriveCommand(new PathConstraints(3, 2), () -> RobotState.SCORING,
+                                () -> GamePieceLocation.E1,
+                                drivetrain),
+                        Scoring.scoreGamePieceAutoCommand(() -> GamePieceLocation.E1.gamePiece,
+                                () -> GamePieceLocation.E1.level,
+                                drivetrain, intake, manipulator,
+                                elevator, elbow),
+                        Commands.waitSeconds(1),
+                        RobotStates.driveDeltaCommand(-0.4, drivetrain, new PathConstraints(4, 3)),
+                        RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow),
                         drivetrain.pathFollowingCommand(
                                 autoPath.getTrajectories().get(0)).asProxy(),
                         drivetrain.chargeStationBalanceCommand().asProxy()));
