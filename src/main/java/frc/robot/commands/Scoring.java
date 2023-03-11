@@ -143,7 +143,7 @@ public class Scoring {
                                 GamePiece.CUBE,
                                 drivetrain.moveDeltaPathFollowingCommand(
                                         new Transform2d(
-                                                new Translation2d(0.25, 0),
+                                                new Translation2d(0.4, 0),
                                                 new Rotation2d()),
                                         new PathConstraints(4,
                                                 3))
