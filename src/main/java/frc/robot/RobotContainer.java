@@ -111,7 +111,7 @@ public class RobotContainer {
     private void configureAuto() {
         TrajectoryLoader.addSettings(
                 new TrajectorySettings("2 Piece N").withMaxVelocity(4.4).withMaxAcceleration(2),
-                new TrajectorySettings("2 Piece Charge N").withMaxVelocity(4.4).withMaxAcceleration(2),
+                new TrajectorySettings("2 Piece Charge N").withMaxVelocity(4.4).withMaxAcceleration(3.2),
                 new TrajectorySettings("2 Piece S").withMaxVelocity(4.4).withMaxAcceleration(2),
                 new TrajectorySettings("2 Piece Charge S").withMaxVelocity(4.4).withMaxAcceleration(2),
                 new TrajectorySettings("1 Piece Charge M").withMaxVelocity(4.4).withMaxAcceleration(2),
