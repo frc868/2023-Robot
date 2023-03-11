@@ -5,48 +5,7 @@
       "type": 6,
       "fields": [],
       "listFields": [
-        [
-          {
-            "type": "Vision Target",
-            "key": "NT:/HoundLog/Watchtower/OV9281-01/Detected AprilTags",
-            "fieldTypeIndex": 0
-          },
-          {
-            "type": "Vision Target",
-            "key": "NT:/HoundLog/Watchtower/OV9281-02/Detected AprilTags",
-            "fieldTypeIndex": 0
-          },
-          {
-            "type": "Vision Target",
-            "key": "NT:/HoundLog/Watchtower/OV9281-03/Detected AprilTags",
-            "fieldTypeIndex": 0
-          },
-          {
-            "type": "Vision Target",
-            "key": "NT:/HoundLog/Watchtower/OV9281-04/Detected AprilTags",
-            "fieldTypeIndex": 0
-          },
-          {
-            "type": "Ghost",
-            "key": "NT:/HoundLog/Watchtower/OV9281-01/Detected Robot Pose3d",
-            "fieldTypeIndex": 0
-          },
-          {
-            "type": "Ghost",
-            "key": "NT:/HoundLog/Watchtower/OV9281-02/Detected Robot Pose3d",
-            "fieldTypeIndex": 0
-          },
-          {
-            "type": "Ghost",
-            "key": "NT:/HoundLog/Watchtower/OV9281-03/Detected Robot Pose3d",
-            "fieldTypeIndex": 0
-          },
-          {
-            "type": "Ghost",
-            "key": "NT:/HoundLog/Watchtower/OV9281-04/Detected Robot Pose3d",
-            "fieldTypeIndex": 0
-          }
-        ],
+        [],
         [
           {
             "type": "Robot",
@@ -54,9 +13,9 @@
             "fieldTypeIndex": 0
           },
           {
-            "type": "Mechanism (Robot)",
-            "key": "NT:/HoundLog/Main/Mechanisms",
-            "fieldTypeIndex": 1
+            "type": "Trajectory",
+            "key": "NT:/HoundLog/Autonomous/Field/Autonomous Routine",
+            "fieldTypeIndex": 0
           }
         ]
       ],
@@ -67,7 +26,7 @@
         "unitDistance": "meters",
         "unitRotation": "degrees"
       },
-      "title": "Field"
+      "title": "3D Field"
     },
     {
       "type": 5,
@@ -128,17 +87,17 @@
               "show": true
             },
             {
-              "key": "NT:/HoundLog/Intake/DoubleSolenoid: Passover Solenoid/Position",
+              "key": "NT:/HoundLog/Intake/Passover Solenoid/Position",
               "color": "#af2437",
               "show": true
             },
             {
-              "key": "NT:/HoundLog/Manipulator/DoubleSolenoid: Pincers/Position",
+              "key": "NT:/HoundLog/Manipulator/Pincers/Position",
               "color": "#80588e",
               "show": true
             },
             {
-              "key": "NT:/HoundLog/Manipulator/DoubleSolenoid: Wrist/Position",
+              "key": "NT:/HoundLog/Manipulator/Wrist/Position",
               "color": "#e48b32",
               "show": true
             }
@@ -160,6 +119,11 @@
               "key": "NT:/HoundLog/Elbow/Control/Setpoint Position",
               "color": "#858584",
               "show": true
+            },
+            {
+              "key": "NT:/HoundLog/Autonomous/Field/Robot/0",
+              "color": "#d993aa",
+              "show": true
             }
           ]
         }
@@ -169,13 +133,13 @@
     {
       "type": 10,
       "fields": [
-        "NT:/HoundLog/Main/Mechanisms",
+        null,
         null,
         null
       ],
       "listFields": [],
       "options": {},
-      "title": "Mechanism Visualization"
+      "title": "Mechanism"
     },
     {
       "type": 1,
@@ -224,6 +188,53 @@
         }
       },
       "title": "Elevator"
+    },
+    {
+      "type": 1,
+      "legends": {
+        "left": {
+          "lockedRange": null,
+          "unitConversion": {
+            "type": null,
+            "factor": 1
+          },
+          "fields": [
+            {
+              "key": "NT:/HoundLog/Elbow/Control/Actual Position",
+              "color": "#e5b31b",
+              "show": true
+            },
+            {
+              "key": "NT:/HoundLog/Elbow/Control/Setpoint Position",
+              "color": "#2b66a2",
+              "show": true
+            }
+          ]
+        },
+        "discrete": {
+          "fields": []
+        },
+        "right": {
+          "lockedRange": null,
+          "unitConversion": {
+            "type": null,
+            "factor": 1
+          },
+          "fields": [
+            {
+              "key": "NT:/HoundLog/Elbow/Control/PID Output",
+              "color": "#af2437",
+              "show": true
+            },
+            {
+              "key": "NT:/HoundLog/Elbow/Control/Feedforward Output",
+              "color": "#80588e",
+              "show": true
+            }
+          ]
+        }
+      },
+      "title": "Elbow"
     },
     {
       "type": 9,
