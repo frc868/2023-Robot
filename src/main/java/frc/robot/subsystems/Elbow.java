@@ -96,10 +96,10 @@ public class Elbow extends ProfiledPIDSubsystem {
      * matches the elbow.
      */
     private SingleJointedArmSim armSim = new SingleJointedArmSim(
-            DCMotor.getNEO(2),
+            DCMotor.getNeo550(1),
             100,
-            SingleJointedArmSim.estimateMOI(Units.inchesToMeters(8), 10),
-            Units.inchesToMeters(8),
+            SingleJointedArmSim.estimateMOI(Units.inchesToMeters(12), 3.63),
+            Units.inchesToMeters(12),
             ElbowPosition.LOW.value - 0.25,
             ElbowPosition.HIGH.value + 0.25,
             true);
@@ -181,7 +181,7 @@ public class Elbow extends ProfiledPIDSubsystem {
         LoggingManager.getInstance().addGroup("Elbow", new LogGroup(
                 new BooleanLogItem("Bottom Hall Effect", bottomHallEffect::get, LogLevel.MAIN),
                 new BooleanLogItem("Top Hall Effect", topHallEffect::get, LogLevel.MAIN),
-                new DoubleLogItem("Control/Actual Position", () -> encoder.getPosition(), LogLevel.MAIN),
+                new DoubleLogItem("Control/Actual Position", () -> getMeasurement(), LogLevel.MAIN),
                 new DoubleLogItem("Control/Actual Velocity", () -> encoder.getVelocity(), LogLevel.MAIN),
                 new DoubleLogItem("Control/Setpoint Position", () -> setpointPosition, LogLevel.MAIN),
                 new DoubleLogItem("Control/Setpoint Velocity", () -> setpointVelocity, LogLevel.MAIN),
