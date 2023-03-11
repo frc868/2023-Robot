@@ -14,6 +14,7 @@ import com.techhounds.houndutil.houndlog.logitems.DoubleArrayLogItem;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -46,16 +47,12 @@ public class Watchtower extends SubsystemBase {
                                     LogLevel.MAIN)));
         }
 
-        // LoggingManager.getInstance().addGroup("Watchtower",
-        // new LogGroup(
-        // new DoubleArrayLogItem(, )));
-
         // log the packed apriltag poses from each cam individually
         // log the robot's pose3d from each cam
     }
 
     public void updatePoseEstimator() {
-        if (Constants.IS_USING_CAMERAS) {
+        if (DriverStation.isTeleopEnabled()) {
             if (poseEstimator != null) {
                 Pose2d prevEstimatedRobotPose = poseEstimator.getEstimatedPosition();
                 for (AprilTagPhotonCamera photonCamera : photonCameras) {

@@ -292,7 +292,7 @@ public class Drivetrain extends SubsystemBase {
                 break;
             case FIELD_ORIENTED:
                 chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed,
-                        thetaSpeed, poseEstimator.getEstimatedPosition().getRotation());
+                        thetaSpeed, getGyroRotation2d());
 
                 break;
         }
