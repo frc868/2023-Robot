@@ -742,15 +742,15 @@ public class Drivetrain extends SubsystemBase {
      * @return the command
      */
     public CommandBase chargeStationBalanceCommand() {
-        PIDController controller = new PIDController(0.04, 0, 0.008);
-        controller.setTolerance(2);
+        PIDController controller = new PIDController(0.02, 0, 0.004);
+        controller.setTolerance(3);
         return new PIDCommand(
                 controller,
                 () -> (-pigeon.getRoll()),
                 0,
                 (d) -> drive(
-                        d > 0.84
-                                ? (d > 0 ? 0.84 : -0.84)
+                        d > 0.2
+                                ? (d > 0 ? 0.2 : -0.2)
                                 : d,
                         0, 0, DriveMode.ROBOT_RELATIVE),
                 this).finallyDo((d) -> this.stop());
