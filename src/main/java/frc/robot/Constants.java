@@ -226,7 +226,7 @@ public final class Constants {
                                 0.71),
                         new Rotation3d(0, 0, Math.PI / 4.0)),
                 new Transform3d(
-                        new Translation3d(-Units.inchesToMeters(10.226), -Units.inchesToMeters(9.1635),
+                        new Translation3d(-Units.inchesToMeters(10.226), -Units.inchesToMeters(7.774),
                                 0.71),
                         new Rotation3d(0, 0, -Math.PI / 4.0)),
 
@@ -235,7 +235,7 @@ public final class Constants {
                                 0.71),
                         new Rotation3d(0, 0, 3.0 * Math.PI / 4.0)),
                 new Transform3d(
-                        new Translation3d(-Units.inchesToMeters(16.524), -Units.inchesToMeters(9.1635),
+                        new Translation3d(-Units.inchesToMeters(12.524), -Units.inchesToMeters(7.774),
                                 0.71),
                         new Rotation3d(0, 0, -3.0 * Math.PI / 4.0)),
         };
