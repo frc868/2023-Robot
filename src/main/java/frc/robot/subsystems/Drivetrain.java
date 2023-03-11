@@ -458,6 +458,7 @@ public class Drivetrain extends SubsystemBase {
      */
     public void resetPoseEstimator(Pose2d pose) {
         poseEstimator.resetPosition(getGyroRotation2d(), getSwerveModulePositions(), pose);
+        pigeon.setYaw(pose.getRotation().getDegrees());
     }
 
     /**
