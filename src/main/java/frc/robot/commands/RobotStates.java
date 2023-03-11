@@ -269,7 +269,11 @@ public class RobotStates {
                 RobotStates.setIntakeModeCommand(() -> gamePieceSupplier.get()),
                 elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake,
                         elbow).withTimeout(0.75),
-                elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator),
+                Commands.select(
+                        Map.of(
+                                GamePiece.CONE, elbow.setDesiredPositionCommand(ElbowPosition.CONE_PICKUP, elevator),
+                                GamePiece.CUBE, elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator)),
+                        () -> gamePieceSupplier.get()),
                 intake.setIntakeDownCommand(elevator),
                 manipulator.setPincersReleasedCommand(() -> gamePieceSupplier.get()),
                 Commands.parallel(

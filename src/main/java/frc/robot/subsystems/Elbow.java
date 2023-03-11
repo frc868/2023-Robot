@@ -53,6 +53,7 @@ public class Elbow extends ProfiledPIDSubsystem {
         MID_STOW(-0.1),
         MID(-0.02),
         MID_CONE_HIGH(0.3),
+        CONE_PICKUP(0.1),
         DOUBLE_SUBSTATION_PICKUP(0.54668),
         HIGH(0.75);
 
