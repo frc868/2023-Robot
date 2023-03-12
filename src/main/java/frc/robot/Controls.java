@@ -295,6 +295,9 @@ public class Controls {
         xbox.leftStick().and(xbox.povUp()).onTrue(elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator));
         xbox.leftStick().and(xbox.povLeft()).onTrue(elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator));
         xbox.leftStick().and(xbox.povDown()).onTrue(elbow.setDesiredPositionCommand(ElbowPosition.LOW, elevator));
+
+        xbox.rightTrigger(0.5).onTrue(Overrides.MANUAL_MECH_CONTROL_MODE.enableC());
+        xbox.leftTrigger(0.5).onFalse(Overrides.MANUAL_MECH_CONTROL_MODE.disableC());
     }
 
     public static void configureOverridesControls(int port1, int port2, Drivetrain drivetrain, Intake intake,
@@ -305,10 +308,10 @@ public class Controls {
         // hid1.button(5).whileTrue(elevator.motorOverride());
         // hid1.button(6).whileTrue(elbow.motorOverride());
 
-        hid1.button(1).onTrue(Overrides.MANUAL_MECH_CONTROL_MODE.enableC())
-                .onFalse(Overrides.MANUAL_MECH_CONTROL_MODE.disableC());
-        hid1.button(3).onTrue(drivetrain.setDriveCurrentLimitCommand(80))
-                .onFalse(drivetrain.setDriveCurrentLimitCommand(60));
+        // hid1.button(1).onTrue(Overrides.MANUAL_MECH_CONTROL_MODE.enableC())
+        // .onFalse(Overrides.MANUAL_MECH_CONTROL_MODE.disableC());
+        // hid1.button(3).onTrue(drivetrain.setDriveCurrentLimitCommand(80))
+        // .onFalse(drivetrain.setDriveCurrentLimitCommand(60));
 
         // hid1.button(15).onTrue(
         // Commands.parallel(
@@ -346,6 +349,7 @@ public class Controls {
         // Overrides.MECH_LIMITS_DISABLE.enableC(),
         // Overrides.DRIVER_EMERGENCY_MODE.enableC()));
 
+        hid1.button(1);
         hid2.button(1);
     }
 }
