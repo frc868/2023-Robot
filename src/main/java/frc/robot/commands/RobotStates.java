@@ -183,7 +183,7 @@ public class RobotStates {
                     System.out.println(error);
                     currentDiscreteError = Optional.of(error.get());
                 }),
-                Commands.waitSeconds(1)).finallyDo(d -> {
+                Commands.waitSeconds(0.5)).finallyDo(d -> {
                     currentDiscreteError = Optional.empty();
                 });
     }
@@ -292,6 +292,60 @@ public class RobotStates {
         );
     }
 
+    public static CommandBase ejectGamePieceCommand(
+            Supplier<GamePiece> gamePieceSupplier,
+            Intake intake,
+            Manipulator manipulator,
+            Elevator elevator,
+            Elbow elbow) {
+        return Commands.either(
+                Commands.sequence(
+                        RobotStates.setIntakeModeCommand(() -> gamePieceSupplier.get()),
+                        Commands.parallel(
+                                elevator.setDesiredPositionCommand(ElevatorPosition.BOTTOM, intake,
+                                        elbow).withTimeout(0.75),
+                                Commands.select(
+                                        Map.of(
+                                                GamePiece.CONE,
+                                                elbow.setDesiredPositionCommand(ElbowPosition.CONE_PICKUP, elevator),
+                                                GamePiece.CUBE,
+                                                elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator)),
+                                        () -> gamePieceSupplier.get())),
+
+                        intake.setIntakeDownCommand(elevator),
+                        manipulator.setPincersReleasedCommand(() -> gamePieceSupplier.get()),
+                        Commands.parallel(
+                                Commands.select(
+                                        Map.of(
+                                                GamePiece.CONE, Commands.none(),
+                                                GamePiece.CUBE, intake.setPassoversExtendedCommand(elevator)
+                                                        .andThen(intake.reversePassoverMotorsCommand())),
+                                        () -> gamePieceSupplier.get()),
+                                manipulator.setPincersReleasedCommand(() -> gamePieceSupplier.get())
+                                        .repeatedly())),
+                singularErrorCommand(() -> "Intake mode not present"),
+                () -> intakeMode.isPresent()).withName("Intake Game Piece");
+
+    }
+
+    public static CommandBase ejectGamePieceFull(
+            BooleanSupplier secondaryButton,
+            Intake intake,
+            Manipulator manipulator,
+            Elevator elevator,
+            Elbow elbow) {
+        return Commands.either(
+                Commands.sequence(
+                        Commands.waitUntil(secondaryButton).deadlineWith(
+                                ejectGamePieceCommand(() -> intakeMode.orElseThrow(), intake, manipulator, elevator,
+                                        elbow)),
+                        endIntakingEjectCommand(() -> intakeMode.orElseThrow(), intake, manipulator, elevator,
+                                elbow)),
+                singularErrorCommand(() -> "Intake mode not present"),
+                () -> intakeMode.isPresent()).withName("Intake Game Piece");
+
+    }
+
     public static CommandBase startIntakingCommand(
             Supplier<GamePiece> gamePieceSupplier,
             Intake intake,
@@ -323,6 +377,22 @@ public class RobotStates {
         return Commands.sequence(
 
                 manipulator.setPincersPincingCommand(() -> gamePieceSupplier.get()),
+                intake.setPassoversRetractedCommand(elevator),
+                intake.setIntakeUpCommand(elevator),
+                Commands.waitSeconds(0.2)
+                        .andThen(elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator)),
+                RobotStates.setCurrentStateCommand(RobotState.SCORING),
+                RobotStates.clearIntakeModeCommand());
+    }
+
+    public static CommandBase endIntakingEjectCommand(
+            Supplier<GamePiece> gamePieceSupplier,
+            Intake intake,
+            Manipulator manipulator,
+            Elevator elevator,
+            Elbow elbow) {
+        return Commands.sequence(
+                manipulator.setPincersClosedCommand(),
                 intake.setPassoversRetractedCommand(elevator),
                 intake.setIntakeUpCommand(elevator),
                 Commands.waitSeconds(0.2)
