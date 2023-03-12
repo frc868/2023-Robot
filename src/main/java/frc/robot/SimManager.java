@@ -137,7 +137,7 @@ public class SimManager {
                     new SendableLogger("Initialize Mechanisms",
                             RobotStates.initializeMechanisms(intake, manipulator, elevator, elbow)),
                     new SendableLogger("Intake Game Piece",
-                            RobotStates.intakeGamePiece(() -> true, intake, manipulator,
+                            RobotStates.intakeGamePiece(() -> false, intake, manipulator,
                                     elevator, elbow)),
                     new SendableLogger("Score Game Piece",
                             Scoring.scoreGamePieceCommand(true, () -> true, d -> {

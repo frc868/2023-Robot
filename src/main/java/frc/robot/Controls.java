@@ -133,6 +133,11 @@ public class Controls {
                         () -> joystick.getHID().getRawButton(14),
                         intake, manipulator, elevator, elbow));
 
+        joystick.button(6)
+                .onTrue(RobotStates.ejectGamePieceFull(
+                        () -> joystick.getHID().getRawButton(14),
+                        intake, manipulator, elevator, elbow));
+
         joystick.button(8)
                 .whileTrue(drivetrain.chargeStationBalanceCommand());
         joystick.button(5).whileTrue(RobotStates.autoDriveCommand(drivetrain, gridInterface));
