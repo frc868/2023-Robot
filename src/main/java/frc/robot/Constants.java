@@ -110,9 +110,9 @@ public final class Constants {
         }
 
         public static final class Elbow {
-            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 5);
+            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 8);
             public static final TunableNumber kI = new TunableNumber("Elbow", "kI", 0);
-            public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0);
+            public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0.5);
             public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 0.05);
             public static final double kS = 0.33055;
             public static final double kG = 0.54418;
@@ -226,7 +226,7 @@ public final class Constants {
                                 0.71),
                         new Rotation3d(0, 0, Math.PI / 4.0)),
                 new Transform3d(
-                        new Translation3d(-Units.inchesToMeters(10.226), -Units.inchesToMeters(9.1635),
+                        new Translation3d(-Units.inchesToMeters(10.226), -Units.inchesToMeters(7.774),
                                 0.71),
                         new Rotation3d(0, 0, -Math.PI / 4.0)),
 
@@ -235,7 +235,7 @@ public final class Constants {
                                 0.71),
                         new Rotation3d(0, 0, 3.0 * Math.PI / 4.0)),
                 new Transform3d(
-                        new Translation3d(-Units.inchesToMeters(16.524), -Units.inchesToMeters(9.1635),
+                        new Translation3d(-Units.inchesToMeters(12.524), -Units.inchesToMeters(7.774),
                                 0.71),
                         new Rotation3d(0, 0, -3.0 * Math.PI / 4.0)),
         };

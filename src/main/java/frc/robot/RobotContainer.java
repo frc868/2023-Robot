@@ -110,14 +110,13 @@ public class RobotContainer {
 
     private void configureAuto() {
         TrajectoryLoader.addSettings(
-                new TrajectorySettings("1 Piece Hold N").withMaxVelocity(3).withMaxAcceleration(4),
-                new TrajectorySettings("2 Piece N").withMaxVelocity(1).withMaxAcceleration(1),
-                new TrajectorySettings("2 Piece Charge N").withMaxVelocity(4).withMaxAcceleration(2),
-                new TrajectorySettings("3 Piece N").withMaxVelocity(2).withMaxAcceleration(2),
-                new TrajectorySettings("2 Piece S").withMaxVelocity(2).withMaxAcceleration(2),
-                new TrajectorySettings("3 Piece S").withMaxVelocity(2).withMaxAcceleration(2),
-                new TrajectorySettings("1 Piece Charge M").withMaxVelocity(2).withMaxAcceleration(2),
-                new TrajectorySettings("Charge Station N").withMaxVelocity(3).withMaxAcceleration(2));
+                new TrajectorySettings("2 Piece N").withMaxVelocity(4.4).withMaxAcceleration(2),
+                new TrajectorySettings("2 Piece Charge N").withMaxVelocity(4.4).withMaxAcceleration(3.2),
+                new TrajectorySettings("2 Piece S").withMaxVelocity(4.4).withMaxAcceleration(2),
+                new TrajectorySettings("2 Piece Charge S").withMaxVelocity(4.4).withMaxAcceleration(2),
+                new TrajectorySettings("1 Piece Charge M").withMaxVelocity(4.4).withMaxAcceleration(2),
+                new TrajectorySettings("2 Piece Charge M").withMaxVelocity(4.4).withMaxAcceleration(2),
+                new TrajectorySettings("Charge Station M").withMaxVelocity(4.4).withMaxAcceleration(3));
         TrajectoryLoader.loadAutoPaths();
 
         // AutoManager.getInstance().addEvent("startIntakingCone",
@@ -181,6 +180,9 @@ public class RobotContainer {
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("Do Nothing",
                         Autos.doNothing()));
+        AutoManager.getInstance().addRoutine(
+                new AutoRoutine("Charge Station M",
+                        Autos.chargeM(TrajectoryLoader.getAutoPath("Charge Station M"), drivetrain)));
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("AutoGenerator",
                         autoGenerator.getAutoCommand()));

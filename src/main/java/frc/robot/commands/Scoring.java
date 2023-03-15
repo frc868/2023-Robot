@@ -145,8 +145,8 @@ public class Scoring {
                                         new Transform2d(
                                                 new Translation2d(0.4, 0),
                                                 new Rotation2d()),
-                                        new PathConstraints(2,
-                                                1))
+                                        new PathConstraints(4,
+                                                3))
                                         .andThen(Commands.sequence(
                                                 manipulator.setPincersReleasedCommand(gamePieceSupplier)))),
                         gamePieceSupplier::get));
