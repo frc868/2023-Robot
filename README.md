@@ -3,6 +3,7 @@
 [![CI](https://github.com/frc868/2023-Robot/actions/workflows/main.yml/badge.svg)](https://github.com/frc868/2023-Robot/actions/workflows/main.yml)
 
 Won the Innovation in Control Award at the FIN District Mishawaka Event 2023.
+
 Won the Innovation in Control Award at the FIN District Princeton Event 2023.
 
 ## Installation
