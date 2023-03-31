@@ -35,10 +35,10 @@ public final class Constants {
     public static final class CAN {
         public static final int FRONT_LEFT_DRIVE_MOTOR = 1;
         public static final int FRONT_LEFT_TURN_MOTOR = 2;
-        public static final int FRONT_RIGHT_DRIVE_MOTOR = 4;
-        public static final int FRONT_RIGHT_TURN_MOTOR = 3;
-        public static final int BACK_LEFT_DRIVE_MOTOR = 6;
-        public static final int BACK_LEFT_TURN_MOTOR = 5;
+        public static final int FRONT_RIGHT_DRIVE_MOTOR = 3;
+        public static final int FRONT_RIGHT_TURN_MOTOR = 4;
+        public static final int BACK_LEFT_DRIVE_MOTOR = 5;
+        public static final int BACK_LEFT_TURN_MOTOR = 6;
         public static final int BACK_RIGHT_DRIVE_MOTOR = 7;
         public static final int BACK_RIGHT_TURN_MOTOR = 8;
 
@@ -55,18 +55,20 @@ public final class Constants {
     }
 
     public static final class Pneumatics {
-        public static final int[] PINCERS = { RobotBase.isReal() ? 13 : 0, RobotBase.isReal() ? 12 : 1 };
-        public static final int[] WRIST = { RobotBase.isReal() ? 10 : 2, RobotBase.isReal() ? 11 : 3 };
-        public static final int[] INTAKE = { RobotBase.isReal() ? 14 : 4, RobotBase.isReal() ? 15 : 5 };
-        public static final int[] PASSOVER = { RobotBase.isReal() ? 8 : 6, RobotBase.isReal() ? 9 : 7 };
+        // forward, reverse
+        public static final int[] PASSOVER = { 3, 12 };
+        public static final int[] WRIST = { 2, 13 };
+        public static final int[] PINCERS = { 1, 14 };
+        public static final int[] INTAKE = { 0, 15 };
     }
 
     public static final class DIO {
+        public static final int ELEVATOR_BOTTOM_LIMIT = 0;
+        public static final int POLE_SWITCH = 1;
+
         public static final int ELEVATOR_TOP_LIMIT = 0;
-        public static final int ELEVATOR_BOTTOM_LIMIT = 1;
         public static final int ELBOW_TOP_LIMIT = 2;
         public static final int ELBOW_BOTTOM_LIMIT = 3;
-        public static final int POLE_SWITCH = 4;
         public static final int GAME_PIECE_SENSOR = 5;
     }
 
