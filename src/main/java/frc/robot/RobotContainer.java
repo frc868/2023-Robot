@@ -36,7 +36,7 @@ public class RobotContainer {
     private MechanismRoot2d root = mechanisms.getRoot("root", 2.5, 0.25);
 
     private MechanismLigament2d fromRobot = root
-            .append(new MechanismLigament2d("fromRobot", -0.33, 0, 0, new Color8Bit(Color.kBlue)));
+            .append(new MechanismLigament2d("fromRobot", -0.33, 0, 0, new Color8Bit(Color.kWhite)));
     private MechanismLigament2d elevatorBaseLigament = fromRobot
             .append(new MechanismLigament2d("elevatorBase", 0.71, 34, 4, new Color8Bit(Color.kCyan)));
     private MechanismLigament2d elevatorLigament = elevatorBaseLigament
@@ -46,22 +46,28 @@ public class RobotContainer {
     private MechanismLigament2d wristLigament = elbowLigament
             .append(new MechanismLigament2d("wrist", 0.2, 90, 3, new Color8Bit(Color.kRed)));
 
-    private MechanismLigament2d toIntake = root
-            .append(new MechanismLigament2d("toIntake", 0.33, 0, 0, new Color8Bit(Color.kBlue)));
-    private MechanismLigament2d intakeLigament = toIntake
-            .append(new MechanismLigament2d("intake", 0.6, 0, 5, new Color8Bit(Color.kPurple)));
+    private MechanismLigament2d toCubapult = fromRobot
+            .append(new MechanismLigament2d("toCubapult", 0.3, 90, 1, new Color8Bit(Color.kWhite)));
+    private MechanismLigament2d cubapultLigament = toCubapult
+            .append(new MechanismLigament2d("cubapult", 0.3, 0, 3, new Color8Bit(Color.kPurple)));
+
+    @SuppressWarnings("unused")
+    private MechanismLigament2d cubapultExtLigament = cubapultLigament
+            .append(new MechanismLigament2d("cubapultExt", 0.07, 90, 3, new Color8Bit(Color.kPurple)));
 
     private final Watchtower watchtower = new Watchtower();
     private final Drivetrain drivetrain = new Drivetrain();
     private final Elbow elbow = new Elbow(elbowLigament);
     private final Elevator elevator = new Elevator(elevatorLigament);
-    private final Intake intake = new Intake(intakeLigament);
+    private final Intake intake = new Intake(cubapultLigament);
     private final Manipulator manipulator = new Manipulator(wristLigament);
     private final LEDs leds = new LEDs();
     private final Misc misc = new Misc();
 
     private final GridInterface gridInterface = new GridInterface();
-    private final AutoGenerator autoGenerator = new AutoGenerator(drivetrain,
+
+    @SuppressWarnings("unused")
+    private final AutoSettingsManager autoSettingsManager = new AutoSettingsManager(drivetrain,
             intake, manipulator, elevator, elbow,
             leds);
 
@@ -110,82 +116,28 @@ public class RobotContainer {
 
     private void configureAuto() {
         TrajectoryLoader.addSettings(
-                new TrajectorySettings("2 Piece N").withMaxVelocity(4.4).withMaxAcceleration(2),
-                new TrajectorySettings("2 Piece Charge N").withMaxVelocity(4.4).withMaxAcceleration(3.2),
-                new TrajectorySettings("2 Piece S").withMaxVelocity(4.4).withMaxAcceleration(2),
-                new TrajectorySettings("2 Piece Charge S").withMaxVelocity(4.4).withMaxAcceleration(2),
-                new TrajectorySettings("1 Piece Charge M").withMaxVelocity(4.4).withMaxAcceleration(2),
-                new TrajectorySettings("2 Piece Charge M").withMaxVelocity(4.4).withMaxAcceleration(2),
-                new TrajectorySettings("Charge Station M").withMaxVelocity(4.4).withMaxAcceleration(3));
+                new TrajectorySettings("Full N").withMaxVelocity(4.4).withMaxAcceleration(4),
+                new TrajectorySettings("3 Piece Link N").withMaxVelocity(4).withMaxAcceleration(2.5),
+                new TrajectorySettings("2 Piece Hold Charge M").withMaxVelocity(4).withMaxAcceleration(2.5),
+                new TrajectorySettings("1 Piece Charge Mobility M").withMaxVelocity(3).withMaxAcceleration(2),
+                new TrajectorySettings("3 Piece Link S").withMaxVelocity(4.4).withMaxAcceleration(3));
         TrajectoryLoader.loadAutoPaths();
-
-        // AutoManager.getInstance().addEvent("startIntakingCone",
-        // RobotStates.startIntakingCommand(() -> GamePiece.CONE, intake, manipulator,
-        // elevator, elbow));
-        // AutoManager.getInstance().addEvent("startIntakingCube",
-        // RobotStates.startIntakingCommand(() -> GamePiece.CUBE, intake, manipulator,
-        // elevator, elbow));
-        // AutoManager.getInstance().addEvent("endIntakingCone",
-        // RobotStates.endIntakingCommand(() -> GamePiece.CUBE, intake, manipulator,
-        // elevator, elbow));
-        // AutoManager.getInstance().addEvent("endIntakingCube",
-        // RobotStates.endIntakingCommand(() -> GamePiece.CUBE, intake, manipulator,
-        // elevator, elbow));
-
         AutoManager.getInstance().addRoutine(
-                new AutoRoutine("2 Piece N",
-                        Autos.twoPieceN(TrajectoryLoader.getAutoPath("2 Piece N"), drivetrain, intake, manipulator,
-                                elevator, elbow)));
+                new AutoRoutine("3 Piece Link N",
+                        () -> Autos.threePieceLinkN(drivetrain, intake, manipulator, elevator, elbow)));
         AutoManager.getInstance().addRoutine(
-                new AutoRoutine("2 Piece Charge N",
-                        Autos.twoPieceChargeN(TrajectoryLoader.getAutoPath("2 Piece Charge N"), drivetrain, intake,
-                                manipulator,
-                                elevator, elbow)));
+                new AutoRoutine("2 Piece Hold Charge M",
+                        () -> Autos.twoPieceHoldChargeM(drivetrain, intake, manipulator, elevator, elbow)));
         AutoManager.getInstance().addRoutine(
-                new AutoRoutine("3 Piece N",
-                        Autos.threePieceN(TrajectoryLoader.getAutoPath("3 Piece N"), drivetrain, intake, manipulator,
-                                elevator, elbow)));
-
-        AutoManager.getInstance().addRoutine(
-                new AutoRoutine("2 Piece S",
-                        Autos.twoPieceS(TrajectoryLoader.getAutoPath("2 Piece S"), drivetrain, intake, manipulator,
-                                elevator, elbow)));
-        AutoManager.getInstance().addRoutine(
-                new AutoRoutine("2 Piece Charge S",
-                        Autos.twoPieceChargeS(TrajectoryLoader.getAutoPath("2 Piece Charge S"), drivetrain, intake,
-                                manipulator,
-                                elevator, elbow)));
-
-        AutoManager.getInstance().addRoutine(
-                new AutoRoutine("3 Piece S",
-                        Autos.threePieceS(TrajectoryLoader.getAutoPath("3 Piece S"), drivetrain, intake, manipulator,
-                                elevator, elbow)));
-
+                new AutoRoutine("1 Piece Charge Mobility M",
+                        () -> Autos.onePieceChargeMobilityM(drivetrain, intake, manipulator, elevator, elbow)));
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("1 Piece Charge M",
-                        Autos.onePieceChargeM(
-                                TrajectoryLoader.getAutoPath("1 Piece Charge M"),
-                                drivetrain, intake, manipulator, elevator, elbow)));
+                        () -> Autos.onePieceChargeMobilityM(drivetrain, intake, manipulator, elevator, elbow)));
         AutoManager.getInstance().addRoutine(
-                new AutoRoutine("2 Piece Charge M",
-                        Autos.twoPieceChargeM(
-                                TrajectoryLoader.getAutoPath("2 Piece Charge M"),
-                                drivetrain, intake, manipulator, elevator, elbow)));
-        AutoManager.getInstance().addRoutine(
-                new AutoRoutine("1 Piece N",
-                        Autos.onePieceN(drivetrain, intake, manipulator, elevator, elbow)));
-        AutoManager.getInstance().addRoutine(
-                new AutoRoutine("1 Piece S",
-                        Autos.onePieceS(drivetrain, intake, manipulator, elevator, elbow)));
-        AutoManager.getInstance().addRoutine(
-                new AutoRoutine("Do Nothing",
-                        Autos.doNothing()));
-        AutoManager.getInstance().addRoutine(
-                new AutoRoutine("Charge Station M",
-                        Autos.chargeM(TrajectoryLoader.getAutoPath("Charge Station M"), drivetrain)));
-        AutoManager.getInstance().addRoutine(
-                new AutoRoutine("AutoGenerator",
-                        autoGenerator.getAutoCommand()));
+                new AutoRoutine("3 Piece Link S",
+                        () -> Autos.threePieceLinkS(drivetrain, intake, manipulator, elevator, elbow)));
+
         // FieldConstants.displayAutoDriveOnField();
         // FieldConstants.displayItemsOnField();
     }
