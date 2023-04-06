@@ -51,10 +51,10 @@ public class Elbow extends ProfiledPIDSubsystem {
     public static enum ElbowPosition {
         LOW(-0.31),
         MID_STOW(-0.1),
-        MID(-0.02),
+        MID(-0.05),
         MID_CONE_HIGH(0.3),
-        CONE_PICKUP(0.1),
-        DOUBLE_SUBSTATION_PICKUP(0.54668),
+        CONE_PICKUP(0.07),
+        SINGLE_SUBSTATION_PICKUP(0.087),
         HIGH(0.75);
 
         public final double value;
