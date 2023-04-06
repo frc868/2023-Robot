@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class FieldConstants {
@@ -19,17 +20,17 @@ public class FieldConstants {
         public static class LeftGrid {
             public static final Pose2d CONE_1 = new Pose2d(
                     new Translation2d(
-                            2.4,
+                            2.45,
                             0.51),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CUBE_2 = new Pose2d(
                     new Translation2d(
-                            2.4,
+                            2.45,
                             1.07),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CONE_3 = new Pose2d(
                     new Translation2d(
-                            2.4,
+                            2.45,
                             1.63),
                     Rotation2d.fromDegrees(180));
         }
@@ -37,7 +38,7 @@ public class FieldConstants {
         public static class MiddleGrid {
             public static final Pose2d CONE_4 = new Pose2d(
                     new Translation2d(
-                            2.4,
+                            2.45,
                             2.18),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CUBE_5 = new Pose2d(
@@ -47,7 +48,7 @@ public class FieldConstants {
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CONE_6 = new Pose2d(
                     new Translation2d(
-                            2.4,
+                            2.45,
                             3.3),
                     Rotation2d.fromDegrees(180));
         }
@@ -55,17 +56,17 @@ public class FieldConstants {
         public static class RightGrid {
             public static final Pose2d CONE_7 = new Pose2d(
                     new Translation2d(
-                            2.4,
+                            2.45,
                             3.96),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CUBE_8 = new Pose2d(
                     new Translation2d(
-                            2.4,
+                            2.45,
                             4.38),
                     Rotation2d.fromDegrees(180));
             public static final Pose2d CONE_9 = new Pose2d(
                     new Translation2d(
-                            2.4,
+                            2.45,
                             5.06),
                     Rotation2d.fromDegrees(180));
         }
@@ -485,6 +486,17 @@ public class FieldConstants {
                 blue.getRotation().getDegrees() % 180 != 0
                         ? blue.getRotation()
                         : blue.getRotation().plus(Rotation2d.fromDegrees(180)));
+    }
+
+    public static Pose2d getStartingPoseFacingGrid(GamePieceLocation gamePieceLocation) {
+        return new Pose2d(1.823, scoringLocationMap.get(Alliance.Blue).get(gamePieceLocation).getY(),
+                Rotation2d.fromDegrees(180));
+    }
+
+    public static Pose2d getStartingCubapultPose(GamePieceLocation gamePieceLocation) {
+        return new Pose2d(1.823 + Units.inchesToMeters(14.5),
+                scoringLocationMap.get(Alliance.Blue).get(gamePieceLocation).getY(),
+                Rotation2d.fromDegrees(0));
     }
 
     public static Map<Alliance, Map<GamePieceLocation, Pose2d>> scoringLocationMap = Map.of(
