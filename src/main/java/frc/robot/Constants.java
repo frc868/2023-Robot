@@ -28,7 +28,7 @@ public final class Constants {
 
     public static final double ROBOT_SIDE_LENGTH = Units.inchesToMeters(34.75);
 
-    public static final boolean IS_USING_CAMERAS = true;
+    public static final boolean IS_USING_CAMERAS = false;
     public static boolean IS_NT_COMMANDS_ENABLED = RobotBase.isSimulation();
     public static boolean IS_VIRTUAL_BUTTON_PANEL_ENABLED = RobotBase.isSimulation();
 
@@ -59,17 +59,17 @@ public final class Constants {
         public static final int[] PASSOVER = { 3, 12 };
         public static final int[] WRIST = { 2, 13 };
         public static final int[] PINCERS = { 1, 14 };
-        public static final int[] INTAKE = { 0, 15 };
+        public static final int[] CUBAPULT = { 0, 15 };
     }
 
     public static final class DIO {
         public static final int ELEVATOR_BOTTOM_LIMIT = 0;
         public static final int POLE_SWITCH = 1;
 
-        public static final int ELEVATOR_TOP_LIMIT = 0;
-        public static final int ELBOW_TOP_LIMIT = 2;
-        public static final int ELBOW_BOTTOM_LIMIT = 3;
-        public static final int GAME_PIECE_SENSOR = 5;
+        public static final int ELEVATOR_TOP_LIMIT = 2; // unused
+        public static final int ELBOW_TOP_LIMIT = 3; // unused
+        public static final int ELBOW_BOTTOM_LIMIT = 4; // unused
+        public static final int GAME_PIECE_SENSOR = 5; // unused
     }
 
     public static final class Gains {
@@ -91,7 +91,7 @@ public final class Constants {
         public static final class Trajectories {
             public static final double xkP = 5; // untested
             public static final double ykP = 5; // untested
-            public static final double thetakP = 2.2; // untested
+            public static final double thetakP = 1; // untested
         }
 
         public static final class TurnToAngle {
@@ -104,7 +104,7 @@ public final class Constants {
             public static final TunableNumber kP = new TunableNumber("Elevator", "kP", 60);
             public static final TunableNumber kI = new TunableNumber("Elevator", "kI", 0);
             public static final TunableNumber kD = new TunableNumber("Elevator", "kD", 0);
-            public static final TunableNumber TOLERANCE = new TunableNumber("Elevator", "Tolerance", 0.005);
+            public static final TunableNumber TOLERANCE = new TunableNumber("Elevator", "Tolerance", 0.015);
             public static final double kS = 0.25696;
             public static final double kG = 0.20167;
             public static final double kV = 2.3833;
@@ -112,9 +112,9 @@ public final class Constants {
         }
 
         public static final class Elbow {
-            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 8);
+            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 6);
             public static final TunableNumber kI = new TunableNumber("Elbow", "kI", 0);
-            public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0.5);
+            public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0.6);
             public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 0.05);
             public static final double kS = 0.33055;
             public static final double kG = 0.54418;
@@ -126,12 +126,11 @@ public final class Constants {
 
     public static final class Geometries {
         public static final class Drivetrain {
-
             public static final class Offsets {
-                public static final double FRONT_LEFT = -4.654;
-                public static final double FRONT_RIGHT = -3.465;
-                public static final double BACK_LEFT = -4.433;
-                public static final double BACK_RIGHT = -4.580;
+                public static final double FRONT_LEFT = -4.63107;
+                public static final double FRONT_RIGHT = -3.5587;
+                public static final double BACK_LEFT = -4.4377;
+                public static final double BACK_RIGHT = -6.2019;
             }
 
             /** Distance between centers of right and left wheels on robot. */
@@ -188,7 +187,7 @@ public final class Constants {
                     "Max Velocity",
                     18 * Math.PI); // untested
             public static final TunableNumber MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = new TunableNumber("Elbow",
-                    "Max Acceleration", 18 * Math.PI); // untested
+                    "Max Acceleration", 10 * Math.PI); // untested
         }
     }
 
@@ -216,29 +215,29 @@ public final class Constants {
     public static final class Vision {
         // front-left, front-right, back-left, back-right
         public static final String[] CAMERA_NAMES = new String[] {
+                "OV9281-01",
                 "OV9281-02",
                 "OV9281-03",
-                "OV9281-01",
                 "OV9281-04"
         };
 
         public static final Transform3d[] ROBOT_TO_CAMS = new Transform3d[] {
                 new Transform3d(
-                        new Translation3d(-Units.inchesToMeters(10.226), -Units.inchesToMeters(5.476),
-                                0.71),
+                        new Translation3d(Units.inchesToMeters(-10.1376), Units.inchesToMeters(-5.3876),
+                                Units.inchesToMeters(28.826)),
                         new Rotation3d(0, 0, Math.PI / 4.0)),
                 new Transform3d(
-                        new Translation3d(-Units.inchesToMeters(10.226), -Units.inchesToMeters(7.774),
-                                0.71),
+                        new Translation3d(Units.inchesToMeters(-10.1376), Units.inchesToMeters(-7.8624),
+                                Units.inchesToMeters(28.826)),
                         new Rotation3d(0, 0, -Math.PI / 4.0)),
 
                 new Transform3d(
-                        new Translation3d(-Units.inchesToMeters(12.524), -Units.inchesToMeters(5.476),
-                                0.71),
+                        new Translation3d(Units.inchesToMeters(-12.6124), Units.inchesToMeters(-5.3876),
+                                Units.inchesToMeters(28.826)),
                         new Rotation3d(0, 0, 3.0 * Math.PI / 4.0)),
                 new Transform3d(
-                        new Translation3d(-Units.inchesToMeters(12.524), -Units.inchesToMeters(7.774),
-                                0.71),
+                        new Translation3d(Units.inchesToMeters(-12.6124), Units.inchesToMeters(-7.8624),
+                                Units.inchesToMeters(28.826)),
                         new Rotation3d(0, 0, -3.0 * Math.PI / 4.0)),
         };
     }
