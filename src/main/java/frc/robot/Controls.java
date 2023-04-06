@@ -16,8 +16,9 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.GamePieceLocation.GridPosition;
 import frc.robot.GamePieceLocation.Level;
+import frc.robot.commands.IntakingCommands;
 import frc.robot.commands.RobotStates;
-import frc.robot.commands.Scoring;
+import frc.robot.commands.ScoringCommands;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Elevator;
@@ -129,12 +130,12 @@ public class Controls {
                 .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CUBE).ignoringDisable(true));
 
         joystick.button(9)
-                .onTrue(RobotStates.intakeGamePiece(
+                .onTrue(IntakingCommands.intakePieceCommand(
                         () -> joystick.getHID().getRawButton(14),
                         intake, manipulator, elevator, elbow));
 
         joystick.button(6)
-                .onTrue(RobotStates.ejectGamePieceFull(
+                .onTrue(IntakingCommands.ejectPieceCommand(
                         () -> joystick.getHID().getRawButton(14),
                         intake, manipulator, elevator, elbow));
 
@@ -207,9 +208,8 @@ public class Controls {
                 .onTrue(Commands.runOnce(() -> gridInterface.reset()).ignoringDisable(true));
 
         getButton.apply(OperatorControls.SCORE)
-                .whileTrue(Scoring
-                        .scoreGamePieceCommand(
-                                true,
+                .whileTrue(ScoringCommands
+                        .scorePieceCommand(
                                 () -> hids[OperatorControls.GAME_PIECE_DROP.hid].getHID()
                                         .getRawButton(OperatorControls.GAME_PIECE_DROP.button),
                                 (b) -> setOutput.accept(OperatorControls.GAME_PIECE_DROP, b),
@@ -287,8 +287,8 @@ public class Controls {
 
         xbox.x().onTrue(intake.setPassoversExtendedCommand(elevator));
         xbox.b().onTrue(intake.setPassoversRetractedCommand(elevator));
-        xbox.y().onTrue(intake.setIntakeUpCommand(elevator));
-        xbox.a().onTrue(intake.setIntakeDownCommand(elevator));
+        xbox.y().onTrue(intake.setCubapultReleased());
+        xbox.a().onTrue(intake.setCubapultPrimed());
 
         xbox.povLeft().onTrue(manipulator.setPincersOpenCommand());
         xbox.povRight().onTrue(manipulator.setPincersClosedCommand());
@@ -299,6 +299,8 @@ public class Controls {
 
         xbox.leftStick().and(xbox.povUp()).onTrue(elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator));
         xbox.leftStick().and(xbox.povLeft()).onTrue(elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator));
+        xbox.leftStick().and(xbox.povRight())
+                .onTrue(elbow.setDesiredPositionCommand(ElbowPosition.MID_CONE_HIGH, elevator));
         xbox.leftStick().and(xbox.povDown()).onTrue(elbow.setDesiredPositionCommand(ElbowPosition.LOW, elevator));
 
         xbox.rightTrigger(0.5).onTrue(Overrides.MANUAL_MECH_CONTROL_MODE.enableC());
