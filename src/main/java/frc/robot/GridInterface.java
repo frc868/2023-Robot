@@ -100,8 +100,6 @@ public class GridInterface {
                 invertedGrid = grid;
             }
 
-            System.out.println(invertedGrid);
-            System.out.println(invertedGridPosition);
             this.setLocation = Optional
                     .of(GamePieceLocation.from(gamePiece, level, invertedGrid, invertedGridPosition));
         } else {

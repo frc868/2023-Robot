@@ -41,8 +41,12 @@ public class LEDs extends SubsystemBase {
         TechHOUNDS(LEDState::techHounds),
         /** Illuminated yellow to signify the cone pickup mode. */
         ConePickup(LEDState::conePickup),
+        /** Illuminated yellow to signify the cone pickup mode. */
+        ConePickupFlashing(LEDState::conePickupFlashing),
         /** Illuminated purple to signify the cube pickup mode. */
         CubePickup(LEDState::cubePickup),
+        /** Illuminated purple to signify the cube pickup mode. */
+        CubePickupFlashing(LEDState::cubePickupFlashing),
         /** Blinking red to signify an error state. */
         Error(LEDState::error),
         /**
@@ -125,11 +129,43 @@ public class LEDs extends SubsystemBase {
         }
 
         /**
+         * Changes the contents of the AddressableLEDBuffer to the cone pickup flashing
+         * state.
+         */
+        private static void conePickupFlashing() {
+            timeStep++; // 50 timesteps is one second
+            timeStep %= 10; // every 1 second it will roll over
+            for (int i = 0; i < buffer.getLength(); i++) {
+                if (timeStep / 5 == 1) {
+                    buffer.setHSV(i, 15, 255, v);
+                } else {
+                    buffer.setHSV(i, 0, 0, 0);
+                }
+            }
+        }
+
+        /**
          * Changes the contents of the AddressableLEDBuffer to the cube pickup state.
          */
         private static void cubePickup() {
             for (int i = 0; i < buffer.getLength(); i++) {
                 buffer.setHSV(i, 150, 255, v);
+            }
+        }
+
+        /**
+         * Changes the contents of the AddressableLEDBuffer to the cube pickup flashing
+         * state.
+         */
+        private static void cubePickupFlashing() {
+            timeStep++; // 50 timesteps is one second
+            timeStep %= 50; // every 1 second it will roll over
+            for (int i = 0; i < buffer.getLength(); i++) {
+                if (timeStep / 10 == 1) {
+                    buffer.setHSV(i, 150, 255, v);
+                } else {
+                    buffer.setHSV(i, 0, 0, 0);
+                }
             }
         }
 
@@ -247,15 +283,19 @@ public class LEDs extends SubsystemBase {
 
         if (RobotStates.getIntakeMode().isPresent()) {
             if (RobotStates.getIntakeMode().get() == GamePiece.CONE) {
-                setLEDState(LEDState.ConePickup);
+                if (RobotStates.getIntaking())
+                    setLEDState(LEDState.ConePickupFlashing);
+                else
+                    setLEDState(LEDState.ConePickup);
             } else if (RobotStates.getIntakeMode().get() == GamePiece.CUBE) {
-                setLEDState(LEDState.CubePickup);
+                if (RobotStates.getIntaking())
+                    setLEDState(LEDState.CubePickupFlashing);
+                else
+                    setLEDState(LEDState.CubePickup);
             }
         } else {
             setLEDState(LEDState.TechHOUNDS);
         }
-
-        // System.out.println(RobotStates.isInitialized());
 
         if (!RobotStates.isInitialized()) {
             setLEDState(LEDState.Uninitialized);

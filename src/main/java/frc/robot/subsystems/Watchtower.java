@@ -1,10 +1,12 @@
 package frc.robot.subsystems;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
 import com.techhounds.houndutil.houndauto.AutoManager;
+import com.techhounds.houndutil.houndlib.AdvantageScopeSerializer;
 import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LoggingManager;
@@ -14,6 +16,7 @@ import com.techhounds.houndutil.houndlog.logitems.DoubleArrayLogItem;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -35,57 +38,79 @@ public class Watchtower extends SubsystemBase {
 
     public Watchtower() {
         AutoManager.getInstance().setPoseEstimatorCallback(this::updatePoseEstimator);
-
         for (AprilTagPhotonCamera cam : photonCameras) {
             LoggingManager.getInstance().addGroup(
                     new LogGroup("Watchtower/" + cam.getName(),
                             new DoubleArrayLogItem("Detected AprilTags",
-                                    () -> packPosesToAdvantageScope(cam.getCurrentlyDetectedAprilTags()),
+                                    () -> AdvantageScopeSerializer
+                                            .serializePose3ds(cam.getCurrentlyDetectedAprilTags()),
                                     LogLevel.MAIN),
                             new DoubleArrayLogItem("Detected Robot Pose3d",
-                                    () -> packPosesToAdvantageScope(List.of(cam.getCurrentlyDetectedRobotPose())),
+                                    () -> AdvantageScopeSerializer
+                                            .serializePose3ds(List.of(cam.getCurrentlyDetectedRobotPose())),
                                     LogLevel.MAIN)));
         }
+
+        LoggingManager.getInstance()
+                .addGroup(new LogGroup("Watchtower",
+                        new DoubleArrayLogItem("Estimated Robot Pose",
+                                () -> AdvantageScopeSerializer
+                                        .serializePose2ds(List.of(this.poseEstimator.getEstimatedPosition())),
+                                LogLevel.MAIN),
+                        new DoubleArrayLogItem("Detected AprilTags",
+                                this::getAllDetectedAprilTags, LogLevel.MAIN),
+                        new DoubleArrayLogItem("Detected Robot Poses",
+                                this::getAllDetectedRobotPoses, LogLevel.MAIN),
+                        new DoubleArrayLogItem("Camera Poses", this::getAllCameraPoses,
+                                LogLevel.MAIN)));
 
         // log the packed apriltag poses from each cam individually
         // log the robot's pose3d from each cam
     }
 
+    public double[] getAllDetectedAprilTags() {
+        List<Pose3d> poses = new ArrayList<Pose3d>();
+        for (AprilTagPhotonCamera cam : photonCameras) {
+            poses.addAll(cam.getCurrentlyDetectedAprilTags());
+        }
+        return AdvantageScopeSerializer.serializePose3ds(poses);
+    }
+
+    public double[] getAllDetectedRobotPoses() {
+        List<Pose3d> poses = new ArrayList<Pose3d>();
+        for (AprilTagPhotonCamera cam : photonCameras) {
+            if (cam.hasPose())
+                poses.add(cam.getCurrentlyDetectedRobotPose());
+        }
+        return AdvantageScopeSerializer.serializePose3ds(poses);
+    }
+
+    public double[] getAllCameraPoses() {
+        List<Pose3d> poses = new ArrayList<Pose3d>();
+        for (Transform3d transform : Constants.Vision.ROBOT_TO_CAMS) {
+            poses.add(new Pose3d(poseEstimator.getEstimatedPosition()).plus(transform));
+        }
+        return AdvantageScopeSerializer.serializePose3ds(poses);
+    }
+
     public void updatePoseEstimator() {
-        if (DriverStation.isTeleopEnabled()) {
-            if (poseEstimator != null) {
-                Pose2d prevEstimatedRobotPose = poseEstimator.getEstimatedPosition();
-                for (AprilTagPhotonCamera photonCamera : photonCameras) {
-                    Optional<EstimatedRobotPose> result = photonCamera
-                            .getEstimatedGlobalPose(prevEstimatedRobotPose);
+        if (poseEstimator != null && DriverStation.isTeleop()) {
+            Pose2d prevEstimatedRobotPose = poseEstimator.getEstimatedPosition();
+            for (AprilTagPhotonCamera photonCamera : photonCameras) {
+                Optional<EstimatedRobotPose> result = photonCamera
+                        .getEstimatedGlobalPose(prevEstimatedRobotPose);
 
-                    if (result.isPresent()) {
-                        EstimatedRobotPose camPose = result.get();
+                if (result.isPresent()) {
+                    EstimatedRobotPose camPose = result.get();
 
-                        poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(),
-                                camPose.timestampSeconds);
-                    }
+                    poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(),
+                            camPose.timestampSeconds);
                 }
             }
-
         }
     }
 
     public void setPoseEstimator(SwerveDrivePoseEstimator poseEstimator) {
         this.poseEstimator = poseEstimator;
-    }
-
-    private double[] packPosesToAdvantageScope(List<Pose3d> poses) {
-        double[] data = new double[poses.size() * 7];
-        for (int i = 0; i < poses.size(); i++) {
-            data[i * 7] = poses.get(i).getX();
-            data[i * 7 + 1] = poses.get(i).getY();
-            data[i * 7 + 2] = poses.get(i).getZ();
-            data[i * 7 + 3] = poses.get(i).getRotation().getQuaternion().getW();
-            data[i * 7 + 4] = poses.get(i).getRotation().getQuaternion().getX();
-            data[i * 7 + 5] = poses.get(i).getRotation().getQuaternion().getY();
-            data[i * 7 + 6] = poses.get(i).getRotation().getQuaternion().getZ();
-        }
-        return data;
     }
 }

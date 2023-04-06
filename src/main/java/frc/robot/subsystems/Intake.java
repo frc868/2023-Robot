@@ -24,8 +24,6 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Overrides;
-import frc.robot.commands.RobotStates;
 
 /**
  * Intake subsystem, contains the motors that run the passovers, and the
@@ -50,10 +48,10 @@ public class Intake extends SubsystemBase {
     private DoubleSolenoid passoverSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
             Constants.Pneumatics.PASSOVER[0], Constants.Pneumatics.PASSOVER[1]);
     /**
-     * The solenoid that controls the intake moving up or down.
+     * The solenoid that has shared control over the cubapult and ramrods.
      */
-    private DoubleSolenoid intakeSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-            Constants.Pneumatics.INTAKE[0], Constants.Pneumatics.INTAKE[1]);
+    private DoubleSolenoid cubapultRamrodSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
+            Constants.Pneumatics.CUBAPULT[0], Constants.Pneumatics.CUBAPULT[1]);
     /**
      * The object that controlls both passover motors.
      */
@@ -91,12 +89,13 @@ public class Intake extends SubsystemBase {
                                 LogProfileBuilder.buildCANSparkMaxLogItems(leftPassoverMotor)),
                         new DeviceLogger<CANSparkMax>(rightPassoverMotor, "Right Passover Motor",
                                 LogProfileBuilder.buildCANSparkMaxLogItems(rightPassoverMotor)),
-                        new DeviceLogger<DoubleSolenoid>(intakeSolenoid, "Intake Solenoid",
-                                LogProfileBuilder.buildDoubleSolenoidLogItems(intakeSolenoid)),
+                        new DeviceLogger<DoubleSolenoid>(cubapultRamrodSolenoid, "Cubapult Solenoid",
+                                LogProfileBuilder.buildDoubleSolenoidLogItems(cubapultRamrodSolenoid)),
                         new DeviceLogger<DoubleSolenoid>(passoverSolenoid, "Passover Solenoid",
                                 LogProfileBuilder.buildDoubleSolenoidLogItems(passoverSolenoid)),
                         new BooleanLogItem("Is Game Piece Detected", this::isGamePieceDetected, LogLevel.MAIN),
                 }));
+
         this.ligament = ligament;
 
         if (RobotBase.isSimulation()) {
@@ -111,7 +110,7 @@ public class Intake extends SubsystemBase {
     @Override
     public void periodic() {
         super.periodic();
-        this.ligament.setAngle(intakeSolenoid.get() == Value.kForward ? 0 : 110);
+        ligament.setAngle(cubapultRamrodSolenoid.get() == Value.kForward ? -90 : 0);
     }
 
     /**
@@ -139,25 +138,6 @@ public class Intake extends SubsystemBase {
     }
 
     /**
-     * Checks if the intake is safe to move based on the elevator.
-     * 
-     * @param elevator
-     * @return true if safe to move
-     */
-    private Pair<Boolean, String> getIfIntakeSafeToMove(Elevator elevator) {
-        boolean safe = true;
-        String str = "none";
-
-        if (!Overrides.SAFETIES_DISABLE.getStatus()) {
-            if (!elevator.isSafeForIntake().getFirst()) {
-                safe = false;
-                str = elevator.isSafeForIntake().getSecond();
-            }
-        }
-        return new Pair<Boolean, String>(safe, str);
-    }
-
-    /**
      * Creates an InstantCommand that sets the passovers to the
      * extended position.
      * This means that it is outside of frame perimeter and able to grip and
@@ -170,7 +150,7 @@ public class Intake extends SubsystemBase {
         // runOnce(() -> passoverSolenoid.set(Value.kForward)),
         // leds.errorCommand(),
         // () -> isSafeToMove(elevator)).withName("Set Passover Extended");
-        return runOnce(() -> passoverSolenoid.set(Value.kForward)).withName("Set Passover Extended");
+        return runOnce(() -> passoverSolenoid.set(Value.kReverse)).withName("Set Passover Extended");
     }
 
     /**
@@ -183,36 +163,43 @@ public class Intake extends SubsystemBase {
      * @return the command
      */
     public CommandBase setPassoversRetractedCommand(Elevator elevator) {
-        return runOnce(() -> passoverSolenoid.set(Value.kReverse)).withName("Set Passover Retracted");
+        return runOnce(() -> passoverSolenoid.set(Value.kForward)).withName("Set Passover Retracted");
     }
 
     /**
-     * Creates an InstantCommand that sets the intake to the up
-     * position. This means that it is inside frame perimeter.
+     * Creates an InstantCommand that sets the cubapult to the primed position.
      * 
      * @return the command
      */
-    public CommandBase setIntakeDownCommand(Elevator elevator) {
-        return Commands
-                .either(
-                        runOnce(() -> intakeSolenoid.set(Value.kForward)),
-                        RobotStates.singularErrorCommand(() -> getIfIntakeSafeToMove(elevator).getSecond()),
-                        () -> getIfIntakeSafeToMove(elevator).getFirst())
-                .withName("Set Intake Down"); // untested
+    public CommandBase setCubapultPrimed() {
+        return runOnce(() -> cubapultRamrodSolenoid.set(Value.kForward)).withName("Set Cubapult Primed"); // untested
     }
 
     /**
-     * Creates an InstantCommand that sets the intake to the up
-     * position. This means that it is inside frame perimeter.
+     * Creates an InstantCommand that sets the Cubapult to the released position.
      * 
      * @return the command
      */
-    public CommandBase setIntakeUpCommand(Elevator elevator) {
-        return Commands
-                .either(runOnce(() -> intakeSolenoid.set(Value.kReverse)),
-                        RobotStates.singularErrorCommand(() -> getIfIntakeSafeToMove(elevator).getSecond()),
-                        () -> getIfIntakeSafeToMove(elevator).getFirst())
-                .withName("Set Intake Up"); // untested
+    public CommandBase setCubapultReleased() {
+        return runOnce(() -> cubapultRamrodSolenoid.set(Value.kReverse)).withName("Set Cubapult Released"); // untested
+    }
+
+    /**
+     * Creates an InstantCommand that sets the ramrods to the extended position.
+     * 
+     * @return the command
+     */
+    public CommandBase setRamrodsExtended() {
+        return runOnce(() -> cubapultRamrodSolenoid.set(Value.kReverse)).withName("Set Ramrods Extended"); // untested
+    }
+
+    /**
+     * Creates an InstantCommand that sets the ramrods to the retracted position.
+     * 
+     * @return the command
+     */
+    public CommandBase setRamrodsRetracted() {
+        return runOnce(() -> cubapultRamrodSolenoid.set(Value.kForward)).withName("Set Ramrods Released"); // untested
     }
 
     /**

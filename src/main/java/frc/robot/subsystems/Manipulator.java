@@ -72,7 +72,7 @@ public class Manipulator extends SubsystemBase {
     @Override
     public void periodic() {
         super.periodic();
-        if (wrist.get() == Value.kForward) {
+        if (wrist.get() == Value.kReverse) {
             wristLigament.setAngle(0);
         } else {
             wristLigament.setAngle(60);
@@ -94,7 +94,7 @@ public class Manipulator extends SubsystemBase {
      * @return the command
      */
     public CommandBase setWristDownCommand() {
-        return Commands.runOnce(() -> wrist.set(Value.kForward)).withName("Wrist Down"); // untested
+        return Commands.runOnce(() -> wrist.set(Value.kReverse)).withName("Wrist Down"); // untested
     }
 
     /**
@@ -105,7 +105,7 @@ public class Manipulator extends SubsystemBase {
      */
     public CommandBase setWristUpCommand(Elevator elevator) {
         return Commands.either(
-                runOnce(() -> wrist.set(Value.kReverse)),
+                runOnce(() -> wrist.set(Value.kForward)),
                 RobotStates.singularErrorCommand(() -> "Error"),
                 () -> true).withName("Wrist Up"); // TODO
     }
@@ -117,7 +117,7 @@ public class Manipulator extends SubsystemBase {
      * @return the command
      */
     public CommandBase setPincersOpenCommand() {
-        return runOnce(() -> pincers.set(Value.kForward)).withName("Pincers Open"); // untested
+        return runOnce(() -> pincers.set(Value.kReverse)).withName("Pincers Open"); // untested
     }
 
     /**
@@ -127,7 +127,7 @@ public class Manipulator extends SubsystemBase {
      * @return the command
      */
     public CommandBase setPincersClosedCommand() {
-        return runOnce(() -> pincers.set(Value.kReverse)).withName("Pincers Closed"); // untested
+        return runOnce(() -> pincers.set(Value.kForward)).withName("Pincers Closed"); // untested
     }
 
     /**
