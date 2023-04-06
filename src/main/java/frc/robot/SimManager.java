@@ -21,10 +21,10 @@ import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.GamePieceLocation.Grid;
 import frc.robot.GamePieceLocation.GridPosition;
 import frc.robot.GamePieceLocation.Level;
-import frc.robot.commands.Autos;
+import frc.robot.commands.IntakingCommands;
 import frc.robot.commands.RobotStates;
 import frc.robot.commands.RobotStates.RobotState;
-import frc.robot.commands.Scoring;
+import frc.robot.commands.ScoringCommands;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Elbow.ElbowPosition;
@@ -82,8 +82,8 @@ public class SimManager {
                     new SendableLogger("Reset",
                             Commands.runOnce(() -> gridInterface.reset()).withName("Reset")),
                     new SendableLogger("Score",
-                            Scoring
-                                    .scoreGamePieceCommand(true, () -> true, d -> {
+                            ScoringCommands
+                                    .scorePieceCommand(() -> true, d -> {
                                     }, drivetrain, gridInterface, intake, manipulator, elevator, elbow)
                                     .andThen(RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow))
                                     .withName("Score"))));
@@ -131,26 +131,23 @@ public class SimManager {
                             RobotStates.setCurrentStateCommand(RobotState.SEEKING)),
                     new SendableLogger("Set Scoring State",
                             RobotStates.setCurrentStateCommand(RobotState.SCORING)),
-                    new SendableLogger("Full Auto Score with movement",
-                            Autos.fullAutoScoreWithMovement(GamePieceLocation.E1, drivetrain, intake, manipulator,
-                                    elevator, elbow).withName("Full Auto Score")),
                     new SendableLogger("Initialize Mechanisms",
                             RobotStates.initializeMechanisms(intake, manipulator, elevator, elbow)),
                     new SendableLogger("Intake Game Piece",
-                            RobotStates.intakeGamePiece(() -> false, intake, manipulator,
+                            IntakingCommands.intakePieceCommand(() -> false, intake, manipulator,
                                     elevator, elbow)),
                     new SendableLogger("Score Game Piece",
-                            Scoring.scoreGamePieceCommand(true, () -> true, d -> {
+                            ScoringCommands.scorePieceCommand(() -> true, d -> {
                             },
                                     drivetrain, gridInterface, intake, manipulator, elevator, elbow)),
                     new SendableLogger("Score Game Piece w Stow",
-                            Scoring.scoreGamePieceCommand(true, () -> false, d -> {
+                            ScoringCommands.scorePieceCommand(() -> false, d -> {
                             }, drivetrain, gridInterface, intake, manipulator, elevator, elbow)
                                     .andThen(RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow))
                                     .withName("Score Game Piece w Stow")),
                     new SendableLogger("Auto Score Game Piece w Stow",
-                            Scoring
-                                    .scoreGamePieceAutoCommand(() -> GamePiece.CONE, () -> Level.HIGH, drivetrain,
+                            ScoringCommands
+                                    .scorePieceAutoCommand(() -> GamePiece.CONE, () -> Level.HIGH, drivetrain,
                                             intake,
                                             manipulator, elevator, elbow)
                                     .andThen(RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow))
@@ -183,10 +180,10 @@ public class SimManager {
                             intake.setPassoversExtendedCommand(elevator)),
                     new SendableLogger("Intake/Commands", "Passover Retracted",
                             intake.setPassoversRetractedCommand(elevator)),
-                    new SendableLogger("Intake/Commands", "Intake Up",
-                            intake.setIntakeUpCommand(elevator)),
-                    new SendableLogger("Intake/Commands", "Intake Down",
-                            intake.setIntakeDownCommand(elevator)),
+                    new SendableLogger("Intake/Commands", "Cubapult Primed",
+                            intake.setCubapultReleased()),
+                    new SendableLogger("Intake/Commands", "Cubapult Released",
+                            intake.setCubapultPrimed()),
                     new SendableLogger("Intake/Commands", "Run Passover Motors",
                             intake.runPassoverMotorsCommand()),
                     new SendableLogger("Intake/Commands", "Sim Game Piece Detected",
