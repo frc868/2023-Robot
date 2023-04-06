@@ -13,6 +13,7 @@ import com.pathplanner.lib.commands.FollowPathWithEvents;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.techhounds.houndutil.houndauto.AutoManager;
+import com.techhounds.houndutil.houndlib.DeferredCommand;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LogProfileBuilder;
 import com.techhounds.houndutil.houndlog.LoggingManager;
@@ -43,7 +44,6 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
-import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -430,7 +430,10 @@ public class Drivetrain extends SubsystemBase {
      * Stops the drivetrain.
      */
     public void stop() {
-        drive(0, 0, 0, DriveMode.ROBOT_RELATIVE);
+        frontLeft.stop();
+        frontRight.stop();
+        backLeft.stop();
+        backRight.stop();
     }
 
     /**
@@ -697,17 +700,16 @@ public class Drivetrain extends SubsystemBase {
      * @return the command
      */
     public CommandBase moveDeltaPathFollowingCommand(Transform2d delta, PathConstraints constraints) {
-        return new ProxyCommand(
-                () -> pathFollowingCommand(PathPlanner.generatePath(
-                        constraints,
-                        new PathPoint(
-                                getPose().getTranslation(),
-                                Rotation2d.fromDegrees(180),
-                                getPose().getRotation()),
-                        new PathPoint(
-                                getPose().plus(delta).getTranslation(),
-                                Rotation2d.fromDegrees(180),
-                                getPose().getRotation()))));
+        return new DeferredCommand(() -> pathFollowingCommand(PathPlanner.generatePath(
+                constraints,
+                new PathPoint(
+                        getPose().getTranslation(),
+                        Rotation2d.fromDegrees(180),
+                        getPose().getRotation()),
+                new PathPoint(
+                        getPose().plus(delta).getTranslation(),
+                        Rotation2d.fromDegrees(180),
+                        getPose().getRotation()))));
     }
 
     /**
@@ -744,7 +746,7 @@ public class Drivetrain extends SubsystemBase {
      */
     public CommandBase chargeStationBalanceCommand() {
         PIDController controller = new PIDController(0.025, 0, 0.004);
-        controller.setTolerance(3);
+        controller.setTolerance(3, 1);
         return new PIDCommand(
                 controller,
                 () -> (-pigeon.getRoll()),
