@@ -50,13 +50,13 @@ import frc.robot.commands.RobotStates;
  */
 public class Elevator extends ProfiledPIDSubsystem {
     public static enum ElevatorPosition {
-        BOTTOM(0),
+        BOTTOM(-0.02),
         CONE_LOW(0.25),
         CONE_MID(1.14),
         CONE_HIGH(1.7),
         CUBE_LOW(0.25),
         CUBE_MID(1.18482),
-        DOUBLE_SUBSTATION_PICKUP(1.664),
+        SINGLE_SUBSTATION_PICKUP(0.5164),
         CUBE_HIGH(1.70220),
         HUMAN_PLAYER(0),
         TOP(1.40);
