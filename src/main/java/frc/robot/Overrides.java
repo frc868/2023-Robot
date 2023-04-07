@@ -22,6 +22,7 @@ public enum Overrides {
     PASSOVER_RIGHT_MOTOR_DISABLE(false),
 
     MANUAL_MECH_CONTROL_MODE(false),
+    ABSOLUTE_ENCODERS(false),
     SAFETIES_DISABLE(true),
     SPEED_LIMITS_DISABLE(true),
     MECH_LIMITS_DISABLE(true),
