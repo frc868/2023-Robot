@@ -56,6 +56,7 @@ public class IntakingCommands {
                 Commands.runOnce(() -> RobotStates.setIntaking(false)),
                 manipulator.setPincersPincingCommand(() -> gamePieceSupplier.get()),
                 intake.setPassoversRetractedCommand(elevator),
+                elevator.setDesiredPositionDeltaCommand(0.02, intake, elbow),
                 Commands.waitSeconds(0.2)
                         .andThen(elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator)),
                 RobotStates.setCurrentStateCommand(RobotState.SCORING),
