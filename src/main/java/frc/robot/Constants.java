@@ -95,7 +95,7 @@ public final class Constants {
         }
 
         public static final class TurnToAngle {
-            public static final double kP = 0.9; // untested
+            public static final double kP = 5; // untested
             public static final double kI = 0; // untested
             public static final double kD = 0; // untested
         }
@@ -112,9 +112,9 @@ public final class Constants {
         }
 
         public static final class Elbow {
-            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 6);
+            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 8);
             public static final TunableNumber kI = new TunableNumber("Elbow", "kI", 0);
-            public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0.6);
+            public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0.5);
             public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 0.05);
             public static final double kS = 0.33055;
             public static final double kG = 0.54418;
