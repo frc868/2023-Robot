@@ -119,6 +119,9 @@ public class Controls {
                         Commands.runOnce(() -> isTwistLimited = false),
                         Commands.runOnce(() -> isInputCubed = false)));
 
+        new Trigger(() -> !RobotStates.getIntaking()).debounce(2).and(joystick.button(14))
+                .toggleOnTrue(intake.toggleRamrodsCommand());
+
         joystick.pov(0, 0, CommandScheduler.getInstance().getDefaultButtonLoop())
                 .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(0), true));
         // 90 on joystick is right, while 90 CCW is left
@@ -129,8 +132,10 @@ public class Controls {
         joystick.pov(0, 270, CommandScheduler.getInstance().getDefaultButtonLoop())
                 .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(90), true));
 
-        joystick.pov(2, 0, CommandScheduler.getInstance().getDefaultButtonLoop()).onTrue(intake.setRamrodsRetracted());
-        joystick.pov(2, 180, CommandScheduler.getInstance().getDefaultButtonLoop()).onTrue(intake.setRamrodsExtended());
+        joystick.pov(2, 0, CommandScheduler.getInstance().getDefaultButtonLoop())
+                .onTrue(intake.setRamrodsRetractedCommand());
+        joystick.pov(2, 180, CommandScheduler.getInstance().getDefaultButtonLoop())
+                .onTrue(intake.setRamrodsExtendedCommand());
         joystick.pov(2, 270, CommandScheduler.getInstance().getDefaultButtonLoop())
                 .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CONE).ignoringDisable(true));
         joystick.pov(2, 90, CommandScheduler.getInstance().getDefaultButtonLoop())
@@ -296,8 +301,8 @@ public class Controls {
 
         xbox.x().onTrue(intake.setPassoversExtendedCommand(elevator));
         xbox.b().onTrue(intake.setPassoversRetractedCommand(elevator));
-        xbox.y().onTrue(intake.setRamrodsRetracted());
-        xbox.a().onTrue(intake.setRamrodsExtended());
+        xbox.y().onTrue(intake.setRamrodsRetractedCommand());
+        xbox.a().onTrue(intake.setRamrodsExtendedCommand());
 
         xbox.povLeft().onTrue(manipulator.setPincersOpenCommand());
         xbox.povRight().onTrue(manipulator.setPincersClosedCommand());
@@ -324,10 +329,12 @@ public class Controls {
         // hid1.button(5).whileTrue(elevator.motorOverride());
         // hid1.button(6).whileTrue(elbow.motorOverride());
 
-        // hid1.button(1).onTrue(Overrides.MANUAL_MECH_CONTROL_MODE.enableC())
-        // .onFalse(Overrides.MANUAL_MECH_CONTROL_MODE.disableC());
-        // hid1.button(3).onTrue(drivetrain.setDriveCurrentLimitCommand(80))
-        // .onFalse(drivetrain.setDriveCurrentLimitCommand(60));
+        hid1.button(1).onTrue(Overrides.MANUAL_MECH_CONTROL_MODE.enableC())
+                .onFalse(Overrides.MANUAL_MECH_CONTROL_MODE.disableC());
+        hid1.button(2).onTrue(Overrides.ABSOLUTE_ENCODERS.enableC())
+                .onFalse(Overrides.ABSOLUTE_ENCODERS.disableC());
+        hid1.button(3).onTrue(drivetrain.setDriveCurrentLimitCommand(65))
+                .onFalse(drivetrain.setDriveCurrentLimitCommand(40));
 
         // hid1.button(15).onTrue(
         // Commands.parallel(
