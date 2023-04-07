@@ -189,7 +189,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setRamrodsExtended() {
+    public CommandBase setRamrodsExtendedCommand() {
         return Commands.runOnce(() -> cubapultRamrodSolenoid.set(Value.kReverse)).withName("Set Ramrods Extended"); // untested
     }
 
@@ -198,8 +198,19 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setRamrodsRetracted() {
+    public CommandBase setRamrodsRetractedCommand() {
         return Commands.runOnce(() -> cubapultRamrodSolenoid.set(Value.kForward)).withName("Set Ramrods Released"); // untested
+    }
+
+    /**
+     * Creates an InstantCommand that sets the ramrods to the retracted position.
+     * 
+     * @return the command
+     */
+    public CommandBase toggleRamrodsCommand() {
+        return Commands.startEnd(
+                () -> cubapultRamrodSolenoid.set(Value.kForward),
+                () -> cubapultRamrodSolenoid.set(Value.kReverse)).withName("Toggle Ramrods"); // untested
     }
 
     /**
