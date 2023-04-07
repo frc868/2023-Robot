@@ -55,6 +55,7 @@ public class Autos {
     }
 
     public static CommandBase driveIntakeScoreGamePiece(
+            boolean raiseElevator,
             PathPlannerTrajectory driveToGamePiece, PathPlannerTrajectory driveToScoringLocation,
             double waitTimeForElevator,
             GamePieceLocation gamePieceLocation,
@@ -75,18 +76,24 @@ public class Autos {
                 IntakingCommands.endIntakingCommand(() -> gamePieceLocation.gamePiece, intake, manipulator,
                         elevator,
                         elbow),
-                Commands.deadline(
-                        Commands.waitUntil(manipulator::isPoleDetected),
-                        Commands.waitSeconds(waitTimeForElevator).andThen(
-                                ScoringCommands.raiseElevatorCommand(
+                Commands.either(
+                        Commands.sequence(
+                                Commands.deadline(
+                                        Commands.waitUntil(manipulator::isPoleDetected),
+                                        Commands.waitSeconds(waitTimeForElevator).andThen(
+                                                ScoringCommands.raiseElevatorCommand(
+                                                        () -> gamePieceLocation.gamePiece,
+                                                        () -> gamePieceLocation.level,
+                                                        intake, manipulator, elevator, elbow).withTimeout(1.2)),
+                                        drivetrain.pathFollowingCommand(driveToScoringLocation)
+                                                .andThen(drivetrain::stop)),
+                                ScoringCommands.placePieceAutoCommand(
                                         () -> gamePieceLocation.gamePiece,
                                         () -> gamePieceLocation.level,
-                                        intake, manipulator, elevator, elbow).withTimeout(1.2)),
-                        drivetrain.pathFollowingCommand(driveToScoringLocation).andThen(drivetrain::stop)),
-                ScoringCommands.placePieceAutoCommand(
-                        () -> gamePieceLocation.gamePiece,
-                        () -> gamePieceLocation.level,
-                        drivetrain, intake, manipulator, elevator, elbow));
+                                        drivetrain, intake, manipulator, elevator, elbow)),
+                        drivetrain.pathFollowingCommand(driveToScoringLocation)
+                                .andThen(drivetrain::stop),
+                        () -> raiseElevator));
     }
 
     public static CommandBase launchCube(Intake intake) {
@@ -104,20 +111,20 @@ public class Autos {
                 autoPath,
                 Commands.sequence(
                         launchCube(intake),
-                        driveIntakeScoreGamePiece(autoPath.getTrajectories().get(0),
+                        driveIntakeScoreGamePiece(true, autoPath.getTrajectories().get(0),
                                 autoPath.getTrajectories().get(1),
                                 autoPath.getTrajectories().get(1).getMarkers().get(0).timeSeconds,
                                 GamePieceLocation.I2, drivetrain, intake,
                                 manipulator,
                                 elevator, elbow),
-                        driveIntakeScoreGamePiece(autoPath.getTrajectories().get(2),
+                        driveIntakeScoreGamePiece(false, autoPath.getTrajectories().get(2),
                                 autoPath.getTrajectories().get(3),
                                 autoPath.getTrajectories().get(3).getMarkers().get(0).timeSeconds,
                                 GamePieceLocation.G2, drivetrain, intake,
                                 manipulator,
-                                elevator, elbow),
-                        Commands.parallel(
-                                RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow))));
+                                elevator, elbow)));
+        // Commands.parallel(
+        // RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow))));
     }
 
     public static AutoTrajectoryCommand twoPieceHoldChargeM(Drivetrain drivetrain,
@@ -128,8 +135,8 @@ public class Autos {
                 FieldConstants.getStartingCubapultPose(GamePieceLocation.E1),
                 autoPath,
                 Commands.sequence(
-                        intake.setCubapultReleased(),
-                        driveIntakeScoreGamePiece(autoPath.getTrajectories().get(0),
+                        launchCube(intake),
+                        driveIntakeScoreGamePiece(true, autoPath.getTrajectories().get(0),
                                 autoPath.getTrajectories().get(1),
                                 autoPath.getTrajectories().get(1).getMarkers().get(0).timeSeconds,
                                 GamePieceLocation.F2, drivetrain, intake,
@@ -138,7 +145,7 @@ public class Autos {
                         RobotStates.driveDeltaCommand(-0.2, drivetrain, new PathConstraints(4, 3)),
                         RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow),
                         Commands.deadline(
-                                drivetrain.pathFollowingCommand(autoPath.getTrajectories().get(2)).asProxy(),
+                                drivetrain.pathFollowingCommand(autoPath.getTrajectories().get(2)),
                                 Commands.sequence(
                                         Commands.waitSeconds(0.5),
                                         RobotStates
@@ -153,8 +160,8 @@ public class Autos {
                                 elevator,
                                 elbow),
                         drivetrain.pathFollowingCommand(
-                                autoPath.getTrajectories().get(3)).asProxy(),
-                        drivetrain.chargeStationBalanceCommand().asProxy()));
+                                autoPath.getTrajectories().get(3)),
+                        drivetrain.chargeStationBalanceCommand()));
     }
 
     public static AutoTrajectoryCommand onePieceChargeMobilityM(Drivetrain drivetrain,
@@ -165,12 +172,11 @@ public class Autos {
                 FieldConstants.getStartingCubapultPose(GamePieceLocation.E1),
                 autoPath,
                 Commands.sequence(
-                        intake.setCubapultReleased(),
-                        drivetrain.pathFollowingCommand(autoPath.getTrajectories().get(0)).andThen(drivetrain::stop)
-                                .asProxy(),
+                        launchCube(intake),
+                        drivetrain.pathFollowingCommand(autoPath.getTrajectories().get(0)).andThen(drivetrain::stop),
                         Commands.waitSeconds(2),
-                        drivetrain.pathFollowingCommand(autoPath.getTrajectories().get(1)).asProxy(),
-                        drivetrain.chargeStationBalanceCommand().asProxy()));
+                        drivetrain.pathFollowingCommand(autoPath.getTrajectories().get(1)),
+                        drivetrain.chargeStationBalanceCommand()));
     }
 
     public static AutoTrajectoryCommand threePieceLinkS(Drivetrain drivetrain, Intake intake,
@@ -180,14 +186,14 @@ public class Autos {
                 FieldConstants.getStartingCubapultPose(GamePieceLocation.B1),
                 autoPath,
                 Commands.sequence(
-                        intake.setCubapultReleased(),
-                        driveIntakeScoreGamePiece(autoPath.getTrajectories().get(0),
+                        launchCube(intake),
+                        driveIntakeScoreGamePiece(true, autoPath.getTrajectories().get(0),
                                 autoPath.getTrajectories().get(1),
                                 autoPath.getTrajectories().get(1).getMarkers().get(0).timeSeconds,
                                 GamePieceLocation.A1, drivetrain, intake,
                                 manipulator,
                                 elevator, elbow),
-                        driveIntakeScoreGamePiece(autoPath.getTrajectories().get(2),
+                        driveIntakeScoreGamePiece(true, autoPath.getTrajectories().get(2),
                                 autoPath.getTrajectories().get(3),
                                 autoPath.getTrajectories().get(3).getMarkers().get(0).timeSeconds,
                                 GamePieceLocation.C1, drivetrain, intake,
@@ -196,10 +202,11 @@ public class Autos {
                         RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow)));
     }
 
-    public static Supplier<AutoTrajectoryCommand> onePieceChargeM(AutoPath autoPath, Drivetrain drivetrain,
+    public static AutoTrajectoryCommand onePieceChargeM(Drivetrain drivetrain,
             Intake intake,
             Manipulator manipulator, Elevator elevator, Elbow elbow) {
-        return () -> new AutoTrajectoryCommand(
+        AutoPath autoPath = TrajectoryLoader.getAutoPath("1 Piece Charge M");
+        return new AutoTrajectoryCommand(
                 FieldConstants.getStartingPoseFacingGrid(GamePieceLocation.E1), autoPath,
                 Commands.sequence(
                         RobotStates.autoDriveCommand(new PathConstraints(3, 2), () -> RobotState.SCORING,
@@ -213,7 +220,7 @@ public class Autos {
                         RobotStates.driveDeltaCommand(-0.4, drivetrain, new PathConstraints(4, 3)),
                         RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow),
                         drivetrain.pathFollowingCommand(
-                                autoPath.getTrajectories().get(0)).asProxy(),
-                        drivetrain.chargeStationBalanceCommand().asProxy()));
+                                autoPath.getTrajectories().get(0)),
+                        drivetrain.chargeStationBalanceCommand()));
     }
 }
