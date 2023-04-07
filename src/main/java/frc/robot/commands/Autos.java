@@ -100,7 +100,7 @@ public class Autos {
         return Commands.sequence(
                 intake.setCubapultReleased(),
                 Commands.waitSeconds(0.1),
-                intake.setRamrodsRetracted());
+                intake.setRamrodsRetractedCommand());
     }
 
     public static AutoTrajectoryCommand threePieceLinkN(Drivetrain drivetrain, Intake intake,
@@ -169,13 +169,20 @@ public class Autos {
             Manipulator manipulator, Elevator elevator, Elbow elbow) {
         AutoPath autoPath = TrajectoryLoader.getAutoPath("1 Piece Charge Mobility M");
         return new AutoTrajectoryCommand(
-                FieldConstants.getStartingCubapultPose(GamePieceLocation.E1),
-                autoPath,
+                FieldConstants.getStartingPoseFacingGrid(GamePieceLocation.E1), autoPath,
                 Commands.sequence(
-                        launchCube(intake),
-                        drivetrain.pathFollowingCommand(autoPath.getTrajectories().get(0)).andThen(drivetrain::stop),
-                        Commands.waitSeconds(2),
-                        drivetrain.pathFollowingCommand(autoPath.getTrajectories().get(1)),
+                        RobotStates.autoDriveCommand(new PathConstraints(3, 2), () -> RobotState.SCORING,
+                                () -> GamePieceLocation.E1,
+                                drivetrain),
+                        ScoringCommands.scorePieceAutoCommand(() -> GamePieceLocation.E1.gamePiece,
+                                () -> GamePieceLocation.E1.level,
+                                drivetrain, intake, manipulator,
+                                elevator, elbow),
+                        Commands.waitSeconds(1),
+                        RobotStates.driveDeltaCommand(-0.4, drivetrain, new PathConstraints(4, 3)),
+                        RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow),
+                        drivetrain.pathFollowingCommand(
+                                autoPath.getTrajectories().get(0)),
                         drivetrain.chargeStationBalanceCommand()));
     }
 
