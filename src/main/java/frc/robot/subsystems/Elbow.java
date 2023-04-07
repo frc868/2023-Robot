@@ -179,6 +179,8 @@ public class Elbow extends ProfiledPIDSubsystem {
 
         motor.burnFlash();
 
+        motor.getEncoder().setPosition(encoder.getPosition());
+
         LoggingManager.getInstance().addGroup("Elbow", new LogGroup(
                 new BooleanLogItem("Bottom Hall Effect", bottomHallEffect::get, LogLevel.MAIN),
                 new BooleanLogItem("Top Hall Effect", topHallEffect::get, LogLevel.MAIN),
@@ -256,7 +258,7 @@ public class Elbow extends ProfiledPIDSubsystem {
      */
     @Override
     protected double getMeasurement() {
-        return RobotBase.isReal() ? encoder.getPosition() : motor.getEncoder().getPosition();
+        return Overrides.ABSOLUTE_ENCODERS.getStatus() ? encoder.getPosition() : motor.getEncoder().getPosition();
     }
 
     /**
