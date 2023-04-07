@@ -11,6 +11,7 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPoint;
 import com.techhounds.houndutil.houndauto.AutoManager;
+import com.techhounds.houndutil.houndlib.DeferredCommand;
 import com.techhounds.houndutil.houndlib.Rectangle2d;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,7 +24,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import frc.robot.FieldConstants;
 import frc.robot.GamePieceLocation;
 import frc.robot.GamePieceLocation.GamePiece;
@@ -459,7 +459,7 @@ public class RobotStates {
         // every time before passing it into the `drivetrain.pathFollowingCommand`
         // method.
         return Commands.either(
-                new ProxyCommand(pathFollowingCommandSupplier).finallyDo((d) -> {
+                new DeferredCommand(pathFollowingCommandSupplier).finallyDo((d) -> {
                     System.out.println(d);
                     drivetrain.stop();
                 }),
@@ -496,7 +496,7 @@ public class RobotStates {
         // this is a proxy command because we have to do things with the trajectory
         // every time before passing it into the `drivetrain.pathFollowingCommand`
         // method.
-        return new ProxyCommand(pathFollowingCommandSupplier)
+        return new DeferredCommand(pathFollowingCommandSupplier, drivetrain)
                 .finallyDo((d) -> drivetrain.stop())
                 .withName("Auto Drive");
     }
