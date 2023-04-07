@@ -92,7 +92,6 @@ public class Controls {
                         () -> -joystick.getY(),
                         () -> -joystick.getX(),
                         () -> -MathUtil.applyDeadband(joystick.getTwist() * (isTwistLimited ? 0.7 : 1), 0.05),
-                        () -> 1 - (joystick.getRawAxis(5) * 0.7),
                         () -> isInputCubed));
 
         joystick.button(13).onTrue(drivetrain.zeroGyroCommand());
@@ -111,19 +110,27 @@ public class Controls {
                         drivetrain.setDriveModeCommand(DriveMode.FIELD_ORIENTED),
                         Commands.runOnce(() -> isTwistLimited = true),
                         Commands.runOnce(() -> isInputCubed = true)))
+                .whileTrue(
+                        Commands.either(
+                                drivetrain.turnWhileMovingCommand(Math.PI, true),
+                                Commands.none(),
+                                () -> FieldConstants.AutoDrive.isInCommunity(drivetrain.getPose())).repeatedly())
                 .onFalse(Commands.parallel(
                         Commands.runOnce(() -> isTwistLimited = false),
                         Commands.runOnce(() -> isInputCubed = false)));
 
         joystick.pov(0, 0, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(0)));
+                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(0), true));
+        // 90 on joystick is right, while 90 CCW is left
         joystick.pov(0, 90, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(270)));
+                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(270), true));
         joystick.pov(0, 180, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(180)));
+                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(180), true));
         joystick.pov(0, 270, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(90)));
+                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(90), true));
 
+        joystick.pov(2, 0, CommandScheduler.getInstance().getDefaultButtonLoop()).onTrue(intake.setRamrodsRetracted());
+        joystick.pov(2, 180, CommandScheduler.getInstance().getDefaultButtonLoop()).onTrue(intake.setRamrodsExtended());
         joystick.pov(2, 270, CommandScheduler.getInstance().getDefaultButtonLoop())
                 .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CONE).ignoringDisable(true));
         joystick.pov(2, 90, CommandScheduler.getInstance().getDefaultButtonLoop())
@@ -141,8 +148,10 @@ public class Controls {
 
         joystick.button(8)
                 .whileTrue(drivetrain.chargeStationBalanceCommand());
+
         joystick.button(5).whileTrue(RobotStates.autoDriveCommand(drivetrain, gridInterface));
 
+        joystick.axisGreaterThan(5, 0.25).whileTrue(drivetrain.turnToHPStationCommand());
     }
 
     public static void configureOperatorControls(int port1, int port2, Drivetrain drivetrain,
@@ -287,8 +296,8 @@ public class Controls {
 
         xbox.x().onTrue(intake.setPassoversExtendedCommand(elevator));
         xbox.b().onTrue(intake.setPassoversRetractedCommand(elevator));
-        xbox.y().onTrue(intake.setCubapultReleased());
-        xbox.a().onTrue(intake.setCubapultPrimed());
+        xbox.y().onTrue(intake.setRamrodsRetracted());
+        xbox.a().onTrue(intake.setRamrodsExtended());
 
         xbox.povLeft().onTrue(manipulator.setPincersOpenCommand());
         xbox.povRight().onTrue(manipulator.setPincersClosedCommand());
