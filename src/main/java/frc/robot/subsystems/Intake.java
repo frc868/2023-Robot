@@ -190,7 +190,7 @@ public class Intake extends SubsystemBase {
      * @return the command
      */
     public CommandBase setRamrodsExtended() {
-        return runOnce(() -> cubapultRamrodSolenoid.set(Value.kReverse)).withName("Set Ramrods Extended"); // untested
+        return Commands.runOnce(() -> cubapultRamrodSolenoid.set(Value.kReverse)).withName("Set Ramrods Extended"); // untested
     }
 
     /**
@@ -199,7 +199,7 @@ public class Intake extends SubsystemBase {
      * @return the command
      */
     public CommandBase setRamrodsRetracted() {
-        return runOnce(() -> cubapultRamrodSolenoid.set(Value.kForward)).withName("Set Ramrods Released"); // untested
+        return Commands.runOnce(() -> cubapultRamrodSolenoid.set(Value.kForward)).withName("Set Ramrods Released"); // untested
     }
 
     /**
