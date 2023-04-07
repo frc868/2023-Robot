@@ -120,6 +120,7 @@ public class RobotContainer {
                 new TrajectorySettings("3 Piece Link N").withMaxVelocity(4).withMaxAcceleration(2.5),
                 new TrajectorySettings("2 Piece Hold Charge M").withMaxVelocity(4).withMaxAcceleration(2.5),
                 new TrajectorySettings("1 Piece Charge Mobility M").withMaxVelocity(3).withMaxAcceleration(2),
+                new TrajectorySettings("1 Piece Charge M").withMaxVelocity(4.4).withMaxAcceleration(2),
                 new TrajectorySettings("3 Piece Link S").withMaxVelocity(4.4).withMaxAcceleration(3));
         TrajectoryLoader.loadAutoPaths();
         AutoManager.getInstance().addRoutine(
@@ -133,7 +134,7 @@ public class RobotContainer {
                         () -> Autos.onePieceChargeMobilityM(drivetrain, intake, manipulator, elevator, elbow)));
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("1 Piece Charge M",
-                        () -> Autos.onePieceChargeMobilityM(drivetrain, intake, manipulator, elevator, elbow)));
+                        () -> Autos.onePieceChargeM(drivetrain, intake, manipulator, elevator, elbow)));
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("3 Piece Link S",
                         () -> Autos.threePieceLinkS(drivetrain, intake, manipulator, elevator, elbow)));
