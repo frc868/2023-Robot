@@ -26,6 +26,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.Constants;
+import frc.robot.Overrides;
 
 public class SwerveModule {
     /** The motor used for driving. */
@@ -35,6 +36,8 @@ public class SwerveModule {
 
     /** The encoder on the motor used for driving. */
     private RelativeEncoder driveEncoder;
+    /** The encoder on the motor used for turning. */
+    private RelativeEncoder turnEncoder;
     /** The CANCoder used to tell the angle of the wheel. */
     private CANCoder turnCanCoder;
 
@@ -113,7 +116,10 @@ public class SwerveModule {
         SparkMaxConfigurator.configure(turnMotor)
                 .withIdleMode(IdleMode.kBrake)
                 .withInverted(turnMotorInverted)
+                .withPositionConversionFactor(Constants.Geometries.Drivetrain.TURN_ENCODER_DISTANCE_TO_METERS, true)
                 .withCurrentLimit(15).burnFlash();
+
+        turnEncoder = turnMotor.getEncoder();
 
         turnCanCoder = new CANCoder(canCoderChannel);
 
@@ -126,6 +132,14 @@ public class SwerveModule {
         turnCanCoder.configSensorDirection(turnCanCoderInverted);
         turnCanCoder.configAbsoluteSensorRange(AbsoluteSensorRange.Unsigned_0_to_360);
         turnCanCoder.configFeedbackCoefficient(2 * Math.PI / 4096.0, "rad", SensorTimeBase.PerSecond); // radians/sec
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(3000);
+                turnEncoder.setPosition(turnCanCoder.getPosition() + turnCanCoderOffset);
+            } catch (Exception e) {
+            }
+        }).start();
 
         turnPIDController.enableContinuousInput(0, 2 * Math.PI);
         turnPIDControllerSimple.enableContinuousInput(0, 2 * Math.PI);
@@ -175,7 +189,8 @@ public class SwerveModule {
      */
     public double getWheelAngle() {
         if (RobotBase.isReal())
-            return turnCanCoder.getPosition() + turnCanCoderOffset;
+            return Overrides.ABSOLUTE_ENCODERS.getStatus() ? turnCanCoder.getPosition() + turnCanCoderOffset
+                    : turnEncoder.getPosition();
         else
             return simCurrentAngle;
     }
