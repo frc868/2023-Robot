@@ -150,14 +150,14 @@ public class Autos {
                                                 elbow))),
                         IntakingCommands.endIntakingCommand(() -> GamePiece.CUBE, intake, manipulator,
                                 elevator,
-                                elbow)),
-                drivetrain.pathFollowingCommand(autoPath.getTrajectories().get(1)));
-        // ScoringCommands.scorePieceAutoCommand(() -> GamePieceLocation.H2.gamePiece,
-        // () -> GamePieceLocation.H2.level,
-        // drivetrain, intake, manipulator,
-        // elevator, elbow),
-        // Commands.waitSeconds(1),
-        // RobotStates.driveDeltaCommand(-0.4, drivetrain, new PathConstraints(4, 3))));
+                                elbow),
+                        drivetrain.pathFollowingCommand(autoPath.getTrajectories().get(1)),
+                        ScoringCommands.scorePieceAutoCommand(() -> GamePieceLocation.H2.gamePiece,
+                                () -> GamePieceLocation.H2.level,
+                                drivetrain, intake, manipulator,
+                                elevator, elbow),
+                        Commands.waitSeconds(1),
+                        RobotStates.driveDeltaCommand(-0.4, drivetrain, new PathConstraints(4, 3))));
         // Commands.parallel(
         // RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow))));
     }
