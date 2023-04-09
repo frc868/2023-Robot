@@ -159,9 +159,9 @@ public class LEDs extends SubsystemBase {
          */
         private static void cubePickupFlashing() {
             timeStep++; // 50 timesteps is one second
-            timeStep %= 50; // every 1 second it will roll over
+            timeStep %= 10; // every 1 second it will roll over
             for (int i = 0; i < buffer.getLength(); i++) {
-                if (timeStep / 10 == 1) {
+                if (timeStep / 5 == 1) {
                     buffer.setHSV(i, 150, 255, v);
                 } else {
                     buffer.setHSV(i, 0, 0, 0);

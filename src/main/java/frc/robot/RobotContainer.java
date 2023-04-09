@@ -117,26 +117,29 @@ public class RobotContainer {
     private void configureAuto() {
         TrajectoryLoader.addSettings(
                 new TrajectorySettings("Full N").withMaxVelocity(4.4).withMaxAcceleration(4),
-                new TrajectorySettings("3 Piece Link N").withMaxVelocity(4).withMaxAcceleration(2.5),
+                new TrajectorySettings("3 Piece Link N").withMaxVelocity(3).withMaxAcceleration(2),
                 new TrajectorySettings("2 Piece Hold Charge M").withMaxVelocity(4).withMaxAcceleration(2.5),
                 new TrajectorySettings("1 Piece Charge Mobility M").withMaxVelocity(3).withMaxAcceleration(2),
+                new TrajectorySettings("1 Piece Charge M").withMaxVelocity(4.4).withMaxAcceleration(2),
+                new TrajectorySettings("1 Piece Mobility S").withMaxVelocity(3.5).withMaxAcceleration(2),
+                new TrajectorySettings("1 Piece Mobility B").withMaxVelocity(3.5).withMaxAcceleration(2),
                 new TrajectorySettings("3 Piece Link S").withMaxVelocity(4.4).withMaxAcceleration(3));
         TrajectoryLoader.loadAutoPaths();
         AutoManager.getInstance().addRoutine(
-                new AutoRoutine("3 Piece Link N",
-                        () -> Autos.threePieceLinkN(drivetrain, intake, manipulator, elevator, elbow)));
+                new AutoRoutine("2 Piece Cube N",
+                        () -> Autos.twoPieceCubeN(drivetrain, intake, manipulator, elevator, elbow)));
         AutoManager.getInstance().addRoutine(
-                new AutoRoutine("2 Piece Hold Charge M",
-                        () -> Autos.twoPieceHoldChargeM(drivetrain, intake, manipulator, elevator, elbow)));
+                new AutoRoutine("1 Piece Mobility N",
+                        () -> Autos.onePieceMobilityN(drivetrain, intake, manipulator, elevator, elbow)));
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("1 Piece Charge Mobility M",
                         () -> Autos.onePieceChargeMobilityM(drivetrain, intake, manipulator, elevator, elbow)));
         AutoManager.getInstance().addRoutine(
                 new AutoRoutine("1 Piece Charge M",
-                        () -> Autos.onePieceChargeMobilityM(drivetrain, intake, manipulator, elevator, elbow)));
+                        () -> Autos.onePieceChargeM(drivetrain, intake, manipulator, elevator, elbow)));
         AutoManager.getInstance().addRoutine(
-                new AutoRoutine("3 Piece Link S",
-                        () -> Autos.threePieceLinkS(drivetrain, intake, manipulator, elevator, elbow)));
+                new AutoRoutine("1 Piece Mobility S",
+                        () -> Autos.onePieceMobilityS(drivetrain, intake, manipulator, elevator, elbow)));
 
         // FieldConstants.displayAutoDriveOnField();
         // FieldConstants.displayItemsOnField();

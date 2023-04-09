@@ -179,10 +179,18 @@ public class Elbow extends ProfiledPIDSubsystem {
 
         motor.burnFlash();
 
+        new Thread(() -> {
+            try {
+                Thread.sleep(3000);
+                motor.getEncoder().setPosition(encoder.getPosition());
+            } catch (Exception e) {
+            }
+        }).start();
+
         LoggingManager.getInstance().addGroup("Elbow", new LogGroup(
                 new BooleanLogItem("Bottom Hall Effect", bottomHallEffect::get, LogLevel.MAIN),
                 new BooleanLogItem("Top Hall Effect", topHallEffect::get, LogLevel.MAIN),
-                new DoubleLogItem("Control/Actual Position", () -> getMeasurement(), LogLevel.MAIN),
+                new DoubleLogItem("Control/Actual Position", () -> encoder.getPosition(), LogLevel.MAIN),
                 new DoubleLogItem("Control/Actual Velocity", () -> encoder.getVelocity(), LogLevel.MAIN),
                 new DoubleLogItem("Control/Setpoint Position", () -> setpointPosition, LogLevel.MAIN),
                 new DoubleLogItem("Control/Setpoint Velocity", () -> setpointVelocity, LogLevel.MAIN),
@@ -256,7 +264,7 @@ public class Elbow extends ProfiledPIDSubsystem {
      */
     @Override
     protected double getMeasurement() {
-        return RobotBase.isReal() ? encoder.getPosition() : motor.getEncoder().getPosition();
+        return Overrides.ABSOLUTE_ENCODERS.getStatus() ? encoder.getPosition() : motor.getEncoder().getPosition();
     }
 
     /**
@@ -393,5 +401,9 @@ public class Elbow extends ProfiledPIDSubsystem {
                 },
                 () -> false,
                 this).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+    }
+
+    public CommandBase sync() {
+        return Commands.runOnce(() -> motor.getEncoder().setPosition(encoder.getPosition()));
     }
 }

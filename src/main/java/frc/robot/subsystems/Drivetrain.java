@@ -113,8 +113,8 @@ public class Drivetrain extends SubsystemBase {
     private ProfiledPIDController turnController = new ProfiledPIDController(Constants.Gains.TurnToAngle.kP,
             Constants.Gains.TurnToAngle.kI,
             Constants.Gains.TurnToAngle.kD,
-            new TrapezoidProfile.Constraints(10 * Math.PI,
-                    10 * Math.PI));
+            new TrapezoidProfile.Constraints(20 * Math.PI,
+                    20 * Math.PI));
 
     /** An enum describing the two types of drive modes. */
     public enum DriveMode {
@@ -547,7 +547,7 @@ public class Drivetrain extends SubsystemBase {
      * @return the command
      */
     public CommandBase teleopDriveCommand(DoubleSupplier xSpeedSupplier, DoubleSupplier ySpeedSupplier,
-            DoubleSupplier thetaSpeedSupplier, DoubleSupplier brakeSupplier, BooleanSupplier isInputCubed) {
+            DoubleSupplier thetaSpeedSupplier, BooleanSupplier isInputCubed) {
         SlewRateLimiter xSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
         SlewRateLimiter ySpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
         SlewRateLimiter thetaSpeedLimiter = new SlewRateLimiter(Constants.Teleop.JOYSTICK_INPUT_RATE_LIMIT);
@@ -573,10 +573,6 @@ public class Drivetrain extends SubsystemBase {
                 thetaSpeed = thetaSpeedLimiter.calculate(thetaSpeed);
             }
 
-            xSpeed *= speedMode.limit * brakeSupplier.getAsDouble();
-            ySpeed *= speedMode.limit * brakeSupplier.getAsDouble();
-            thetaSpeed *= speedMode.limit * brakeSupplier.getAsDouble();
-
             if (getTurnControllerEnabled()) {
                 thetaSpeed = getTurnControllerOutput();
             }
@@ -601,16 +597,23 @@ public class Drivetrain extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase turnWhileMovingCommand(double angle) {
+    public CommandBase turnWhileMovingCommand(double angle, boolean fieldRelative) {
         return Commands.startEnd(() -> {
             if (!isTurningEnabled) {
                 turnController.reset(getGyroAngleRad());
             }
             isTurningEnabled = true;
-            turnController.setGoal(angle);
+            if (fieldRelative && DriverStation.getAlliance() == Alliance.Red)
+                turnController.setGoal(angle + Math.PI);
+            else
+                turnController.setGoal(angle);
         }, () -> {
             isTurningEnabled = false;
         }).withName("Turn While Moving");
+    }
+
+    public CommandBase turnToHPStationCommand() {
+        return turnWhileMovingCommand(Math.PI / 2, false);
     }
 
     /**
@@ -745,18 +748,19 @@ public class Drivetrain extends SubsystemBase {
      * @return the command
      */
     public CommandBase chargeStationBalanceCommand() {
-        PIDController controller = new PIDController(0.025, 0, 0.004);
-        controller.setTolerance(3, 1);
+        PIDController controller = new PIDController(0.035, 0, 0.004);
+        controller.setTolerance(3);
         return new PIDCommand(
                 controller,
                 () -> (-pigeon.getRoll()),
                 0,
                 (d) -> drive(
-                        d > 0.2
-                                ? (d > 0 ? 0.2 : -0.2)
+                        d > 0.6
+                                ? (d > 0 ? 0.6 : -0.6)
                                 : d,
                         0, 0, DriveMode.ROBOT_RELATIVE),
-                this).finallyDo((d) -> this.stop());
+                this)
+                .finallyDo((d) -> this.stop());
     }
 
     // public CommandBase motorOverride(Motor) {

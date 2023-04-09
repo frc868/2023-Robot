@@ -95,7 +95,7 @@ public final class Constants {
         }
 
         public static final class TurnToAngle {
-            public static final double kP = 0.9; // untested
+            public static final double kP = 1.1; // untested
             public static final double kI = 0; // untested
             public static final double kD = 0; // untested
         }
@@ -112,9 +112,9 @@ public final class Constants {
         }
 
         public static final class Elbow {
-            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 6);
+            public static final TunableNumber kP = new TunableNumber("Elbow", "kP", 8);
             public static final TunableNumber kI = new TunableNumber("Elbow", "kI", 0);
-            public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0.6);
+            public static final TunableNumber kD = new TunableNumber("Elbow", "kD", 0.5);
             public static final TunableNumber TOLERANCE = new TunableNumber("Elbow", "Tolerance", 0.05);
             public static final double kS = 0.33055;
             public static final double kG = 0.54418;
@@ -138,9 +138,11 @@ public final class Constants {
             /** Distance between front and back wheels on robot. */
             public static final double WHEEL_BASE_METERS = Units.inchesToMeters(22.75);
             public static final double GEARING = 1.0 / 6.75;
+            public static final double TURN_GEARING = 1.0 / (150.0 / 7.0);
             public static final double WHEEL_RADIUS_METERS = 0.048;
             public static final double WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * WHEEL_RADIUS_METERS;
             public static final double ENCODER_DISTANCE_TO_METERS = WHEEL_CIRCUMFERENCE * GEARING;
+            public static final double TURN_ENCODER_DISTANCE_TO_METERS = 2 * Math.PI * TURN_GEARING;
 
             public static final double MAX_PHYSICAL_VELOCITY_METERS_PER_SECOND = 4.42;
             public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI / 4;

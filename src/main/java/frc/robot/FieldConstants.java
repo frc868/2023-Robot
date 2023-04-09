@@ -479,6 +479,15 @@ public class FieldConstants {
                                         new Pose2d(BOTTOM_RED_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)),
                                         new Pose2d(TOP_LEFT_INTERMEDIARY, Rotation2d.fromDegrees(180)) })));
 
+        public static boolean isInCommunity(Pose2d point) {
+            return COMMUNITY_BLUE_BOTTOM_ZONE.isInRect(point)
+                    || COMMUNITY_BLUE_TOP_SLIVER_ZONE.isInRect(point)
+                    || COMMUNITY_BLUE_TOP_ZONE.isInRect(point)
+                    || COMMUNITY_RED_BOTTOM_ZONE.isInRect(point)
+                    || COMMUNITY_RED_TOP_SLIVER_ZONE.isInRect(point)
+                    || COMMUNITY_RED_TOP_ZONE.isInRect(point);
+        }
+
     }
 
     public static Pose2d reflectBlueToRed(Pose2d blue) {
