@@ -402,4 +402,8 @@ public class Elbow extends ProfiledPIDSubsystem {
                 () -> false,
                 this).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
     }
+
+    public CommandBase sync() {
+        return Commands.runOnce(() -> motor.getEncoder().setPosition(encoder.getPosition()));
+    }
 }
