@@ -6,6 +6,8 @@ Won the Innovation in Control Award at the FIN District Mishawaka Event 2023.
 
 Won the Innovation in Control Award at the FIN District Princeton Event 2023.
 
+Won the Autonomous Award sponsored by Ford at the FIRST Indiana State Championship 2023.
+
 ## Installation
 
 In order to get this repository fully situated on your computer, please first download the latest version of the 2023 WPILib tools, open the WPILib version of VS Code, and clone this repository. Using GitHub Desktop to clone the repository is recommended, or install Git and use the command-line.
