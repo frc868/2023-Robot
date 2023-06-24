@@ -1,101 +1,429 @@
 {
   "NetworkTables": {
-    "Retained Values": {
-      "open": false
+    "HoundLog": {
+      "open": true
     },
+    "combined": true,
     "transitory": {
       "HoundLog": {
         "Elbow": {
           "Elbow Motor": {
-            "open": true
+            "open": false
           }
         },
         "Elevator": {
-          "open": true
+          "open": false
+        },
+        "Subsystems": {
+          "Intake": {
+            "Right Passover Motor": {
+              "open": false
+            }
+          }
+        },
+        "WPILib": {
+          "Mechanisms": {
+            "open": false
+          }
         },
         "open": true
       }
     },
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/HoundLog//WPILib/CommandScheduler": "Scheduler",
+      "/HoundLog//WPILib/Mechanisms": "Mechanism2d",
+      "/HoundLog//WPILib/Subsystem Info/Drivetrain": "Subsystem",
+      "/HoundLog//WPILib/Subsystem Info/Elbow": "Subsystem",
+      "/HoundLog//WPILib/Subsystem Info/Elevator": "Subsystem",
+      "/HoundLog//WPILib/Subsystem Info/Intake": "Subsystem",
+      "/HoundLog//WPILib/Subsystem Info/LEDs": "Subsystem",
+      "/HoundLog//WPILib/Subsystem Info/Manipulator": "Subsystem",
+      "/HoundLog//WPILib/Subsystem Info/Watchtower": "Subsystem",
       "/HoundLog/Autonomous/Chooser": "String Chooser",
       "/HoundLog/Autonomous/Field": "Field2d",
-      "/HoundLog/Drivetrain/BrakeO": "Command",
-      "/HoundLog/Drivetrain/BrakeX": "Command",
-      "/HoundLog/Drivetrain/Fast": "Command",
-      "/HoundLog/Drivetrain/Path Follow": "Command",
-      "/HoundLog/Drivetrain/Path Follow Auto": "Command",
-      "/HoundLog/Drivetrain/Slow": "Command",
-      "/HoundLog/Drivetrain/Turn CCW": "Command",
-      "/HoundLog/Drivetrain/Turn CW": "Command",
-      "/HoundLog/Drivetrain/Ultra": "Command",
-      "/HoundLog/Elbow/Set High": "Command",
-      "/HoundLog/Elbow/Set Low": "Command",
-      "/HoundLog/Elbow/Set Middle": "Command",
-      "/HoundLog/Elevator/Set Bottom": "Command",
-      "/HoundLog/Elevator/Set Cone High": "Command",
-      "/HoundLog/Elevator/Set Cone Low": "Command",
-      "/HoundLog/Elevator/Set Cone Mid": "Command",
-      "/HoundLog/Elevator/Set Cube High": "Command",
-      "/HoundLog/Elevator/Set Cube Low": "Command",
-      "/HoundLog/Elevator/Set Cube Mid": "Command",
-      "/HoundLog/Elevator/Set Human Player": "Command",
-      "/HoundLog/Elevator/Set Top": "Command",
-      "/HoundLog/Elevator/Zero Encoder": "Command",
-      "/HoundLog/Elevator/Zero Encoder 2": "Command",
-      "/HoundLog/Elevator/Zero Encoder Real": "Command",
-      "/HoundLog/Intake/Intake Down": "Command",
-      "/HoundLog/Intake/Intake Up": "Command",
-      "/HoundLog/Intake/Passover Extended": "Command",
-      "/HoundLog/Intake/Passover Retracted": "Command",
-      "/HoundLog/Intake/Run Passover Motors": "Command",
-      "/HoundLog/Intake/Sim Game Piece Detected": "Command",
-      "/HoundLog/LEDs/Cone Pickup": "Command",
-      "/HoundLog/LEDs/Cube Pickup": "Command",
-      "/HoundLog/LEDs/Error": "Command",
-      "/HoundLog/LEDs/Go To Previous State": "Command",
-      "/HoundLog/LEDs/Rainbow": "Command",
-      "/HoundLog/LEDs/TechHOUNDS": "Command",
-      "/HoundLog/LEDs/Uninitialized": "Command",
-      "/HoundLog/Main/Drive to Scoring Location": "Command",
-      "/HoundLog/Main/Drivetrain": "Subsystem",
-      "/HoundLog/Main/Elbow": "Subsystem",
-      "/HoundLog/Main/Elevator": "Subsystem",
-      "/HoundLog/Main/Intake": "Subsystem",
-      "/HoundLog/Main/Intake Game Piece": "Command",
-      "/HoundLog/Main/LEDs": "Subsystem",
-      "/HoundLog/Main/Manipulator": "Subsystem",
-      "/HoundLog/Main/Misc": "Subsystem",
-      "/HoundLog/Main/Prepare to Intake Game Piece": "Command",
-      "/HoundLog/Main/Score Game Piece": "Command",
-      "/HoundLog/Main/Stow Elevator": "Command",
-      "/HoundLog/Manipulator/Pincers Closed": "Command",
-      "/HoundLog/Manipulator/Pincers Open": "Command",
-      "/HoundLog/Manipulator/Sim Pole Switch Triggered": "Command",
-      "/HoundLog/Manipulator/Wrist Down": "Command",
-      "/HoundLog/Manipulator/Wrist Up": "Command",
-      "/HoundLog/Operator Panel/Reset": "Command",
-      "/HoundLog/Operator Panel/Score": "Command",
-      "/HoundLog/Operator Panel/Select Intake Mode Cone": "Command",
-      "/HoundLog/Operator Panel/Select Intake Mode Cube": "Command",
-      "/HoundLog/Operator Panel/Select Left Grid": "Command",
-      "/HoundLog/Operator Panel/Select Left High Location": "Command",
-      "/HoundLog/Operator Panel/Select Left Low Location": "Command",
-      "/HoundLog/Operator Panel/Select Left Middle Location": "Command",
-      "/HoundLog/Operator Panel/Select Middle Grid": "Command",
-      "/HoundLog/Operator Panel/Select Middle High Location": "Command",
-      "/HoundLog/Operator Panel/Select Middle Low Location": "Command",
-      "/HoundLog/Operator Panel/Select Middle Middle Location": "Command",
-      "/HoundLog/Operator Panel/Select Right Grid": "Command",
-      "/HoundLog/Operator Panel/Select Right High Location": "Command",
-      "/HoundLog/Operator Panel/Select Right Low Location": "Command",
-      "/HoundLog/Operator Panel/Select Right Middle Location": "Command",
-      "/HoundLog/Overrides/Operator Override": "Command",
-      "/SmartDashboard/Mechanisms": "Mechanism2d",
-      "/SmartDashboard/PPSwerveControllerCommand_field": "Field2d"
+      "/HoundLog/Autonomous/Generate Routine": "Command",
+      "/HoundLog/Commands/Drivetrain/Brake O": "Command",
+      "/HoundLog/Commands/Drivetrain/Brake X": "Command",
+      "/HoundLog/Commands/Drivetrain/Rotate to 0°": "Command",
+      "/HoundLog/Commands/Drivetrain/Rotate to 180°": "Command",
+      "/HoundLog/Commands/Drivetrain/Rotate to 270°": "Command",
+      "/HoundLog/Commands/Drivetrain/Rotate to 90°": "Command",
+      "/HoundLog/Commands/Elbow/Move to Setpoint": "Command",
+      "/HoundLog/Commands/Elbow/Setpoint Chooser": "String Chooser",
+      "/HoundLog/Commands/Elevator/Move to Setpoint": "Command",
+      "/HoundLog/Commands/Elevator/Setpoint Chooser": "String Chooser",
+      "/HoundLog/Commands/Intake/Cubapult Primed": "Command",
+      "/HoundLog/Commands/Intake/Cubapult Released": "Command",
+      "/HoundLog/Commands/Intake/Passover Extended": "Command",
+      "/HoundLog/Commands/Intake/Passover Retracted": "Command",
+      "/HoundLog/Commands/Intake/Run Passover Motors": "Command",
+      "/HoundLog/Commands/Intake/Simulate Game Piece Detected": "Command",
+      "/HoundLog/Commands/LEDs/Hold Selected State": "Command",
+      "/HoundLog/Commands/LEDs/LED State Chooser": "String Chooser",
+      "/HoundLog/Commands/Manipulator/Pincers Closed": "Command",
+      "/HoundLog/Commands/Manipulator/Pincers Open": "Command",
+      "/HoundLog/Commands/Manipulator/Simulate Pole Switch Triggered": "Command",
+      "/HoundLog/Commands/Manipulator/Wrist Down": "Command",
+      "/HoundLog/Commands/Manipulator/Wrist Up": "Command",
+      "/HoundLog/Commands/Sequences/Choosers/Game Piece Chooser": "String Chooser",
+      "/HoundLog/Commands/Sequences/Choosers/Level Chooser": "String Chooser",
+      "/HoundLog/Commands/Sequences/Intaking/Eject Game Piece": "Command",
+      "/HoundLog/Commands/Sequences/Intaking/Finish Ejecting": "Command",
+      "/HoundLog/Commands/Sequences/Intaking/Finish Intaking": "Command",
+      "/HoundLog/Commands/Sequences/Intaking/Human Player Pickup": "Command",
+      "/HoundLog/Commands/Sequences/Intaking/Human Player Stow Elevator": "Command",
+      "/HoundLog/Commands/Sequences/Intaking/Intake Game Piece": "Command",
+      "/HoundLog/Commands/Sequences/Intaking/Start and Run Ejecting": "Command",
+      "/HoundLog/Commands/Sequences/Intaking/Start and Run Intaking": "Command",
+      "/HoundLog/Commands/Sequences/Scoring/Full Score Sequence": "Command",
+      "/HoundLog/Commands/Sequences/Scoring/Full Score Sequence Auto": "Command",
+      "/HoundLog/Commands/Sequences/Scoring/Place Piece": "Command",
+      "/HoundLog/Commands/Sequences/Scoring/Place Piece Auto": "Command",
+      "/HoundLog/Commands/Sequences/Scoring/Raise Elevator": "Command",
+      "/HoundLog/Commands/Sequences/Scoring/Stow Elevator": "Command",
+      "/HoundLog/Commands/Sequences/Scoring/Trigger Secondary Button": "Command",
+      "/HoundLog/Commands/States/Clear Intake Mode": "Command",
+      "/HoundLog/Commands/States/Initialize Mechanisms": "Command",
+      "/HoundLog/Commands/States/Robot State Chooser": "String Chooser",
+      "/HoundLog/Commands/States/Set Intake Mode": "Command",
+      "/HoundLog/Commands/States/Set Robot State": "Command",
+      "/HoundLog/Simulation/Operator Panel/Reset": "Command",
+      "/HoundLog/Simulation/Operator Panel/Score": "Command",
+      "/HoundLog/Simulation/Operator Panel/Select Left Grid": "Command",
+      "/HoundLog/Simulation/Operator Panel/Select Left High Location": "Command",
+      "/HoundLog/Simulation/Operator Panel/Select Left Low Location": "Command",
+      "/HoundLog/Simulation/Operator Panel/Select Left Middle Location": "Command",
+      "/HoundLog/Simulation/Operator Panel/Select Middle Grid": "Command",
+      "/HoundLog/Simulation/Operator Panel/Select Middle High Location": "Command",
+      "/HoundLog/Simulation/Operator Panel/Select Middle Low Location": "Command",
+      "/HoundLog/Simulation/Operator Panel/Select Middle Middle Location": "Command",
+      "/HoundLog/Simulation/Operator Panel/Select Right Grid": "Command",
+      "/HoundLog/Simulation/Operator Panel/Select Right High Location": "Command",
+      "/HoundLog/Simulation/Operator Panel/Select Right Low Location": "Command",
+      "/HoundLog/Simulation/Operator Panel/Select Right Middle Location": "Command"
     },
     "windows": {
+      "/FMSInfo": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog//WPILib/CommandScheduler": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog//WPILib/Mechanisms": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog//WPILib/Subsystem Info/Drivetrain": {
+        "window": {
+          "name": "Drivetrain",
+          "visible": true
+        }
+      },
+      "/HoundLog//WPILib/Subsystem Info/Elbow": {
+        "window": {
+          "name": "Elbow",
+          "visible": true
+        }
+      },
+      "/HoundLog//WPILib/Subsystem Info/Elevator": {
+        "window": {
+          "name": "Elevator",
+          "visible": true
+        }
+      },
+      "/HoundLog//WPILib/Subsystem Info/Intake": {
+        "window": {
+          "name": "Intake",
+          "visible": true
+        }
+      },
+      "/HoundLog//WPILib/Subsystem Info/LEDs": {
+        "window": {
+          "name": "LEDs",
+          "visible": true
+        }
+      },
+      "/HoundLog//WPILib/Subsystem Info/Manipulator": {
+        "window": {
+          "name": "Manipulator",
+          "visible": true
+        }
+      },
+      "/HoundLog//WPILib/Subsystem Info/Watchtower": {
+        "window": {
+          "name": "Watchtower",
+          "visible": true
+        }
+      },
       "/HoundLog/Autonomous/Chooser": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Autonomous/Field": {
+        "Robot": {
+          "length": 0.8799999952316284,
+          "width": 0.8799999952316284
+        },
+        "backLeft": {
+          "length": 0.30000001192092896,
+          "width": 0.30000001192092896
+        },
+        "backRight": {
+          "length": 0.30000001192092896,
+          "width": 0.30000001192092896
+        },
+        "bottom": 544,
+        "frontLeft": {
+          "length": 0.30000001192092896,
+          "width": 0.30000001192092896
+        },
+        "frontRight": {
+          "length": 0.30000001192092896,
+          "width": 0.30000001192092896
+        },
+        "height": 8.013679504394531,
+        "image": "/Users/davidracovan/Downloads/2023-field.png",
+        "left": 46,
+        "right": 1088,
+        "top": 36,
+        "width": 16.541748046875,
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Autonomous/Generate Routine": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Drivetrain/Brake O": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Drivetrain/Brake X": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Drivetrain/Rotate to 0°": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Drivetrain/Rotate to 180°": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Drivetrain/Rotate to 270°": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Drivetrain/Rotate to 90°": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Elbow/Move to Setpoint": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Elbow/Setpoint Chooser": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Elevator/Move to Setpoint": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Elevator/Setpoint Chooser": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Intake/Cubapult Primed": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Intake/Cubapult Released": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Intake/Passover Extended": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Intake/Passover Retracted": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Intake/Run Passover Motors": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Intake/Simulate Game Piece Detected": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/LEDs/Hold Selected State": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/LEDs/LED State Chooser": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Manipulator/Pincers Closed": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Manipulator/Pincers Open": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Manipulator/Simulate Pole Switch Triggered": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Manipulator/Wrist Down": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Manipulator/Wrist Up": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Choosers/Game Piece Chooser": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Choosers/Level Chooser": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Intaking/Eject Game Piece": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Intaking/Finish Ejecting": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Intaking/Finish Intaking": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Intaking/Human Player Pickup": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Intaking/Human Player Stow Elevator": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Intaking/Intake Game Piece": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Intaking/Start and Run Ejecting": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Intaking/Start and Run Intaking": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Scoring/Full Score Sequence": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Scoring/Full Score Sequence Auto": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Scoring/Place Piece": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Scoring/Place Piece Auto": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Scoring/Raise Elevator": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Scoring/Stow Elevator": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/Sequences/Scoring/Trigger Secondary Button": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/States/Clear Intake Mode": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/States/Initialize Mechanisms": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/States/Robot State Chooser": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/States/Set Intake Mode": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/HoundLog/Commands/States/Set Robot State": {
         "window": {
           "visible": true
         }
@@ -103,53 +431,21 @@
     }
   },
   "NetworkTables Settings": {
-    "dsClient": false,
     "mode": "Client (NT4)",
-    "serverTeam": "868"
+    "serverTeam": "localhost"
   },
   "Plots": {
     "Plot <0>": {
       "plots": [
         {
-          "height": 558,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/HoundLog/Elbow/Elbow Motor/Encoder Distance"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/HoundLog/Elbow/Feedforward"
-            },
-            {
-              "color": [
-                0.3333333432674408,
-                0.658823549747467,
-                0.4078431725502014,
-                1.0
-              ],
-              "id": "NT:/HoundLog/Elbow/PID Output"
-            },
-            {
-              "color": [
-                0.7686275243759155,
-                0.30588236451148987,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/HoundLog/Elbow/Setpoint Position"
-            }
-          ]
+          "height": 219
+        }
+      ]
+    },
+    "Plot <1>": {
+      "plots": [
+        {
+          "height": 216
         }
       ]
     }
