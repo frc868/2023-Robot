@@ -17,7 +17,6 @@ import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.GamePieceLocation.GridPosition;
 import frc.robot.GamePieceLocation.Level;
 import frc.robot.commands.IntakingCommands;
-import frc.robot.commands.RobotStates;
 import frc.robot.commands.ScoringCommands;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elbow;
@@ -89,9 +88,11 @@ public class Controls {
 
         drivetrain.setDefaultCommand(
                 drivetrain.teleopDriveCommand(
-                        () -> -joystick.getY(),
-                        () -> -joystick.getX(),
-                        () -> -MathUtil.applyDeadband(joystick.getTwist() * (isTwistLimited ? 0.7 : 1), 0.05),
+                        () -> -joystick.getY() * Constants.DRIVE_RATE_LIMIT.get(),
+                        () -> -joystick.getX() * Constants.DRIVE_RATE_LIMIT.get(),
+                        () -> -MathUtil.applyDeadband(
+                                joystick.getTwist() * Constants.DRIVE_RATE_LIMIT.get() * (isTwistLimited ? 0.7 : 1),
+                                0.05),
                         () -> isInputCubed));
 
         joystick.button(13).onTrue(drivetrain.zeroGyroCommand());
@@ -112,34 +113,34 @@ public class Controls {
                         Commands.runOnce(() -> isInputCubed = true)))
                 .whileTrue(
                         Commands.either(
-                                drivetrain.turnWhileMovingCommand(Math.PI, true),
+                                drivetrain.controlledRotateCommand(Math.PI, true),
                                 Commands.none(),
                                 () -> FieldConstants.AutoDrive.isInCommunity(drivetrain.getPose())).repeatedly())
                 .onFalse(Commands.parallel(
                         Commands.runOnce(() -> isTwistLimited = false),
                         Commands.runOnce(() -> isInputCubed = false)));
 
-        new Trigger(() -> !RobotStates.getIntaking()).debounce(2).and(joystick.button(14))
+        new Trigger(() -> !Modes.getIntaking()).debounce(2).and(joystick.button(14))
                 .toggleOnTrue(intake.toggleRamrodsCommand());
 
         joystick.pov(0, 0, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(0), true));
+                .whileTrue(drivetrain.controlledRotateCommand(Math.toRadians(0), true));
         // 90 on joystick is right, while 90 CCW is left
         joystick.pov(0, 90, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(270), true));
+                .whileTrue(drivetrain.controlledRotateCommand(Math.toRadians(270), true));
         joystick.pov(0, 180, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(180), true));
+                .whileTrue(drivetrain.controlledRotateCommand(Math.toRadians(180), true));
         joystick.pov(0, 270, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(90), true));
+                .whileTrue(drivetrain.controlledRotateCommand(Math.toRadians(90), true));
 
         joystick.pov(2, 0, CommandScheduler.getInstance().getDefaultButtonLoop())
                 .onTrue(intake.setRamrodsRetractedCommand());
         joystick.pov(2, 180, CommandScheduler.getInstance().getDefaultButtonLoop())
                 .onTrue(intake.setRamrodsExtendedCommand());
         joystick.pov(2, 270, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CONE).ignoringDisable(true));
+                .onTrue(Modes.setIntakeModeCommand(() -> GamePiece.CONE).ignoringDisable(true));
         joystick.pov(2, 90, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CUBE).ignoringDisable(true));
+                .onTrue(Modes.setIntakeModeCommand(() -> GamePiece.CUBE).ignoringDisable(true));
 
         joystick.button(9)
                 .onTrue(IntakingCommands.intakePieceCommand(
@@ -154,9 +155,8 @@ public class Controls {
         joystick.button(8)
                 .whileTrue(drivetrain.chargeStationBalanceCommand());
 
-        joystick.button(5).whileTrue(RobotStates.autoDriveCommand(drivetrain, gridInterface));
+        joystick.button(5).whileTrue(drivetrain.autoDriveCommand(gridInterface));
 
-        joystick.axisGreaterThan(5, 0.25).whileTrue(drivetrain.turnToHPStationCommand());
     }
 
     public static void configureOperatorControls(int port1, int port2, Drivetrain drivetrain,
@@ -165,8 +165,8 @@ public class Controls {
 
         BooleanConsumer safeStop = (d) -> {
             if (d) {
-                elevator.disable();
-                elbow.disable();
+                elevator.holdCurrentPositionCommand().schedule();
+                elbow.holdCurrentPositionCommand().schedule();
             }
         };
 
@@ -223,7 +223,7 @@ public class Controls {
 
         getButton.apply(OperatorControls.SCORE)
                 .whileTrue(ScoringCommands
-                        .scorePieceCommand(
+                        .fullScoreSequenceCommand(
                                 () -> hids[OperatorControls.GAME_PIECE_DROP.hid].getHID()
                                         .getRawButton(OperatorControls.GAME_PIECE_DROP.button),
                                 (b) -> setOutput.accept(OperatorControls.GAME_PIECE_DROP, b),
@@ -236,7 +236,7 @@ public class Controls {
                         false)));
 
         getButton.apply(OperatorControls.STOW)
-                .whileTrue(RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow)
+                .whileTrue(ScoringCommands.stowElevatorCommand(intake, manipulator, elevator, elbow)
                         .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.STOW,
                                 true)))
                         .finallyDo(safeStop))
@@ -244,7 +244,7 @@ public class Controls {
                         false)));
 
         getButton.apply(OperatorControls.HP_STOW)
-                .whileTrue(RobotStates.stowElevatorHPStationCommand(intake, manipulator, elevator,
+                .whileTrue(IntakingCommands.humanPlayerStowElevatorCommand(intake, manipulator, elevator,
                         elbow)
                         .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_STOW,
                                 true)))
@@ -254,12 +254,12 @@ public class Controls {
 
         getButton.apply(OperatorControls.HP_CONE)
                 .whileTrue(
-                        RobotStates.humanPlayerPickupCommand(
+                        IntakingCommands.humanPlayerPickupCommand(
                                 () -> hids[OperatorControls.GAME_PIECE_DROP.hid].getHID()
                                         .getRawButton(OperatorControls.GAME_PIECE_DROP.button),
                                 (b) -> setOutput.accept(OperatorControls.GAME_PIECE_DROP, b),
-                                GamePiece.CONE,
-                                drivetrain, intake,
+                                () -> GamePiece.CONE,
+                                intake,
                                 manipulator, elevator,
                                 elbow)
                                 .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_CONE,
@@ -269,11 +269,10 @@ public class Controls {
                         false)));
 
         getButton.apply(OperatorControls.HP_CUBE)
-                .whileTrue(RobotStates
+                .whileTrue(IntakingCommands
                         .humanPlayerPickupCommand(() -> hids[OperatorControls.GAME_PIECE_DROP.hid].getHID()
                                 .getRawButton(OperatorControls.GAME_PIECE_DROP.button),
-                                (b) -> setOutput.accept(OperatorControls.GAME_PIECE_DROP, b), GamePiece.CUBE,
-                                drivetrain,
+                                (b) -> setOutput.accept(OperatorControls.GAME_PIECE_DROP, b), () -> GamePiece.CUBE,
                                 intake, manipulator, elevator,
                                 elbow)
                         .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.HP_CONE, true)))
@@ -282,7 +281,7 @@ public class Controls {
                         false)));
 
         getButton.apply(OperatorControls.INITIALIZE)
-                .whileTrue(RobotStates.initializeMechanisms(intake, manipulator, elevator,
+                .whileTrue(Modes.initializeMechanisms(intake, manipulator, elevator,
                         elbow)
                         .andThen(Commands.runOnce(() -> setOutput.accept(OperatorControls.INITIALIZE,
                                 true))));
@@ -294,10 +293,12 @@ public class Controls {
             Elevator elevator, Elbow elbow) {
         CommandXboxController xbox = new CommandXboxController(port);
 
-        elevator.setDefaultCommand(
-                elevator.setOverridenElevatorSpeedCommand(() -> -0.25 * xbox.getLeftY(), intake,
-                        elbow));
-        elbow.setDefaultCommand(elbow.setOverridenElbowSpeedCommand(() -> -0.25 * xbox.getRightY()));
+        // elevator.setDefaultCommand(
+        // elevator.setOverridenElevatorSpeedCommand(() -> -0.25 * xbox.getLeftY(),
+        // intake,
+        // elbow));
+        // elbow.setDefaultCommand(elbow.setOverridenElbowSpeedCommand(() -> -0.25 *
+        // xbox.getRightY()));
 
         xbox.x().onTrue(intake.setPassoversExtendedCommand(elevator));
         xbox.b().onTrue(intake.setPassoversRetractedCommand(elevator));
@@ -306,16 +307,15 @@ public class Controls {
 
         xbox.povLeft().onTrue(manipulator.setPincersOpenCommand());
         xbox.povRight().onTrue(manipulator.setPincersClosedCommand());
-        xbox.povUp().onTrue(manipulator.setWristUpCommand(elevator));
+        xbox.povUp().onTrue(manipulator.setWristUpCommand());
         xbox.povDown().onTrue(manipulator.setWristDownCommand());
         xbox.rightBumper().whileTrue(intake.runPassoverMotorsCommand());
         xbox.leftBumper().whileTrue(intake.reversePassoverMotorsCommand());
 
-        xbox.leftStick().and(xbox.povUp()).onTrue(elbow.setDesiredPositionCommand(ElbowPosition.HIGH, elevator));
-        xbox.leftStick().and(xbox.povLeft()).onTrue(elbow.setDesiredPositionCommand(ElbowPosition.MID, elevator));
-        xbox.leftStick().and(xbox.povRight())
-                .onTrue(elbow.setDesiredPositionCommand(ElbowPosition.MID_CONE_HIGH, elevator));
-        xbox.leftStick().and(xbox.povDown()).onTrue(elbow.setDesiredPositionCommand(ElbowPosition.LOW, elevator));
+        xbox.leftStick().and(xbox.povUp()).onTrue(elbow.moveToPositionCommand(() -> ElbowPosition.HIGH));
+        xbox.leftStick().and(xbox.povLeft()).onTrue(elbow.moveToPositionCommand(() -> ElbowPosition.MID));
+        xbox.leftStick().and(xbox.povRight()).onTrue(elbow.moveToPositionCommand(() -> ElbowPosition.MID_CONE_HIGH));
+        xbox.leftStick().and(xbox.povDown()).onTrue(elbow.moveToPositionCommand(() -> ElbowPosition.LOW));
 
         xbox.rightTrigger(0.5).onTrue(Overrides.MANUAL_MECH_CONTROL_MODE.enableC());
         xbox.leftTrigger(0.5).onFalse(Overrides.MANUAL_MECH_CONTROL_MODE.disableC());

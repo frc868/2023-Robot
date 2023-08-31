@@ -9,15 +9,8 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
 import com.techhounds.houndutil.houndlib.Utils;
-import com.techhounds.houndutil.houndlog.LogGroup;
-import com.techhounds.houndutil.houndlog.LogProfileBuilder;
-import com.techhounds.houndutil.houndlog.LoggingManager;
-import com.techhounds.houndutil.houndlog.enums.LogLevel;
-import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
-import com.techhounds.houndutil.houndlog.loggers.Logger;
-import com.techhounds.houndutil.houndlog.logitems.BooleanLogItem;
-import com.techhounds.houndutil.houndlog.logitems.DoubleLogItem;
-
+import com.techhounds.houndutil.houndlog.interfaces.Log;
+import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -33,14 +26,14 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.Overrides;
+import frc.robot.Modes;
 import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.GamePieceLocation.Level;
-import frc.robot.commands.RobotStates;
 
 /**
  * The elevator subsystem, with two motors and motion profling.
@@ -48,9 +41,10 @@ import frc.robot.commands.RobotStates;
  * @author hr
  * @author jt
  */
-public class Elevator extends ProfiledPIDSubsystem {
+@LoggedObject
+public class Elevator extends SubsystemBase {
     public static enum ElevatorPosition {
-        BOTTOM(-0.02),
+        BOTTOM(0),
         CONE_LOW(0.25),
         CONE_MID(1.14),
         CONE_HIGH(1.7),
@@ -70,19 +64,34 @@ public class Elevator extends ProfiledPIDSubsystem {
     }
 
     /** The left motor of the elevator. */
-    private CANSparkMax leftMotor = new CANSparkMax(Constants.CAN.ELEVATOR_LEFT_MOTOR, MotorType.kBrushless);
+    @Log(name = "Left Motor")
+    private CANSparkMax leftMotor = new CANSparkMax(Constants.CAN.ELEVATOR_LEFT_MOTOR_ID, MotorType.kBrushless);
 
     /** The right motor of the elevator. */
-    private CANSparkMax rightMotor = new CANSparkMax(Constants.CAN.ELEVATOR_RIGHT_MOTOR, MotorType.kBrushless);
+    @Log(name = "Right Motor")
+    private CANSparkMax rightMotor = new CANSparkMax(Constants.CAN.ELEVATOR_RIGHT_MOTOR_ID, MotorType.kBrushless);
 
-    /** The object that controlls both elevator motors. */
+    /** The group that controls both elevator motors. */
     private MotorControllerGroup motors = new MotorControllerGroup(leftMotor, rightMotor);
 
     /** Hall effect sensor that represents the minimum extension of the elevator. */
+    @Log(name = "Bottom Hall Effect")
     private DigitalInput bottomHallEffect = new DigitalInput(Constants.DIO.ELEVATOR_BOTTOM_LIMIT);
 
-    /** Hall effect sensor that represents the maximum extension of the elevator. */
-    private DigitalInput topHallEffect = new DigitalInput(Constants.DIO.ELEVATOR_TOP_LIMIT);
+    private TrapezoidProfile.Constraints normalConstraints = new TrapezoidProfile.Constraints(
+            Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND,
+            Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
+
+    private TrapezoidProfile.Constraints stowingConstraints = new TrapezoidProfile.Constraints(
+            Constants.Geometries.Elevator.MAX_STOWING_VELOCITY_METERS_PER_SECOND,
+            Constants.Geometries.Elevator.MAX_STOWING_ACCELERATION_METERS_PER_SECOND_SQUARED);
+
+    @Log(name = "Profiled PID Controller")
+    private ProfiledPIDController pidController = new ProfiledPIDController(
+            Constants.Gains.Elevator.kP,
+            Constants.Gains.Elevator.kI,
+            Constants.Gains.Elevator.kD,
+            normalConstraints);
 
     /**
      * The feedforward controller (calculates voltage based on the setpoint's
@@ -98,13 +107,13 @@ public class Elevator extends ProfiledPIDSubsystem {
     private MechanismLigament2d ligament;
 
     /**
-     * The physics simulator for this mechansim. The elevator sim takes in voltages
+     * The physics simulator for this mechanism. The elevator sim takes in voltages
      * from the motor and simulates an elevator under the influence of gravity.
      */
     private ElevatorSim elevatorSim = new ElevatorSim(
             DCMotor.getNEO(2),
             4,
-            10,
+            15,
             Units.inchesToMeters(1.2),
             Units.inchesToMeters(0),
             1.72,
@@ -117,57 +126,15 @@ public class Elevator extends ProfiledPIDSubsystem {
      */
     private DIOSim bottomHallEffectSim;
 
-    /**
-     * The wrapper of the topHallEffect for simulation. This allows you to set
-     * the values of the sensor in sim without changing the values IRL. This value
-     * is not used when the robot is running IRL.
-     */
-    private DIOSim topHallEffectSim;
-
-    /** Used to graph on NT. */
-    private double setpointPosition = 0;
-    /** Used to graph on NT. */
-    private double setpointVelocity = 0;
-    /** Used to graph on NT. */
-    private double pidOutput = 0;
-    /** Used to graph on NT. */
+    @Log(name = "Feedback", groups = "Control")
+    private double feedback = 0;
+    @Log(name = "Feedforward", groups = "Control")
     private double feedforward = 0;
 
     /**
      * Initializes the elevator.
      */
     public Elevator(MechanismLigament2d ligament) {
-        super(new ProfiledPIDController(
-                Constants.Gains.Elevator.kP.get(),
-                Constants.Gains.Elevator.kI.get(),
-                Constants.Gains.Elevator.kD.get(),
-                // 0, 0, 0,
-                new TrapezoidProfile.Constraints(
-                        Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND.get(),
-                        Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
-
-        getController().setTolerance(Constants.Gains.Elevator.TOLERANCE.get());
-
-        Constants.Gains.Elevator.kP.setConsumer((d) -> getController().setP(d));
-        Constants.Gains.Elevator.kI.setConsumer((d) -> getController().setI(d));
-        Constants.Gains.Elevator.kD.setConsumer((d) -> getController().setD(d));
-        Constants.Gains.Elevator.TOLERANCE.setConsumer((d) -> getController().setTolerance(d));
-        // Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND.setConsumer((d)
-        // -> getController()
-        // .setConstraints(
-        // new TrapezoidProfile.Constraints(
-        // d,
-        // Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.get())));
-
-        // Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED.setConsumer((d)
-        // -> getController()
-        // .setConstraints(
-        // new TrapezoidProfile.Constraints(
-        // Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND.get(),
-        // d)));
-
-        this.ligament = ligament;
-
         SparkMaxConfigurator.configure(leftMotor)
                 .withIdleMode(IdleMode.kBrake)
                 .withCurrentLimit(40)
@@ -181,36 +148,21 @@ public class Elevator extends ProfiledPIDSubsystem {
                 .withPositionConversionFactor(Constants.Geometries.Elevator.ENCODER_DISTANCE_TO_METERS, true)
                 .burnFlash();
 
-        LoggingManager.getInstance().addGroup("Elevator", new LogGroup(
-                new Logger[] {
-                        new BooleanLogItem("Bottom Hall Effect", bottomHallEffect::get, LogLevel.MAIN),
-                        new BooleanLogItem("Top Hall Effect", topHallEffect::get, LogLevel.MAIN),
-                        new DoubleLogItem("Control/Position", () -> this.getMeasurement(), LogLevel.MAIN),
-                        new DoubleLogItem("Control/Velocity", () -> leftMotor.getEncoder().getVelocity(),
-                                LogLevel.MAIN),
-                        new DoubleLogItem("Control/Setpoint Position", () -> setpointPosition, LogLevel.MAIN),
-                        new DoubleLogItem("Control/Setpoint Velocity", () -> setpointVelocity, LogLevel.MAIN),
-                        new DoubleLogItem("Control/Feedforward", () -> feedforward, LogLevel.MAIN),
-                        new DoubleLogItem("Control/PID Output", () -> pidOutput, LogLevel.MAIN),
-                        new DoubleLogItem("Control/Total Output", () -> pidOutput + feedforward, LogLevel.MAIN),
-                        new DeviceLogger<CANSparkMax>(leftMotor, "Primary Elevator Motor",
-                                LogProfileBuilder.buildCANSparkMaxLogItems(leftMotor)),
-                        new DeviceLogger<CANSparkMax>(rightMotor, "Secondary Elevator Motor",
-                                LogProfileBuilder.buildCANSparkMaxLogItems(rightMotor)),
-                }));
+        pidController.setTolerance(Constants.Gains.Elevator.TOLERANCE);
+
+        this.ligament = ligament;
 
         if (RobotBase.isSimulation()) {
             bottomHallEffectSim = new DIOSim(bottomHallEffect);
             bottomHallEffectSim.setValue(false);
-            topHallEffectSim = new DIOSim(topHallEffect);
-            topHallEffectSim.setValue(false);
-            // RobotStates.enableInitialized();
         }
 
         new Trigger(bottomHallEffect::get).whileTrue(
                 Commands.parallel(
                         Commands.runOnce(this::resetEncoders).ignoringDisable(true),
-                        Commands.runOnce(RobotStates::enableInitialized)).ignoringDisable(true));
+                        Commands.runOnce(Modes::enableInitialized)).ignoringDisable(true));
+
+        setDefaultCommand(moveToCurrentGoalCommand());
     }
 
     /**
@@ -218,8 +170,7 @@ public class Elevator extends ProfiledPIDSubsystem {
      */
     @Override
     public void periodic() {
-        super.periodic();
-        ligament.setLength(-0.71 + getMeasurement());
+        ligament.setLength(-0.71 + getPosition());
     }
 
     /**
@@ -233,71 +184,16 @@ public class Elevator extends ProfiledPIDSubsystem {
         elevatorSim.update(0.020);
         leftMotor.getEncoder().setPosition(elevatorSim.getPositionMeters());
         bottomHallEffectSim.setValue(elevatorSim.getPositionMeters() <= 0);
-        topHallEffectSim.setValue(elevatorSim.getPositionMeters() >= 2.03);
     }
 
     /**
-     * Uses the output from the ProfiledPIDController. Adds the output to the result
-     * of the calculation from the feedforward controller.
-     * 
-     * @param output   the output of the ProfiledPIDController
-     * @param setpoint the setpoint state of the ProfiledPIDController, for
-     *                 feedforward
-     */
-    @Override
-    public void useOutput(double output, TrapezoidProfile.State setpoint) {
-        setpointPosition = setpoint.position;
-        setpointVelocity = setpoint.velocity;
-        feedforward = feedforwardController.calculate(setpoint.velocity);
-        pidOutput = output;
-        setVoltage(output + feedforward);
-    }
-
-    /**
-     * Returns the measurement of the process variable used by the
-     * ProfiledPIDController.
+     * Returns the current position of the elevator.
      * 
      * @return the output of the left motor's encoder
      */
-    @Override
-    public double getMeasurement() {
+    @Log(name = "Position")
+    public double getPosition() {
         return leftMotor.getEncoder().getPosition();
-    }
-
-    /**
-     * Get the goal position of the elevator.
-     * 
-     * @return the goal position of the elevator
-     */
-    public double getGoal() {
-        return getController().getGoal().position;
-    }
-
-    /**
-     * Checks if the elevator is at its goal position.
-     * 
-     * @return true if the elevator is at its goal position
-     */
-    public boolean isAtGoal() {
-        return getController().atGoal();
-    }
-
-    public boolean isAtPosition(ElevatorPosition position) {
-        return isEnabled()
-                ? this.getGoal() == position.value && isAtGoal()
-                : (this.getMeasurement() - position.value) < Constants.Gains.Elevator.TOLERANCE.get();
-    }
-
-    /**
-     * Check if the elevator is lowered. This is useful for the subsystem safeties.
-     * 
-     * @return true if the elevator is at the bottom state and is within the
-     *         tolerance of the controller.
-     */
-    public Pair<Boolean, String> isSafeForIntake() {
-        boolean safe = isAtPosition(ElevatorPosition.BOTTOM);
-        String str = safe ? "none" : "Elevator not lowered: cannot move intake";
-        return new Pair<Boolean, String>(safe, str);
     }
 
     /**
@@ -305,19 +201,13 @@ public class Elevator extends ProfiledPIDSubsystem {
      * 
      * @return true if the elevator is safe to move
      */
-    private Pair<Boolean, String> getIfSafeToMove(Intake intake, Elbow elbow) {
+    private Pair<Boolean, String> getIfSafeToMove() {
         boolean safe = true;
         String str = "none";
         if (!Overrides.SAFETIES_DISABLE.getStatus()) {
-
-            if (!RobotStates.isInitialized()) {
+            if (!Modes.isInitialized()) {
                 safe = false;
                 str = "Robot not initialized: cannot move elevator";
-            }
-
-            if (!intake.isSafeForElevator().getFirst()) {
-                safe = false;
-                str = intake.isSafeForElevator().getSecond();
             }
         }
 
@@ -325,19 +215,11 @@ public class Elevator extends ProfiledPIDSubsystem {
     }
 
     /**
-     * Sets the value of each encoder to the minimum distance.
+     * Sets the value of both motor encoders to zero.
      */
     public void resetEncoders() {
         leftMotor.getEncoder().setPosition(0);
         rightMotor.getEncoder().setPosition(0);
-    }
-
-    /**
-     * Stops both motors.
-     */
-    public void stop() {
-        leftMotor.stopMotor();
-        rightMotor.stopMotor();
     }
 
     /**
@@ -347,8 +229,7 @@ public class Elevator extends ProfiledPIDSubsystem {
      * @param speed the speed, from -1.0 to 1.0
      */
     public void setSpeed(double speed) {
-        if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(),
-                speed) || Overrides.MECH_LIMITS_DISABLE.getStatus()) {
+        if (!Utils.limitMechanism(bottomHallEffect.get(), false, speed) || Overrides.MECH_LIMITS_DISABLE.getStatus()) {
             if (RobotBase.isReal()) {
                 motors.set(speed);
             } else {
@@ -367,7 +248,7 @@ public class Elevator extends ProfiledPIDSubsystem {
      * @param speed the speed, from -1.0 to 1.0
      */
     private void setVoltage(double voltage) {
-        if (!Utils.limitMechanism(bottomHallEffect.get(), topHallEffect.get(),
+        if (!Utils.limitMechanism(bottomHallEffect.get(), false,
                 voltage) || Overrides.MECH_LIMITS_DISABLE.getStatus())
             motors.setVoltage(voltage);
         else {
@@ -375,65 +256,58 @@ public class Elevator extends ProfiledPIDSubsystem {
         }
     }
 
-    /**
-     * Creates an InstantCommand that sets the goal position of the elevator, and
-     * enables the controller.
-     * 
-     * @param position an ElevatorPosition to set the elevator to
-     * @return the command
-     */
-    public CommandBase setDesiredPositionCommand(ElevatorPosition position, Intake intake,
-            Elbow elbow) {
-        return setDesiredPositionCommand(() -> position, intake, elbow);
+    private CommandBase moveToCurrentGoalCommand() {
+        return run(() -> {
+            feedback = pidController.calculate(getPosition());
+            feedforward = feedforwardController.calculate(pidController.getSetpoint().position,
+                    pidController.getSetpoint().velocity);
+            setVoltage(feedback + feedforward);
+        }).withName("Move to Current Goal");
     }
 
-    public CommandBase setDesiredPositionCommand(Supplier<ElevatorPosition> positionSupplier, Intake intake,
-            Elbow elbow) {
+    public CommandBase moveToPositionCommand(Supplier<ElevatorPosition> goalPositionSupplier) {
         return Commands.either(
                 Commands.sequence(
                         runOnce(() -> {
-                            if (positionSupplier.get() == ElevatorPosition.BOTTOM)
-                                getController().setConstraints(new TrapezoidProfile.Constraints(
-                                        Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND_STOW.get(),
-                                        Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED_STOW
-                                                .get()));
+                            if (goalPositionSupplier.get() == ElevatorPosition.BOTTOM)
+                                pidController.setConstraints(stowingConstraints);
                             else
-                                getController().setConstraints(new TrapezoidProfile.Constraints(
-                                        Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND.get(),
-                                        Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED
-                                                .get()));
+                                pidController.setConstraints(normalConstraints);
                         }),
-                        runOnce(() -> setGoal(positionSupplier.get().value)),
-                        runOnce(this::enable),
-                        Commands.waitUntil(this::isAtGoal).withTimeout(1.5)),
-                RobotStates.singularErrorCommand(() -> getIfSafeToMove(intake, elbow).getSecond()),
-                () -> getIfSafeToMove(intake, elbow).getFirst());
+                        runOnce(() -> pidController.reset(getPosition())),
+                        runOnce(() -> pidController.setGoal(goalPositionSupplier.get().value)), // also sets 0 velocity
+                        moveToCurrentGoalCommand()
+                                .until(pidController::atGoal))
+                        .withTimeout(2)
+                        .finallyDo((d) -> {
+                            pidController.setConstraints(normalConstraints);
+                            motors.stopMotor();
+                        }),
+                Modes.singularErrorCommand(() -> getIfSafeToMove().getSecond()),
+                () -> getIfSafeToMove().getFirst());
     }
 
-    /**
-     * Creates an InstantCommand that drops the current position of the elevator by
-     * a value.
-     * 
-     * @param position an ElevatorPosition to set the elevator to
-     * @return the command
-     */
-    public CommandBase setDesiredPositionDeltaCommand(double position, Intake intake, Elbow elbow) {
+    public CommandBase moveToArbitraryPositionCommand(Supplier<Double> goalPositionSupplier) {
         return Commands.either(
                 Commands.sequence(
-                        runOnce(() -> {
-                            getController().setConstraints(new TrapezoidProfile.Constraints(
-                                    Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND_STOW.get(),
-                                    Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED_STOW
-                                            .get()));
-                        }),
-                        runOnce(() -> setGoal(getGoal() + position)),
-                        runOnce(this::enable),
-                        Commands.waitUntil(this::isAtGoal).withTimeout(0.3)),
-                RobotStates.singularErrorCommand(() -> getIfSafeToMove(intake, elbow).getSecond()),
-                () -> getIfSafeToMove(intake, elbow).getFirst());
+                        runOnce(() -> pidController.reset(getPosition())),
+                        runOnce(() -> pidController.setGoal(goalPositionSupplier.get())),
+                        moveToCurrentGoalCommand().until(pidController::atGoal)).withTimeout(2)
+                        .finallyDo((d) -> motors.stopMotor()),
+                Modes.singularErrorCommand(() -> getIfSafeToMove().getSecond()),
+                () -> getIfSafeToMove().getFirst());
     }
 
-    public CommandBase setScoringPositionCommand(Supplier<GamePiece> gamePieceMode,
+    public CommandBase movePositionDeltaCommand(Supplier<Double> delta) {
+        return moveToArbitraryPositionCommand(() -> pidController.getGoal().position + delta.get());
+    }
+
+    public CommandBase holdCurrentPositionCommand() {
+        return runOnce(() -> pidController.setGoal(getPosition())).andThen(run(() -> {
+        }));
+    }
+
+    public CommandBase moveToScoringPositionCommand(Supplier<GamePiece> gamePieceMode,
             Supplier<Level> scoringMode, Intake intake, Elbow elbow) {
         return Commands.select(
                 Map.of(
@@ -441,40 +315,40 @@ public class Elevator extends ProfiledPIDSubsystem {
                         Commands.select(
                                 Map.of(
                                         Level.LOW,
-                                        setDesiredPositionCommand(ElevatorPosition.CONE_LOW, intake, elbow),
+                                        moveToPositionCommand(() -> ElevatorPosition.CONE_LOW),
                                         Level.MIDDLE,
-                                        setDesiredPositionCommand(ElevatorPosition.CONE_MID, intake, elbow),
+                                        moveToPositionCommand(() -> ElevatorPosition.CONE_MID),
                                         Level.HIGH,
-                                        setDesiredPositionCommand(ElevatorPosition.CONE_HIGH, intake, elbow)),
+                                        moveToPositionCommand(() -> ElevatorPosition.CONE_HIGH)),
                                 scoringMode::get),
                         GamePiece.CUBE,
                         Commands.select(
                                 Map.of(
                                         Level.LOW,
-                                        setDesiredPositionCommand(ElevatorPosition.CUBE_LOW, intake, elbow),
+                                        moveToPositionCommand(() -> ElevatorPosition.CUBE_LOW),
                                         Level.MIDDLE,
-                                        setDesiredPositionCommand(ElevatorPosition.CUBE_MID, intake, elbow),
+                                        moveToPositionCommand(() -> ElevatorPosition.CUBE_MID),
                                         Level.HIGH,
-                                        setDesiredPositionCommand(ElevatorPosition.CUBE_HIGH, intake, elbow)),
+                                        moveToPositionCommand(() -> ElevatorPosition.CUBE_HIGH)),
                                 scoringMode::get)),
                 gamePieceMode::get);
     }
 
     /**
-     * Creates a psuedo-StartEndCommand that runs the motors down at 10% speed until
+     * Creates a psuedo-StartEndCommand that runs the motors down at 15% speed until
      * the bottom hall effect sensor is reached, then zeros the encoders.
      */
     public CommandBase zeroEncoderCommand() {
-        return startEnd(() -> setSpeed(-0.2), () -> {
+        return startEnd(() -> setSpeed(-0.15), () -> {
             this.resetEncoders();
-            RobotStates.enableInitialized();
+            Modes.enableInitialized();
             motors.stopMotor();
         }).until(bottomHallEffect::get).withName("Zero Encoder");
     }
 
     public CommandBase manualZeroEncoderCommand() {
         return Commands.runOnce(() -> {
-            RobotStates.enableInitialized();
+            Modes.enableInitialized();
             this.resetEncoders();
         });
     }
@@ -490,7 +364,6 @@ public class Elevator extends ProfiledPIDSubsystem {
     public CommandBase setOverridenElevatorSpeedCommand(DoubleSupplier speed, Intake intake, Elbow elbow) {
         return run(() -> {
             if (Overrides.MANUAL_MECH_CONTROL_MODE.getStatus()) {
-                this.disable();
                 setSpeed(speed.getAsDouble());
             }
         }).withName("Set Overridden Elevator Speed");

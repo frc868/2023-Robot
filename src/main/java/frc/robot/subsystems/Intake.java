@@ -3,14 +3,8 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
-import com.techhounds.houndutil.houndlog.LogGroup;
-import com.techhounds.houndutil.houndlog.LogProfileBuilder;
-import com.techhounds.houndutil.houndlog.LoggingManager;
-import com.techhounds.houndutil.houndlog.enums.LogLevel;
-import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
-import com.techhounds.houndutil.houndlog.loggers.Logger;
-import com.techhounds.houndutil.houndlog.logitems.BooleanLogItem;
-
+import com.techhounds.houndutil.houndlog.interfaces.Log;
+import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -31,27 +25,32 @@ import frc.robot.Constants;
  * 
  * @author bam
  */
+@LoggedObject
 public class Intake extends SubsystemBase {
     /**
      * The motor that drives the left side of the passover.
      */
-    private CANSparkMax leftPassoverMotor = new CANSparkMax(Constants.CAN.PASSOVER_LEFT_MOTOR,
+    @Log(name = "Left Passover Motor")
+    private CANSparkMax leftPassoverMotor = new CANSparkMax(Constants.CAN.PASSOVER_LEFT_MOTOR_ID,
             MotorType.kBrushless);
     /**
      * The motor that drives the right side of the passover.
      */
-    private CANSparkMax rightPassoverMotor = new CANSparkMax(Constants.CAN.PASSOVER_RIGHT_MOTOR,
+    @Log(name = "Right Passover Motor")
+    private CANSparkMax rightPassoverMotor = new CANSparkMax(Constants.CAN.PASSOVER_RIGHT_MOTOR_ID,
             MotorType.kBrushless);
     /**
      * The solenoid that controls the passover extending or retracting.
      */
+    @Log(name = "Passover Solenoid")
     private DoubleSolenoid passoverSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-            Constants.Pneumatics.PASSOVER[0], Constants.Pneumatics.PASSOVER[1]);
+            Constants.Pneumatics.PASSOVER_PORTS[0], Constants.Pneumatics.PASSOVER_PORTS[1]);
     /**
      * The solenoid that has shared control over the cubapult and ramrods.
      */
+    @Log(name = "Cubapolt-Ramrod Solenoid")
     private DoubleSolenoid cubapultRamrodSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-            Constants.Pneumatics.CUBAPULT[0], Constants.Pneumatics.CUBAPULT[1]);
+            Constants.Pneumatics.CUBAPULT_PORTS[0], Constants.Pneumatics.CUBAPULT_PORTS[1]);
     /**
      * The object that controlls both passover motors.
      */
@@ -61,6 +60,7 @@ public class Intake extends SubsystemBase {
     private MechanismLigament2d ligament;
 
     /** The beam break that detects if a game piece is in the robot. */
+    @Log(name = "Game Piece Detector")
     private DigitalInput gamePieceDetector = new DigitalInput(Constants.DIO.GAME_PIECE_SENSOR);
 
     /**
@@ -82,19 +82,6 @@ public class Intake extends SubsystemBase {
         SparkMaxConfigurator.configure(rightPassoverMotor)
                 .withCurrentLimit(25)
                 .burnFlash();
-
-        LoggingManager.getInstance().addGroup("Intake", new LogGroup(
-                new Logger[] {
-                        new DeviceLogger<CANSparkMax>(leftPassoverMotor, "Left Passover Motor",
-                                LogProfileBuilder.buildCANSparkMaxLogItems(leftPassoverMotor)),
-                        new DeviceLogger<CANSparkMax>(rightPassoverMotor, "Right Passover Motor",
-                                LogProfileBuilder.buildCANSparkMaxLogItems(rightPassoverMotor)),
-                        new DeviceLogger<DoubleSolenoid>(cubapultRamrodSolenoid, "Cubapult Solenoid",
-                                LogProfileBuilder.buildDoubleSolenoidLogItems(cubapultRamrodSolenoid)),
-                        new DeviceLogger<DoubleSolenoid>(passoverSolenoid, "Passover Solenoid",
-                                LogProfileBuilder.buildDoubleSolenoidLogItems(passoverSolenoid)),
-                        new BooleanLogItem("Is Game Piece Detected", this::isGamePieceDetected, LogLevel.MAIN),
-                }));
 
         this.ligament = ligament;
 
@@ -280,9 +267,9 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase simGamePieceDetectedCommand() {
+    public CommandBase simulateGamePieceDetectedCommand() {
         return Commands.runOnce(() -> gamePieceDetectorSim.setValue(true))
                 .andThen(Commands.waitSeconds(1))
-                .andThen(() -> gamePieceDetectorSim.setValue(false)).withName("Sim Game Piece Detected");
+                .andThen(() -> gamePieceDetectorSim.setValue(false)).withName("Simulate Game Piece Detected");
     }
 }

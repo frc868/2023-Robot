@@ -1,10 +1,9 @@
 package frc.robot.subsystems;
 
-import com.techhounds.houndutil.houndlog.LogGroup;
-import com.techhounds.houndutil.houndlog.LoggingManager;
-import com.techhounds.houndutil.houndlog.enums.LogLevel;
-import com.techhounds.houndutil.houndlog.logitems.BooleanLogItem;
-import com.techhounds.houndutil.houndlog.logitems.StringLogItem;
+import java.util.function.Supplier;
+
+import com.techhounds.houndutil.houndlog.interfaces.Log;
+import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
@@ -13,8 +12,8 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Modes;
 import frc.robot.GamePieceLocation.GamePiece;
-import frc.robot.commands.RobotStates;
 
 /**
  * The LEDs subsystem, which controls the state of the LEDs through an internal
@@ -22,14 +21,18 @@ import frc.robot.commands.RobotStates;
  * 
  * @author dr
  */
+@LoggedObject
 public class LEDs extends SubsystemBase {
     /** The LEDs. */
     private AddressableLED leds = new AddressableLED(0);
 
-    /** The last state of the LEDs before it was in {@code state}. */
-    private LEDState previousState = LEDState.TechHOUNDS;
     /** The current state of the LEDs. */
     private LEDState state = LEDState.Uninitialized;
+
+    @Log(name = "State")
+    private Supplier<String> stateSupp = () -> this.state.toString();
+    @Log(name = "Is Error")
+    private Supplier<Boolean> isErrorSupp = () -> this.state == LEDState.Error;
 
     /**
      * Describes the states that the LEDs can be in.
@@ -221,10 +224,7 @@ public class LEDs extends SubsystemBase {
         leds.setData(state.getBuffer());
         leds.start();
 
-        LoggingManager.getInstance().addGroup("LEDs",
-                new LogGroup(
-                        new StringLogItem("State", () -> this.state.toString(), LogLevel.MAIN),
-                        new BooleanLogItem("Is Failure", () -> this.state == LEDState.Error, LogLevel.MAIN)));
+        setDefaultCommand(updateStateMachineCommand());
     }
 
     /**
@@ -243,70 +243,55 @@ public class LEDs extends SubsystemBase {
      * @param state the new LEDState.
      */
     public void setLEDState(LEDState state) {
-        this.previousState = this.state;
         this.state = state;
     }
 
     /**
-     * Sets the state of the LEDs, and sets the previousState to the old current
-     * state.
-     * 
-     * @param state the new LEDState.
-     */
-    public void setPreviousLEDState() {
-        setLEDState(previousState);
-    }
-
-    /**
-     * Creates a command that changes the state of the LEDs.
+     * Creates a command that changes the state of the LEDs, then idles.
      * 
      * @param state the new LEDState.
      * @return the command
      */
-    public CommandBase setLEDStateCommand(LEDState state) {
-        return Commands.runOnce(() -> this.setLEDState(state));
+    public CommandBase holdLEDStateCommand(Supplier<LEDState> state) {
+        return runOnce(() -> this.setLEDState(state.get())).andThen(Commands.run(() -> {
+        })).ignoringDisable(true).withName("Hold LED State");
     }
 
-    /**
-     * Creates a command that sets the LEDs to their previous setting.
-     * 
-     * @return
-     */
-    public CommandBase setPreviousLEDStateCommand() {
-        return Commands.runOnce(() -> this.setLEDState(previousState));
-    }
-
-    public void updateStateMachine() {
-        if (DriverStation.isDisabled()) {
-            setLEDState(LEDState.Rainbow);
-        }
-
-        if (RobotStates.getIntakeMode().isPresent()) {
-            if (RobotStates.getIntakeMode().get() == GamePiece.CONE) {
-                if (RobotStates.getIntaking())
-                    setLEDState(LEDState.ConePickupFlashing);
-                else
-                    setLEDState(LEDState.ConePickup);
-            } else if (RobotStates.getIntakeMode().get() == GamePiece.CUBE) {
-                if (RobotStates.getIntaking())
-                    setLEDState(LEDState.CubePickupFlashing);
-                else
-                    setLEDState(LEDState.CubePickup);
+    public CommandBase updateStateMachineCommand() {
+        return run(() -> {
+            if (Modes.getIntakeMode().isPresent()) {
+                if (Modes.getIntakeMode().get() == GamePiece.CONE) {
+                    if (Modes.getIntaking())
+                        setLEDState(LEDState.ConePickupFlashing);
+                    else
+                        setLEDState(LEDState.ConePickup);
+                } else if (Modes.getIntakeMode().get() == GamePiece.CUBE) {
+                    if (Modes.getIntaking())
+                        setLEDState(LEDState.CubePickupFlashing);
+                    else
+                        setLEDState(LEDState.CubePickup);
+                }
+            } else {
+                setLEDState(LEDState.TechHOUNDS);
             }
-        } else {
-            setLEDState(LEDState.TechHOUNDS);
-        }
 
-        if (!RobotStates.isInitialized()) {
-            setLEDState(LEDState.Uninitialized);
-        }
+            if (DriverStation.isDisabled()) {
+                setLEDState(LEDState.Rainbow);
+            }
 
-        if (RobotStates.getCurrentDiscreteError().isPresent()) {
-            setLEDState(LEDState.Error);
-        }
-        if (RobotStates.getCurrentContinuousError().isPresent()) {
-            setLEDState(LEDState.TemporaryError);
-        }
+            if (!Modes.isInitialized()) {
+                setLEDState(LEDState.Uninitialized);
+            }
+
+            if (Modes.getCurrentDiscreteError().isPresent()) {
+                setLEDState(LEDState.Error);
+            }
+            if (Modes.getCurrentContinuousError().isPresent()) {
+                setLEDState(LEDState.TemporaryError);
+            }
+        })
+                .ignoringDisable(true)
+                .withName("Update State Machine");
     }
 
     /**
@@ -315,7 +300,6 @@ public class LEDs extends SubsystemBase {
     @Override
     public void periodic() {
         super.periodic();
-        updateStateMachine();
         leds.setData(state.getBuffer());
     }
 }

@@ -1,24 +1,25 @@
 package frc.robot.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.pathplanner.lib.PathConstraints;
-import com.pathplanner.lib.PathPlannerTrajectory;
-import com.pathplanner.lib.auto.PIDConstants;
-import com.pathplanner.lib.auto.SwerveAutoBuilder;
-import com.techhounds.houndutil.houndauto.AutoManager;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPoint;
 import com.techhounds.houndutil.houndauto.AutoPath;
-import com.techhounds.houndutil.houndauto.AutoTrajectoryCommand;
-import com.techhounds.houndutil.houndauto.trajectoryloader.TrajectoryLoader;
+import com.techhounds.houndutil.houndauto.AutoRoutine;
+import com.techhounds.houndutil.houndauto.AutoSetting;
+import com.techhounds.houndutil.houndlib.Utils;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.Constants;
+import frc.robot.AutoSettingValue;
 import frc.robot.FieldConstants;
 import frc.robot.GamePieceLocation;
-import frc.robot.GamePieceLocation.GamePiece;
-import frc.robot.commands.RobotStates.RobotState;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Elevator;
@@ -26,224 +27,314 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Manipulator;
 
 public class Autos {
-    public static SwerveAutoBuilder getBuilder(Drivetrain drivetrain) {
-        return new SwerveAutoBuilder(
-                drivetrain::getPose,
-                (p) -> drivetrain.resetPoseEstimator(p),
-                Constants.Geometries.Drivetrain.KINEMATICS,
-                new PIDConstants(Constants.Gains.Trajectories.xkP, 0, 0),
-                new PIDConstants(Constants.Gains.Trajectories.thetakP, 0, 0),
-                (s) -> drivetrain.setModuleStates(s, true, true),
-                AutoManager.getInstance().getEventMap(),
-                false,
-                drivetrain);
-    }
+    public static AutoRoutine northOnePiece(Drivetrain drivetrain, Intake intake,
+            Manipulator manipulator, Elevator elevator, Elbow elbow) {
+        List<AutoSetting> settings = List.of(
+                new AutoSetting("Game Piece?",
+                        new AutoSettingValue[] { AutoSettingValue.CONE, AutoSettingValue.CUBE,
+                                AutoSettingValue.CUBAPULT }),
+                new AutoSetting("Mobility?",
+                        new AutoSettingValue[] { AutoSettingValue.YES, AutoSettingValue.NO }),
+                new AutoSetting("Balance on Charge Station?",
+                        new AutoSettingValue[] { AutoSettingValue.YES, AutoSettingValue.NO }));
 
-    public static Supplier<AutoTrajectoryCommand> pathPlannerTrajectory(AutoPath autoPath, Drivetrain drivetrain) {
-        return () -> new AutoTrajectoryCommand(autoPath, getBuilder(drivetrain).fullAuto(autoPath.getTrajectories()));
-    }
+        Supplier<List<PathPoint>> waypointsSupplier = () -> {
+            List<PathPoint> waypoints = new ArrayList<PathPoint>();
+            Pose2d pose;
+            switch ((AutoSettingValue) settings.get(0).getValue()) {
+                case CONE:
+                    pose = FieldConstants.getStartingPoseFacingGrid(GamePieceLocation.I1);
+                    waypoints.add(Utils.convertPose2dToPathPoint(
+                            new Pose2d(pose.getTranslation(),
+                                    Rotation2d.fromDegrees(0)),
+                            pose.getRotation()));
+                    break;
+                case CUBE:
+                    pose = FieldConstants.getStartingPoseFacingGrid(GamePieceLocation.H1);
+                    waypoints.add(Utils.convertPose2dToPathPoint(
+                            new Pose2d(pose.getTranslation(),
+                                    Rotation2d.fromDegrees(0)),
+                            pose.getRotation()));
+                    break;
+                case CUBAPULT:
+                    waypoints.add(Utils.convertPose2dToPathPoint(
+                            FieldConstants.getStartingCubapultPose(GamePieceLocation.H1), true));
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unexpected setting value!");
+            }
 
-    /**
-     * Creates the DoNothing command.
-     * 
-     * @param autoPath   the {@link AutoPath} containing the Figure 8 trajectory.
-     * @param drivetrain the drivetrain
-     * @return the command
-     */
-    public static Supplier<AutoTrajectoryCommand> doNothing() {
-        return () -> new AutoTrajectoryCommand(new Pose2d());
-    }
+            if (settings.get(1).getValue() == AutoSettingValue.YES) {
+                switch ((AutoSettingValue) settings.get(0).getValue()) {
+                    case CUBAPULT:
+                        waypoints.add(
+                                new PathPoint(FieldConstants.Blue.AutoPathPoints.North.MOBILITY,
+                                        Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)));
+                        break;
+                    case CONE:
+                    case CUBE:
+                        waypoints.add(new PathPoint(FieldConstants.Blue.AutoPathPoints.North.MOBILITY,
+                                Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(180)));
+                        break; // flip 180 if not using cubapult
+                    default:
+                        throw new IllegalArgumentException("Unexpected setting value!");
 
-    public static CommandBase driveIntakeScoreGamePiece(
-            boolean raiseElevator,
-            PathPlannerTrajectory driveToGamePiece, PathPlannerTrajectory driveToScoringLocation,
-            double waitTimeForElevator,
-            GamePieceLocation gamePieceLocation,
-            Drivetrain drivetrain, Intake intake, Manipulator manipulator, Elevator elevator, Elbow elbow) {
-        return Commands.sequence(
-                Commands.deadline(
-                        drivetrain.pathFollowingCommand(driveToGamePiece),
-                        Commands.sequence(
-                                Commands.waitSeconds(0.5),
-                                RobotStates
-                                        .stowElevatorCommand(intake, manipulator, elevator,
-                                                elbow)
-                                        .withTimeout(0.75),
-                                IntakingCommands.runIntakingCommand(() -> gamePieceLocation.gamePiece,
-                                        intake,
-                                        manipulator, elevator,
-                                        elbow))),
-                IntakingCommands.endIntakingCommand(() -> gamePieceLocation.gamePiece, intake, manipulator,
-                        elevator,
-                        elbow),
+                }
+            }
+            if (settings.get(2).getValue() == AutoSettingValue.YES) {
+                if (settings.get(1).getValue() == AutoSettingValue.YES) {
+                    waypoints.add(
+                            new PathPoint(
+                                    FieldConstants.Blue.AutoPathPoints.North.CHARGE_STATION_BALANCE,
+                                    Rotation2d.fromDegrees(180),
+                                    Rotation2d.fromDegrees(
+                                            settings.get(0).getValue() == AutoSettingValue.CUBAPULT ? 0 : 180))
+                                    .withPrevControlLength(3));
+                } else {
+                    waypoints.add(new PathPoint(
+                            FieldConstants.Blue.AutoPathPoints.North.CHARGE_STATION_BALANCE,
+                            Rotation2d.fromDegrees(0),
+                            Rotation2d.fromDegrees(settings.get(0).getValue() == AutoSettingValue.CUBAPULT ? 0 : 180))
+                            .withPrevControlLength(3));
+                }
+            }
+            return waypoints;
+        };
+
+        Supplier<AutoPath> autoPathSupplier = () -> {
+            List<PathPoint> waypoints = waypointsSupplier.get();
+
+            if (waypoints.size() == 1) {
+                waypoints.add(waypoints.get(0)); // to make a trajectory nonetheless
+            }
+            return new AutoPath("North: 1 Piece",
+                    PathPlanner.generatePath(new PathConstraints(4, 3), waypoints));
+        };
+
+        Supplier<Pose2d> blueInitialPoseSupplier = () -> {
+            PathPoint startPoint = waypointsSupplier.get().get(0);
+            return new Pose2d(startPoint.position, startPoint.holonomicRotation);
+        };
+
+        Function<AutoPath, CommandBase> command = (autoPath) -> Commands.sequence(
                 Commands.either(
-                        Commands.sequence(
-                                Commands.deadline(
-                                        Commands.waitUntil(manipulator::isPoleDetected),
-                                        Commands.waitSeconds(waitTimeForElevator).andThen(
-                                                ScoringCommands.raiseElevatorCommand(
-                                                        () -> gamePieceLocation.gamePiece,
-                                                        () -> gamePieceLocation.level,
-                                                        intake, manipulator, elevator, elbow).withTimeout(1.2)),
-                                        drivetrain.pathFollowingCommand(driveToScoringLocation)
-                                                .andThen(drivetrain::stop)),
-                                ScoringCommands.placePieceAutoCommand(
-                                        () -> gamePieceLocation.gamePiece,
-                                        () -> gamePieceLocation.level,
-                                        drivetrain, intake, manipulator, elevator, elbow)),
-                        drivetrain.pathFollowingCommand(driveToScoringLocation)
-                                .andThen(drivetrain::stop),
-                        () -> raiseElevator));
+                        AutoCommands.launchCube(intake),
+                        AutoCommands.scorePreload(
+                                () -> settings.get(0).getValue() == AutoSettingValue.CONE
+                                        ? GamePieceLocation.I1
+                                        : GamePieceLocation.H1,
+                                drivetrain, intake, manipulator, elevator, elbow),
+                        () -> settings.get(0).getValue() == AutoSettingValue.CUBAPULT),
+                AutoCommands.driveOut(autoPath.getTrajectories().get(0), drivetrain, intake, manipulator, elevator,
+                        elbow));
+        return new AutoRoutine("North: 1 Piece", settings, autoPathSupplier, blueInitialPoseSupplier, command);
     }
 
-    public static CommandBase launchCube(Intake intake) {
-        return Commands.sequence(
-                intake.setCubapultReleased(),
-                Commands.waitSeconds(0.1),
-                intake.setRamrodsRetractedCommand());
-    }
-
-    // public static AutoTrajectoryCommand threePieceLinkN(Drivetrain drivetrain,
-    // Intake intake,
-    // Manipulator manipulator, Elevator elevator, Elbow elbow) {
-    // AutoPath autoPath = TrajectoryLoader.getAutoPath("3 Piece Link N");
-    // return new AutoTrajectoryCommand(
-    // FieldConstants.getStartingCubapultPose(GamePieceLocation.H1),
-    // autoPath,
-    // Commands.sequence(
-    // launchCube(intake),
-    // driveIntakeScoreGamePiece(true, autoPath.getTrajectories().get(0),
-    // autoPath.getTrajectories().get(1),
-    // autoPath.getTrajectories().get(1).getMarkers().get(0).timeSeconds,
-    // GamePieceLocation.I2, drivetrain, intake,
-    // manipulator,
-    // elevator, elbow),
-    // driveIntakeScoreGamePiece(false, autoPath.getTrajectories().get(2),
-    // autoPath.getTrajectories().get(3),
-    // autoPath.getTrajectories().get(3).getMarkers().get(0).timeSeconds,
-    // GamePieceLocation.G2, drivetrain, intake,
-    // manipulator,
-    // elevator, elbow)));
-    // // Commands.parallel(
-    // // RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow))));
-    // }
-
-    public static AutoTrajectoryCommand twoPieceCubeN(Drivetrain drivetrain, Intake intake,
+    public static AutoRoutine northTwoPiece(Drivetrain drivetrain, Intake intake,
             Manipulator manipulator, Elevator elevator, Elbow elbow) {
-        AutoPath autoPath = TrajectoryLoader.getAutoPath("3 Piece Link N");
-        return new AutoTrajectoryCommand(
-                FieldConstants.getStartingCubapultPose(GamePieceLocation.H1),
-                autoPath,
-                Commands.sequence(
-                        launchCube(intake),
-                        Commands.deadline(
-                                drivetrain.pathFollowingCommand(autoPath.getTrajectories().get(0)),
-                                Commands.sequence(
-                                        Commands.waitSeconds(0.5),
-                                        RobotStates
-                                                .stowElevatorCommand(intake, manipulator, elevator,
-                                                        elbow)
-                                                .withTimeout(0.75),
-                                        IntakingCommands.runIntakingCommand(() -> GamePiece.CUBE,
-                                                intake,
-                                                manipulator, elevator,
-                                                elbow))),
-                        IntakingCommands.endIntakingCommand(() -> GamePiece.CUBE, intake, manipulator,
-                                elevator,
-                                elbow),
-                        drivetrain.pathFollowingCommand(autoPath.getTrajectories().get(1)),
-                        ScoringCommands.scorePieceAutoCommand(() -> GamePieceLocation.H2.gamePiece,
-                                () -> GamePieceLocation.H2.level,
-                                drivetrain, intake, manipulator,
-                                elevator, elbow),
-                        Commands.waitSeconds(1),
-                        RobotStates.driveDeltaCommand(-0.4, drivetrain, new PathConstraints(4, 3))));
-        // Commands.parallel(
-        // RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow))));
+        List<AutoSetting> settings = List.of(
+                new AutoSetting("Preload Game Piece?",
+                        new AutoSettingValue[] { AutoSettingValue.CONE, AutoSettingValue.CUBE,
+                                AutoSettingValue.CUBAPULT }),
+                new AutoSetting("Second Game Piece?",
+                        new AutoSettingValue[] { AutoSettingValue.CONE, AutoSettingValue.CUBE }),
+                new AutoSetting("Second Game Piece Location?",
+                        new AutoSettingValue[] { AutoSettingValue.ITEM1, AutoSettingValue.ITEM2 }),
+                new AutoSetting("Balance on Charge Station?",
+                        new AutoSettingValue[] { AutoSettingValue.YES, AutoSettingValue.NO }));
+
+        Supplier<List<PathPoint>> waypointsSupplier = () -> {
+            List<PathPoint> waypoints = new ArrayList<PathPoint>();
+            Pose2d pose;
+            switch ((AutoSettingValue) settings.get(0).getValue()) {
+                case CONE:
+                    pose = FieldConstants.getStartingPoseFacingGrid(GamePieceLocation.I1);
+                    waypoints.add(Utils.convertPose2dToPathPoint(
+                            new Pose2d(pose.getTranslation(),
+                                    Rotation2d.fromDegrees(0)),
+                            pose.getRotation()));
+                    break;
+                case CUBE:
+                    pose = FieldConstants.getStartingPoseFacingGrid(GamePieceLocation.H1);
+                    waypoints.add(Utils.convertPose2dToPathPoint(
+                            new Pose2d(pose.getTranslation(),
+                                    Rotation2d.fromDegrees(0)),
+                            pose.getRotation()));
+                    break;
+                case CUBAPULT:
+                    waypoints.add(Utils.convertPose2dToPathPoint(
+                            FieldConstants.getStartingCubapultPose(GamePieceLocation.H1), true));
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unexpected setting value!");
+            }
+
+            if (settings.get(1).getValue() == AutoSettingValue.YES) {
+                switch ((AutoSettingValue) settings.get(0).getValue()) {
+                    case CUBAPULT:
+                        waypoints.add(
+                                new PathPoint(FieldConstants.Blue.AutoPathPoints.North.MOBILITY,
+                                        Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)));
+                        break;
+                    case CONE:
+                    case CUBE:
+                        waypoints.add(new PathPoint(FieldConstants.Blue.AutoPathPoints.North.MOBILITY,
+                                Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(180)));
+                        break; // flip 180 if not using cubapult
+                    default:
+                        throw new IllegalArgumentException("Unexpected setting value!");
+
+                }
+            }
+            if (settings.get(2).getValue() == AutoSettingValue.YES) {
+                if (settings.get(1).getValue() == AutoSettingValue.YES) {
+                    waypoints.add(
+                            new PathPoint(
+                                    FieldConstants.Blue.AutoPathPoints.North.CHARGE_STATION_BALANCE,
+                                    Rotation2d.fromDegrees(180),
+                                    Rotation2d.fromDegrees(
+                                            settings.get(0).getValue() == AutoSettingValue.CUBAPULT ? 0 : 180))
+                                    .withPrevControlLength(3));
+                } else {
+                    waypoints.add(new PathPoint(
+                            FieldConstants.Blue.AutoPathPoints.North.CHARGE_STATION_BALANCE,
+                            Rotation2d.fromDegrees(0),
+                            Rotation2d.fromDegrees(settings.get(0).getValue() == AutoSettingValue.CUBAPULT ? 0 : 180))
+                            .withPrevControlLength(3));
+                }
+            }
+            return waypoints;
+        };
+
+        Supplier<AutoPath> autoPathSupplier = () -> {
+            List<PathPoint> waypoints = waypointsSupplier.get();
+
+            if (waypoints.size() == 1) {
+                waypoints.add(waypoints.get(0)); // to make a trajectory nonetheless
+            }
+            return new AutoPath("North: 1 Piece",
+                    PathPlanner.generatePath(new PathConstraints(4, 3), waypoints));
+        };
+
+        Supplier<Pose2d> blueInitialPoseSupplier = () -> {
+            PathPoint startPoint = waypointsSupplier.get().get(0);
+            return new Pose2d(startPoint.position, startPoint.holonomicRotation);
+        };
+
+        Function<AutoPath, CommandBase> command = (autoPath) -> Commands.sequence(
+                Commands.either(
+                        AutoCommands.launchCube(intake),
+                        AutoCommands.scorePreload(
+                                () -> settings.get(0).getValue() == AutoSettingValue.CONE
+                                        ? GamePieceLocation.I1
+                                        : GamePieceLocation.H1,
+                                drivetrain, intake, manipulator, elevator, elbow),
+                        () -> settings.get(0).getValue() == AutoSettingValue.CUBAPULT),
+                AutoCommands.driveOut(autoPath.getTrajectories().get(0), drivetrain, intake, manipulator, elevator,
+                        elbow));
+        return new AutoRoutine("North: 1 Piece", settings, autoPathSupplier, blueInitialPoseSupplier, command);
     }
 
-    public static AutoTrajectoryCommand onePieceMobilityN(Drivetrain drivetrain, Intake intake,
+    public static AutoRoutine southOnePiece(Drivetrain drivetrain, Intake intake,
             Manipulator manipulator, Elevator elevator, Elbow elbow) {
-        AutoPath autoPath = TrajectoryLoader.getAutoPath("1 Piece Mobility N");
-        return new AutoTrajectoryCommand(
-                FieldConstants.getStartingPoseFacingGrid(GamePieceLocation.H1),
-                autoPath,
-                Commands.sequence(
-                        RobotStates.autoDriveCommand(new PathConstraints(3, 2), () -> RobotState.SCORING,
-                                () -> GamePieceLocation.H1,
-                                drivetrain),
-                        ScoringCommands.scorePieceAutoCommand(() -> GamePieceLocation.E1.gamePiece,
-                                () -> GamePieceLocation.H1.level,
-                                drivetrain, intake, manipulator,
-                                elevator, elbow),
-                        Commands.waitSeconds(1),
-                        RobotStates.driveDeltaCommand(-0.4, drivetrain, new PathConstraints(4, 3)),
-                        RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow),
-                        drivetrain.pathFollowingCommand(autoPath.getTrajectories().get(0))));
-    }
+        List<AutoSetting> settings = List.of(
+                new AutoSetting("Game Piece?",
+                        new AutoSettingValue[] { AutoSettingValue.CONE, AutoSettingValue.CUBE,
+                                AutoSettingValue.CUBAPULT }),
+                new AutoSetting("Mobility?",
+                        new AutoSettingValue[] { AutoSettingValue.YES, AutoSettingValue.NO }),
+                new AutoSetting("Balance on Charge Station?",
+                        new AutoSettingValue[] { AutoSettingValue.YES, AutoSettingValue.NO }));
 
-    public static AutoTrajectoryCommand onePieceChargeMobilityM(Drivetrain drivetrain,
-            Intake intake,
-            Manipulator manipulator, Elevator elevator, Elbow elbow) {
-        AutoPath autoPath = TrajectoryLoader.getAutoPath("1 Piece Charge Mobility M");
-        return new AutoTrajectoryCommand(
-                FieldConstants.getStartingPoseFacingGrid(GamePieceLocation.E1), autoPath,
-                Commands.sequence(
-                        RobotStates.autoDriveCommand(new PathConstraints(3, 2), () -> RobotState.SCORING,
-                                () -> GamePieceLocation.E1,
-                                drivetrain),
-                        ScoringCommands.scorePieceAutoCommand(() -> GamePieceLocation.E1.gamePiece,
-                                () -> GamePieceLocation.E1.level,
-                                drivetrain, intake, manipulator,
-                                elevator, elbow),
-                        Commands.waitSeconds(1),
-                        RobotStates.driveDeltaCommand(-0.4, drivetrain, new PathConstraints(4, 3)),
-                        RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow),
-                        drivetrain.pathFollowingCommand(
-                                autoPath.getTrajectories().get(0)),
-                        drivetrain.chargeStationBalanceCommand()));
-    }
+        Supplier<List<PathPoint>> waypointsSupplier = () -> {
+            List<PathPoint> waypoints = new ArrayList<PathPoint>();
+            Pose2d pose;
+            switch ((AutoSettingValue) settings.get(0).getValue()) {
+                case CONE:
+                    pose = FieldConstants.getStartingPoseFacingGrid(GamePieceLocation.A1);
+                    waypoints.add(Utils.convertPose2dToPathPoint(
+                            new Pose2d(pose.getTranslation(),
+                                    Rotation2d.fromDegrees(0)),
+                            pose.getRotation()));
+                    break;
+                case CUBE:
+                    pose = FieldConstants.getStartingPoseFacingGrid(GamePieceLocation.B1);
+                    waypoints.add(Utils.convertPose2dToPathPoint(
+                            new Pose2d(pose.getTranslation(),
+                                    Rotation2d.fromDegrees(0)),
+                            pose.getRotation()));
+                    break;
+                case CUBAPULT:
+                    waypoints.add(Utils.convertPose2dToPathPoint(
+                            FieldConstants.getStartingCubapultPose(GamePieceLocation.B1), true));
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unexpected setting value!");
+            }
 
-    public static AutoTrajectoryCommand onePieceChargeM(Drivetrain drivetrain,
-            Intake intake,
-            Manipulator manipulator, Elevator elevator, Elbow elbow) {
-        AutoPath autoPath = TrajectoryLoader.getAutoPath("1 Piece Charge M");
-        return new AutoTrajectoryCommand(
-                FieldConstants.getStartingPoseFacingGrid(GamePieceLocation.E1), autoPath,
-                Commands.sequence(
-                        RobotStates.autoDriveCommand(new PathConstraints(3, 2), () -> RobotState.SCORING,
-                                () -> GamePieceLocation.E1,
-                                drivetrain),
-                        ScoringCommands.scorePieceAutoCommand(() -> GamePieceLocation.E1.gamePiece,
-                                () -> GamePieceLocation.E1.level,
-                                drivetrain, intake, manipulator,
-                                elevator, elbow),
-                        Commands.waitSeconds(1),
-                        RobotStates.driveDeltaCommand(-0.4, drivetrain, new PathConstraints(4, 3)),
-                        RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow),
-                        drivetrain.pathFollowingCommand(
-                                autoPath.getTrajectories().get(0)),
-                        drivetrain.chargeStationBalanceCommand()));
-    }
+            if (settings.get(1).getValue() == AutoSettingValue.YES) {
+                switch ((AutoSettingValue) settings.get(0).getValue()) {
+                    case CUBAPULT:
+                        waypoints.add(
+                                new PathPoint(FieldConstants.Blue.AutoPathPoints.South.MOBILITY,
+                                        Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(0)));
+                        break;
+                    case CONE:
+                    case CUBE:
+                        waypoints.add(new PathPoint(FieldConstants.Blue.AutoPathPoints.South.MOBILITY,
+                                Rotation2d.fromDegrees(0), Rotation2d.fromDegrees(180)));
+                        break; // flip 180 if not using cubapult
+                    default:
+                        throw new IllegalArgumentException("Unexpected setting value!");
 
-    public static AutoTrajectoryCommand onePieceMobilityS(Drivetrain drivetrain,
-            Intake intake,
-            Manipulator manipulator, Elevator elevator, Elbow elbow) {
-        AutoPath autoPath = TrajectoryLoader.getAutoPath("1 Piece Mobility S");
-        return new AutoTrajectoryCommand(
-                FieldConstants.getStartingPoseFacingGrid(GamePieceLocation.B1), autoPath,
-                Commands.sequence(
-                        RobotStates.autoDriveCommand(new PathConstraints(3, 2), () -> RobotState.SCORING,
-                                () -> GamePieceLocation.B1,
-                                drivetrain),
-                        ScoringCommands.scorePieceAutoCommand(() -> GamePieceLocation.E1.gamePiece,
-                                () -> GamePieceLocation.B1.level,
-                                drivetrain, intake, manipulator,
-                                elevator, elbow),
-                        Commands.waitSeconds(1),
-                        RobotStates.driveDeltaCommand(-0.4, drivetrain, new PathConstraints(4, 3)),
-                        RobotStates.stowElevatorCommand(intake, manipulator, elevator, elbow),
-                        drivetrain.pathFollowingCommand(
-                                autoPath.getTrajectories().get(0))));
+                }
+            }
+            if (settings.get(2).getValue() == AutoSettingValue.YES) {
+                if (settings.get(1).getValue() == AutoSettingValue.YES) {
+                    waypoints.add(
+                            new PathPoint(
+                                    FieldConstants.Blue.AutoPathPoints.South.CHARGE_STATION_BALANCE,
+                                    Rotation2d.fromDegrees(180),
+                                    Rotation2d.fromDegrees(
+                                            settings.get(0).getValue() == AutoSettingValue.CUBAPULT ? 0 : 180))
+                                    .withPrevControlLength(3));
+                } else {
+                    waypoints.add(new PathPoint(
+                            FieldConstants.Blue.AutoPathPoints.South.CHARGE_STATION_BALANCE,
+                            Rotation2d.fromDegrees(0),
+                            Rotation2d.fromDegrees(settings.get(0).getValue() == AutoSettingValue.CUBAPULT ? 0 : 180))
+                            .withPrevControlLength(3));
+                }
+            }
+            return waypoints;
+        };
+
+        Supplier<AutoPath> autoPathSupplier = () -> {
+            List<PathPoint> waypoints = waypointsSupplier.get();
+
+            if (waypoints.size() == 1) {
+                waypoints.add(waypoints.get(0)); // to make a trajectory nonetheless
+            }
+            return new AutoPath("South: 1 Piece",
+                    PathPlanner.generatePath(new PathConstraints(4, 3), waypoints));
+        };
+
+        Supplier<Pose2d> blueInitialPoseSupplier = () -> {
+            PathPoint startPoint = waypointsSupplier.get().get(0);
+            return new Pose2d(startPoint.position, startPoint.holonomicRotation);
+        };
+
+        Function<AutoPath, CommandBase> command = (autoPath) -> Commands.sequence(
+                Commands.either(
+                        AutoCommands.launchCube(intake),
+                        AutoCommands.scorePreload(
+                                () -> settings.get(0).getValue() == AutoSettingValue.CONE
+                                        ? GamePieceLocation.A1
+                                        : GamePieceLocation.B1,
+                                drivetrain, intake, manipulator, elevator, elbow),
+                        () -> settings.get(0).getValue() == AutoSettingValue.CUBAPULT),
+                AutoCommands.driveOut(autoPath.getTrajectories().get(0), drivetrain, intake, manipulator, elevator,
+                        elbow));
+        return new AutoRoutine("South: 1 Piece", settings, autoPathSupplier, blueInitialPoseSupplier, command);
     }
 }

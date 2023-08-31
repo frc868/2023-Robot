@@ -3,16 +3,14 @@ package frc.robot.subsystems;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.photonvision.EstimatedRobotPose;
 import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndlib.AdvantageScopeSerializer;
 import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera;
-import com.techhounds.houndutil.houndlog.LogGroup;
-import com.techhounds.houndutil.houndlog.LoggingManager;
-import com.techhounds.houndutil.houndlog.enums.LogLevel;
-import com.techhounds.houndutil.houndlog.logitems.DoubleArrayLogItem;
-
+import com.techhounds.houndutil.houndlog.interfaces.Log;
+import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -21,53 +19,40 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
+@LoggedObject
 public class Watchtower extends SubsystemBase {
     private SwerveDrivePoseEstimator poseEstimator = null;
 
     /** The PhotonVision cameras, used to detect the AprilTags. */
+
+    @Log(name = "OV9281-01", groups = "Cameras")
+    AprilTagPhotonCamera photonCamera1 = new AprilTagPhotonCamera("OV9281-01",
+            Constants.Vision.ROBOT_TO_CAMS[0]);
+
+    @Log(name = "OV9281-02", groups = "Cameras")
+    AprilTagPhotonCamera photonCamera2 = new AprilTagPhotonCamera("OV9281-02",
+            Constants.Vision.ROBOT_TO_CAMS[1]);
+
+    @Log(name = "OV9281-03", groups = "Cameras")
+    AprilTagPhotonCamera photonCamera3 = new AprilTagPhotonCamera("OV9281-03",
+            Constants.Vision.ROBOT_TO_CAMS[2]);
+
+    @Log(name = "OV9281-04", groups = "Cameras")
+    AprilTagPhotonCamera photonCamera4 = new AprilTagPhotonCamera("OV9281-04",
+            Constants.Vision.ROBOT_TO_CAMS[3]);
+
     private AprilTagPhotonCamera[] photonCameras = new AprilTagPhotonCamera[] {
-            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[0],
-                    Constants.Vision.ROBOT_TO_CAMS[0]),
-            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[1],
-                    Constants.Vision.ROBOT_TO_CAMS[1]),
-            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[2],
-                    Constants.Vision.ROBOT_TO_CAMS[2]),
-            new AprilTagPhotonCamera(Constants.Vision.CAMERA_NAMES[3],
-                    Constants.Vision.ROBOT_TO_CAMS[3])
-    };
+            photonCamera1, photonCamera2, photonCamera3, photonCamera4 };
+
+    @Log(name = "Overall Estimated Robot Pose")
+    private Supplier<double[]> estimatedPoseSupp = () -> AdvantageScopeSerializer
+            .serializePose2ds(List.of(this.poseEstimator.getEstimatedPosition()));
 
     public Watchtower() {
         AutoManager.getInstance().setPoseEstimatorCallback(this::updatePoseEstimator);
-        for (AprilTagPhotonCamera cam : photonCameras) {
-            LoggingManager.getInstance().addGroup(
-                    new LogGroup("Watchtower/" + cam.getName(),
-                            new DoubleArrayLogItem("Detected AprilTags",
-                                    () -> AdvantageScopeSerializer
-                                            .serializePose3ds(cam.getCurrentlyDetectedAprilTags()),
-                                    LogLevel.MAIN),
-                            new DoubleArrayLogItem("Detected Robot Pose3d",
-                                    () -> AdvantageScopeSerializer
-                                            .serializePose3ds(List.of(cam.getCurrentlyDetectedRobotPose())),
-                                    LogLevel.MAIN)));
-        }
-
-        LoggingManager.getInstance()
-                .addGroup(new LogGroup("Watchtower",
-                        new DoubleArrayLogItem("Estimated Robot Pose",
-                                () -> AdvantageScopeSerializer
-                                        .serializePose2ds(List.of(this.poseEstimator.getEstimatedPosition())),
-                                LogLevel.MAIN),
-                        new DoubleArrayLogItem("Detected AprilTags",
-                                this::getAllDetectedAprilTags, LogLevel.MAIN),
-                        new DoubleArrayLogItem("Detected Robot Poses",
-                                this::getAllDetectedRobotPoses, LogLevel.MAIN),
-                        new DoubleArrayLogItem("Camera Poses", this::getAllCameraPoses,
-                                LogLevel.MAIN)));
-
-        // log the packed apriltag poses from each cam individually
-        // log the robot's pose3d from each cam
     }
 
+    @Log(name = "Detected AprilTags")
     public double[] getAllDetectedAprilTags() {
         List<Pose3d> poses = new ArrayList<Pose3d>();
         for (AprilTagPhotonCamera cam : photonCameras) {
@@ -76,6 +61,7 @@ public class Watchtower extends SubsystemBase {
         return AdvantageScopeSerializer.serializePose3ds(poses);
     }
 
+    @Log(name = "Detected Robot Poses")
     public double[] getAllDetectedRobotPoses() {
         List<Pose3d> poses = new ArrayList<Pose3d>();
         for (AprilTagPhotonCamera cam : photonCameras) {
@@ -85,6 +71,7 @@ public class Watchtower extends SubsystemBase {
         return AdvantageScopeSerializer.serializePose3ds(poses);
     }
 
+    @Log(name = "Camera Poses")
     public double[] getAllCameraPoses() {
         List<Pose3d> poses = new ArrayList<Pose3d>();
         for (Transform3d transform : Constants.Vision.ROBOT_TO_CAMS) {

@@ -127,6 +127,18 @@ public class FieldConstants {
                     Rotation2d.fromDegrees(90));
 
         }
+
+        public static class AutoPathPoints {
+            public static class North {
+                public static final Translation2d MOBILITY = new Translation2d(5.38, 4.86);
+                public static final Translation2d CHARGE_STATION_BALANCE = new Translation2d(3.83, 3.2);
+            }
+
+            public static class South {
+                public static final Translation2d MOBILITY = new Translation2d(5.38, 0.7);
+                public static final Translation2d CHARGE_STATION_BALANCE = new Translation2d(3.83, 2.2);
+            }
+        }
     }
 
     public static class Red {

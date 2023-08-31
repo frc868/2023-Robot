@@ -3,13 +3,8 @@ package frc.robot.subsystems;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import com.techhounds.houndutil.houndlog.LogGroup;
-import com.techhounds.houndutil.houndlog.LogProfileBuilder;
-import com.techhounds.houndutil.houndlog.LoggingManager;
-import com.techhounds.houndutil.houndlog.enums.LogLevel;
-import com.techhounds.houndutil.houndlog.loggers.DeviceLogger;
-import com.techhounds.houndutil.houndlog.logitems.BooleanLogItem;
-
+import com.techhounds.houndutil.houndlog.interfaces.Log;
+import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -22,25 +17,28 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.GamePieceLocation.GamePiece;
-import frc.robot.commands.RobotStates;
 
 /**
  * The manipulator class, containing the wrist, pincer, and pole detector.
  * 
  * @author gc
  */
+@LoggedObject
 public class Manipulator extends SubsystemBase {
     /** The solenoid that controls the wrist of the manipulator. */
+    @Log(name = "Wrist Solenoid")
     private DoubleSolenoid wrist = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-            Constants.Pneumatics.WRIST[0],
-            Constants.Pneumatics.WRIST[1]);
+            Constants.Pneumatics.WRIST_PORTS[0],
+            Constants.Pneumatics.WRIST_PORTS[1]);
 
     /** The solenoid that controls the pincer to hold game pieces. */
+    @Log(name = "Pincers Solenoid")
     private DoubleSolenoid pincers = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-            Constants.Pneumatics.PINCERS[0],
-            Constants.Pneumatics.PINCERS[1]);
+            Constants.Pneumatics.PINCERS_PORTS[0],
+            Constants.Pneumatics.PINCERS_PORTS[1]);
 
     /** Beam break sensor that detects if the wingdong is hitting the pole. */
+    @Log(name = "Pole Switch")
     private DigitalInput poleSwitch = new DigitalInput(Constants.DIO.POLE_SWITCH);
     private DIOSim poleSwitchSim;
 
@@ -53,16 +51,9 @@ public class Manipulator extends SubsystemBase {
     public Manipulator(MechanismLigament2d wristLigament) {
         this.wristLigament = wristLigament;
 
-        LoggingManager.getInstance().addGroup("Manipulator", new LogGroup(
-                new DeviceLogger<DoubleSolenoid>(wrist, "Wrist",
-                        LogProfileBuilder.buildDoubleSolenoidLogItems(wrist)),
-                new DeviceLogger<DoubleSolenoid>(pincers, "Pincers",
-                        LogProfileBuilder.buildDoubleSolenoidLogItems(pincers)),
-                new BooleanLogItem("Is Pole Detected", this::isPoleDetected, LogLevel.MAIN)));
-
         if (RobotBase.isSimulation()) {
             poleSwitchSim = new DIOSim(poleSwitch);
-            poleSwitchSim.setValue(true);
+            poleSwitchSim.setValue(false);
         }
     }
 
@@ -103,11 +94,8 @@ public class Manipulator extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setWristUpCommand(Elevator elevator) {
-        return Commands.either(
-                runOnce(() -> wrist.set(Value.kForward)),
-                RobotStates.singularErrorCommand(() -> "Error"),
-                () -> true).withName("Wrist Up"); // TODO
+    public CommandBase setWristUpCommand() {
+        return Commands.runOnce(() -> wrist.set(Value.kForward)).withName("Wrist Up");
     }
 
     /**
@@ -175,11 +163,11 @@ public class Manipulator extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase simPoleSwitchTriggered() {
+    public CommandBase simulatePoleSwitchTriggered() {
         // this is commands so that Manipulator isn't added as a requirement
         // automatically
         return Commands.runOnce(() -> poleSwitchSim.setValue(false))
                 .andThen(Commands.waitSeconds(1))
-                .andThen(() -> poleSwitchSim.setValue(true)).withName("Sim Pole Switch Triggered");
+                .andThen(() -> poleSwitchSim.setValue(true)).withName("Simulate Pole Switch Triggered");
     }
 }
