@@ -64,6 +64,10 @@
       "/HoundLog/Autonomous/Auto Setting #2": "String Chooser",
       "/HoundLog/Autonomous/Auto Setting #3": "String Chooser",
       "/HoundLog/Autonomous/Auto Setting #4": "String Chooser",
+      "/HoundLog/Autonomous/Auto Setting Value #1": "String Chooser",
+      "/HoundLog/Autonomous/Auto Setting Value #2": "String Chooser",
+      "/HoundLog/Autonomous/Auto Setting Value #3": "String Chooser",
+      "/HoundLog/Autonomous/Auto Setting Value #4": "String Chooser",
       "/HoundLog/Autonomous/Chooser": "String Chooser",
       "/HoundLog/Autonomous/Field": "Field2d",
       "/HoundLog/Autonomous/Generate Routine": "Command",
@@ -90,6 +94,20 @@
       "/HoundLog/Commands/Manipulator/Simulate Pole Switch Triggered": "Command",
       "/HoundLog/Commands/Manipulator/Wrist Down": "Command",
       "/HoundLog/Commands/Manipulator/Wrist Up": "Command",
+      "/HoundLog/Commands/Operator Panel/Reset": "Command",
+      "/HoundLog/Commands/Operator Panel/Score": "Command",
+      "/HoundLog/Commands/Operator Panel/Select Left Grid": "Command",
+      "/HoundLog/Commands/Operator Panel/Select Left High Location": "Command",
+      "/HoundLog/Commands/Operator Panel/Select Left Low Location": "Command",
+      "/HoundLog/Commands/Operator Panel/Select Left Middle Location": "Command",
+      "/HoundLog/Commands/Operator Panel/Select Middle Grid": "Command",
+      "/HoundLog/Commands/Operator Panel/Select Middle High Location": "Command",
+      "/HoundLog/Commands/Operator Panel/Select Middle Low Location": "Command",
+      "/HoundLog/Commands/Operator Panel/Select Middle Middle Location": "Command",
+      "/HoundLog/Commands/Operator Panel/Select Right Grid": "Command",
+      "/HoundLog/Commands/Operator Panel/Select Right High Location": "Command",
+      "/HoundLog/Commands/Operator Panel/Select Right Low Location": "Command",
+      "/HoundLog/Commands/Operator Panel/Select Right Middle Location": "Command",
       "/HoundLog/Commands/Sequences/Choosers/Game Piece Chooser": "String Chooser",
       "/HoundLog/Commands/Sequences/Choosers/Level Chooser": "String Chooser",
       "/HoundLog/Commands/Sequences/Intaking/Eject Game Piece": "Command",
@@ -203,7 +221,6 @@
           "length": 0.30000001192092896,
           "width": 0.30000001192092896
         },
-        "bottom": 544,
         "frontLeft": {
           "length": 0.30000001192092896,
           "width": 0.30000001192092896
@@ -213,10 +230,6 @@
           "width": 0.30000001192092896
         },
         "height": 8.013679504394531,
-        "image": "/Users/davidracovan/Downloads/2023-field.png",
-        "left": 46,
-        "right": 1088,
-        "top": 36,
         "width": 16.541748046875,
         "window": {
           "visible": true

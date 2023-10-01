@@ -106,7 +106,7 @@
     "###/FMSInfo": {
       "Collapsed": "0",
       "Pos": "336,28",
-      "Size": "169,167"
+      "Size": "144,167"
     },
     "###/HoundLog//WPILib/CommandScheduler": {
       "Collapsed": "0",
@@ -416,7 +416,7 @@
     "###/HoundLog/Commands/Sequences/Scoring/Trigger Secondary Button": {
       "Collapsed": "0",
       "Pos": "809,301",
-      "Size": "167,71"
+      "Size": "167,65"
     },
     "###/HoundLog/Commands/States/Clear Intake Mode": {
       "Collapsed": "0",
@@ -427,7 +427,7 @@
     "###/HoundLog/Commands/States/Initialize Mechanisms": {
       "Collapsed": "0",
       "Pos": "817,218",
-      "Size": "148,71"
+      "Size": "148,65"
     },
     "###/HoundLog/Commands/States/Robot State Chooser": {
       "Collapsed": "0",

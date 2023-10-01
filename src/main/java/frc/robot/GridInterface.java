@@ -5,11 +5,6 @@ import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import java.util.ArrayList;
 import java.util.Optional;
 
-import com.techhounds.houndutil.houndlog.LogGroup;
-import com.techhounds.houndutil.houndlog.LoggingManager;
-import com.techhounds.houndutil.houndlog.enums.LogLevel;
-import com.techhounds.houndutil.houndlog.logitems.StringLogItem;
-
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -27,12 +22,6 @@ public class GridInterface {
     private Optional<GenericHID[]> hids = Optional.empty();
 
     public GridInterface() {
-        LoggingManager.getInstance().addGroup("GridInterface", new LogGroup(
-                new StringLogItem("setGrid", () -> setGrid.isEmpty() ? "null" : setGrid.get().toString(),
-                        LogLevel.MAIN),
-                new StringLogItem("setLocation",
-                        () -> setLocation.isEmpty() ? "null" : setLocation.get().toString(),
-                        LogLevel.MAIN)));
     }
 
     public void setHIDOutputDevices(GenericHID hid1, GenericHID hid2) {

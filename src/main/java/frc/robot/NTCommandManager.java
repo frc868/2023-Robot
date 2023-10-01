@@ -37,7 +37,7 @@ public class NTCommandManager {
             GridInterface gridInterface, Intake intake,
             Manipulator manipulator, Elevator elevator, Elbow elbow, LEDs leds) {
         if (Constants.IS_VIRTUAL_BUTTON_PANEL_ENABLED) {
-            LoggingManager.getInstance().addGroup("Simulation/Operator Panel", new LogGroup(
+            LoggingManager.getInstance().addGroup("Commands/Operator Panel", new LogGroup(
                     new SendableLogger("Select Left Grid",
                             gridInterface.setGridCommand(Grid.LEFT).withName("Left Grid")),
                     new SendableLogger("Select Middle Grid",

@@ -137,6 +137,7 @@ public class RobotContainer {
         }
         configureButtonBindings();
         configureAuto();
+
         NTCommandManager.configureNTCommands(drivetrain, gridInterface, intake, manipulator, elevator, elbow, leds);
     }
 
