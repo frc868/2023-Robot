@@ -1,0 +1,71 @@
+{
+  "tabPane": [
+    {
+      "title": "Match",
+      "autoPopulate": false,
+      "autoPopulatePrefix": "",
+      "widgetPane": {
+        "gridSize": 128.0,
+        "showGrid": true,
+        "hgap": 16.0,
+        "vgap": 16.0,
+        "titleType": 0,
+        "tiles": {
+          "7,0": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "ComboBox Chooser",
+              "_source0": "network_table:///HoundLog/Autonomous/Chooser",
+              "_title": "HoundLog/Autonomous/Chooser",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "0,0": {
+            "size": [
+              7,
+              4
+            ],
+            "content": {
+              "_type": "Field",
+              "_source0": "network_table:///HoundLog/Autonomous/Field",
+              "_title": "HoundLog/Autonomous/Field",
+              "_glyph": 148,
+              "_showGlyph": false,
+              "Game/Game": "A2023_Charged_Up",
+              "Visuals/Robot Icon Size": 50.0,
+              "Visuals/Show Outside Circles": false,
+              "Colors/frontRight": "#FFFFFFFF",
+              "Colors/Autonomous Routine": "#FFFFFFFF",
+              "Colors/frontLeft": "#FFFFFFFF",
+              "Colors/backLeft": "#FFFFFFFF",
+              "Colors/backRight": "#FFFFFFFF"
+            }
+          },
+          "7,1": {
+            "size": [
+              3,
+              1
+            ],
+            "content": {
+              "_type": "Command",
+              "_source0": "network_table:///HoundLog/Autonomous/Generate Routine",
+              "_title": "HoundLog/Autonomous/Generate Routine",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          }
+        }
+      }
+    }
+  ],
+  "windowGeometry": {
+    "x": 0.0,
+    "y": 26.0,
+    "width": 1680.0,
+    "height": 1050.0
+  }
+}
