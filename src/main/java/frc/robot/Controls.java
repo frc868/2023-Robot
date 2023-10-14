@@ -152,7 +152,7 @@ public class Controls {
                         intake, manipulator, elevator, elbow));
 
         joystick.button(8)
-                .whileTrue(drivetrain.chargeStationBalanceCommand());
+                .whileTrue(elbow.syncCommand());
 
         joystick.button(5).whileTrue(RobotStates.autoDriveCommand(drivetrain, gridInterface));
 
