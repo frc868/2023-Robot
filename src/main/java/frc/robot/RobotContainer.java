@@ -106,12 +106,14 @@ public class RobotContainer {
     private void configureButtonBindings() {
         Controls.configureDriverControls(0, drivetrain, gridInterface, intake, manipulator,
                 elevator, elbow);
-        Controls.configureOperatorControls(1, 2, drivetrain, gridInterface, intake, manipulator,
-                elevator, elbow);
-        Controls.configureBackupOperatorControls(3, gridInterface, intake, manipulator, elevator,
-                elbow);
-        Controls.configureOverridesControls(4, 5, drivetrain, intake, manipulator,
-                elevator, elbow);
+        // Controls.configureOperatorControls(1, 2, drivetrain, gridInterface, intake,
+        // manipulator,
+        // elevator, elbow);
+        // Controls.configureBackupOperatorControls(3, gridInterface, intake,
+        // manipulator, elevator,
+        // elbow);
+        // Controls.configureOverridesControls(4, 5, drivetrain, intake, manipulator,
+        // elevator, elbow);
     }
 
     private void configureAuto() {

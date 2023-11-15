@@ -212,6 +212,8 @@ public final class Constants {
          * Larger numbers mean less of a rate limit.
          */
         public static final double JOYSTICK_INPUT_RATE_LIMIT = 15.0; // untested
+
+        public static final TunableNumber DRIVETRAIN_SPEED_LIMIT = new TunableNumber("Drivetrain", "Speed Limit", 0.2);
     }
 
     public static final class Vision {

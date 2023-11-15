@@ -89,74 +89,78 @@ public class Controls {
 
         drivetrain.setDefaultCommand(
                 drivetrain.teleopDriveCommand(
-                        () -> -joystick.getY(),
-                        () -> -joystick.getX(),
-                        () -> -MathUtil.applyDeadband(joystick.getTwist() * (isTwistLimited ? 0.7 : 1), 0.05),
+                        () -> -joystick.getY() * Constants.Teleop.DRIVETRAIN_SPEED_LIMIT.get(),
+                        () -> -joystick.getX() * Constants.Teleop.DRIVETRAIN_SPEED_LIMIT.get(),
+                        () -> -MathUtil.applyDeadband(joystick.getTwist()
+                                * Constants.Teleop.DRIVETRAIN_SPEED_LIMIT.get() * (isTwistLimited ? 0.7 : 1), 0.05),
                         () -> isInputCubed));
-
         joystick.button(13).onTrue(drivetrain.zeroGyroCommand());
 
-        joystick.button(3).and(joystick.button(2).negate())
-                .onTrue(Commands.parallel(
-                        drivetrain.setDriveModeCommand(DriveMode.ROBOT_RELATIVE),
-                        Commands.runOnce(() -> isTwistLimited = true),
-                        Commands.runOnce(() -> isInputCubed = true)))
-                .onFalse(Commands.parallel(
-                        drivetrain.setDriveModeCommand(DriveMode.FIELD_ORIENTED),
-                        Commands.runOnce(() -> isTwistLimited = false),
-                        Commands.runOnce(() -> isInputCubed = false)));
-        joystick.button(2).and(joystick.button(3))
-                .onTrue(Commands.parallel(
-                        drivetrain.setDriveModeCommand(DriveMode.FIELD_ORIENTED),
-                        Commands.runOnce(() -> isTwistLimited = true),
-                        Commands.runOnce(() -> isInputCubed = true)))
-                .whileTrue(
-                        Commands.either(
-                                drivetrain.turnWhileMovingCommand(Math.PI, true),
-                                Commands.none(),
-                                () -> FieldConstants.AutoDrive.isInCommunity(drivetrain.getPose())).repeatedly())
-                .onFalse(Commands.parallel(
-                        Commands.runOnce(() -> isTwistLimited = false),
-                        Commands.runOnce(() -> isInputCubed = false)));
+        // joystick.button(3).and(joystick.button(2).negate())
+        // .onTrue(Commands.parallel(
+        // drivetrain.setDriveModeCommand(DriveMode.ROBOT_RELATIVE),
+        // Commands.runOnce(() -> isTwistLimited = true),
+        // Commands.runOnce(() -> isInputCubed = true)))
+        // .onFalse(Commands.parallel(
+        // drivetrain.setDriveModeCommand(DriveMode.FIELD_ORIENTED),
+        // Commands.runOnce(() -> isTwistLimited = false),
+        // Commands.runOnce(() -> isInputCubed = false)));
+        // joystick.button(2).and(joystick.button(3))
+        // .onTrue(Commands.parallel(
+        // drivetrain.setDriveModeCommand(DriveMode.FIELD_ORIENTED),
+        // Commands.runOnce(() -> isTwistLimited = true),
+        // Commands.runOnce(() -> isInputCubed = true)))
+        // .whileTrue(
+        // Commands.either(
+        // drivetrain.turnWhileMovingCommand(Math.PI, true),
+        // Commands.none(),
+        // () ->
+        // FieldConstants.AutoDrive.isInCommunity(drivetrain.getPose())).repeatedly())
+        // .onFalse(Commands.parallel(
+        // Commands.runOnce(() -> isTwistLimited = false),
+        // Commands.runOnce(() -> isInputCubed = false)));
 
-        new Trigger(() -> !RobotStates.getIntaking()).debounce(2).and(joystick.button(14))
-                .toggleOnTrue(intake.toggleRamrodsCommand());
+        // new Trigger(() ->
+        // !RobotStates.getIntaking()).debounce(2).and(joystick.button(14))
+        // .toggleOnTrue(intake.toggleRamrodsCommand());
 
-        joystick.pov(0, 0, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(0), true));
-        // 90 on joystick is right, while 90 CCW is left
-        joystick.pov(0, 90, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(270), true));
-        joystick.pov(0, 180, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(180), true));
-        joystick.pov(0, 270, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(90), true));
+        // joystick.pov(0, 0, CommandScheduler.getInstance().getDefaultButtonLoop())
+        // .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(0), true));
+        // // 90 on joystick is right, while 90 CCW is left
+        // joystick.pov(0, 90, CommandScheduler.getInstance().getDefaultButtonLoop())
+        // .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(270), true));
+        // joystick.pov(0, 180, CommandScheduler.getInstance().getDefaultButtonLoop())
+        // .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(180), true));
+        // joystick.pov(0, 270, CommandScheduler.getInstance().getDefaultButtonLoop())
+        // .whileTrue(drivetrain.turnWhileMovingCommand(Math.toRadians(90), true));
 
-        joystick.pov(2, 0, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .onTrue(intake.setRamrodsRetractedCommand());
-        joystick.pov(2, 180, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .onTrue(intake.setRamrodsExtendedCommand());
-        joystick.pov(2, 270, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CONE).ignoringDisable(true));
-        joystick.pov(2, 90, CommandScheduler.getInstance().getDefaultButtonLoop())
-                .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CUBE).ignoringDisable(true));
+        // joystick.pov(2, 0, CommandScheduler.getInstance().getDefaultButtonLoop())
+        // .onTrue(intake.setRamrodsRetractedCommand());
+        // joystick.pov(2, 180, CommandScheduler.getInstance().getDefaultButtonLoop())
+        // .onTrue(intake.setRamrodsExtendedCommand());
+        // joystick.pov(2, 270, CommandScheduler.getInstance().getDefaultButtonLoop())
+        // .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CONE).ignoringDisable(true));
+        // joystick.pov(2, 90, CommandScheduler.getInstance().getDefaultButtonLoop())
+        // .onTrue(RobotStates.setIntakeModeCommand(GamePiece.CUBE).ignoringDisable(true));
 
-        joystick.button(9)
-                .onTrue(IntakingCommands.intakePieceCommand(
-                        () -> joystick.getHID().getRawButton(14),
-                        intake, manipulator, elevator, elbow));
+        // joystick.button(9)
+        // .onTrue(IntakingCommands.intakePieceCommand(
+        // () -> joystick.getHID().getRawButton(14),
+        // intake, manipulator, elevator, elbow));
 
-        joystick.button(6)
-                .onTrue(IntakingCommands.ejectPieceCommand(
-                        () -> joystick.getHID().getRawButton(14),
-                        intake, manipulator, elevator, elbow));
+        // joystick.button(6)
+        // .onTrue(IntakingCommands.ejectPieceCommand(
+        // () -> joystick.getHID().getRawButton(14),
+        // intake, manipulator, elevator, elbow));
 
-        joystick.button(8)
-                .whileTrue(elbow.syncCommand());
+        // joystick.button(8)
+        // .whileTrue(elbow.syncCommand());
 
-        joystick.button(5).whileTrue(RobotStates.autoDriveCommand(drivetrain, gridInterface));
+        // joystick.button(5).whileTrue(RobotStates.autoDriveCommand(drivetrain,
+        // gridInterface));
 
-        joystick.axisGreaterThan(5, 0.25).whileTrue(drivetrain.turnToHPStationCommand());
+        // joystick.axisGreaterThan(5,
+        // 0.25).whileTrue(drivetrain.turnToHPStationCommand());
     }
 
     public static void configureOperatorControls(int port1, int port2, Drivetrain drivetrain,
