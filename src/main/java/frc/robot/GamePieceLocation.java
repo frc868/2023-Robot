@@ -63,17 +63,17 @@ public enum GamePieceLocation {
     H2(new GamePieceLocationMetadata(GamePiece.CUBE, Level.MIDDLE, Grid.RIGHT, GridPosition.MIDDLE)),
     I2(new GamePieceLocationMetadata(GamePiece.CONE, Level.MIDDLE, Grid.RIGHT, GridPosition.RIGHT)),
 
-    A3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.LOW, Grid.LEFT, GridPosition.LEFT)),
-    B3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.LOW, Grid.LEFT, GridPosition.MIDDLE)),
-    C3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.LOW, Grid.LEFT, GridPosition.RIGHT)),
+    A3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.HYBRID, Grid.LEFT, GridPosition.LEFT)),
+    B3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.HYBRID, Grid.LEFT, GridPosition.MIDDLE)),
+    C3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.HYBRID, Grid.LEFT, GridPosition.RIGHT)),
 
-    D3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.LOW, Grid.MIDDLE, GridPosition.LEFT)),
-    E3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.LOW, Grid.MIDDLE, GridPosition.MIDDLE)),
-    F3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.LOW, Grid.MIDDLE, GridPosition.RIGHT)),
+    D3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.HYBRID, Grid.MIDDLE, GridPosition.LEFT)),
+    E3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.HYBRID, Grid.MIDDLE, GridPosition.MIDDLE)),
+    F3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.HYBRID, Grid.MIDDLE, GridPosition.RIGHT)),
 
-    G3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.LOW, Grid.RIGHT, GridPosition.LEFT)),
-    H3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.LOW, Grid.RIGHT, GridPosition.MIDDLE)),
-    I3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.LOW, Grid.RIGHT, GridPosition.RIGHT));
+    G3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.HYBRID, Grid.RIGHT, GridPosition.LEFT)),
+    H3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.HYBRID, Grid.RIGHT, GridPosition.MIDDLE)),
+    I3(new GamePieceLocationMetadata(GamePiece.HYBRID, Level.HYBRID, Grid.RIGHT, GridPosition.RIGHT));
 
     public final GamePiece gamePiece;
     public final Level level;
@@ -95,7 +95,7 @@ public enum GamePieceLocation {
     }
 
     public enum Level {
-        LOW,
+        HYBRID,
         MIDDLE,
         HIGH;
     }

@@ -8,12 +8,13 @@ import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Modes;
 import frc.robot.GamePieceLocation.GamePiece;
+import frc.robot.Modes.RobotState;
 
 /**
  * The LEDs subsystem, which controls the state of the LEDs through an internal
@@ -27,12 +28,11 @@ public class LEDs extends SubsystemBase {
     private AddressableLED leds = new AddressableLED(0);
 
     /** The current state of the LEDs. */
+    @Log
     private LEDState state = LEDState.Uninitialized;
 
-    @Log(name = "State")
-    private Supplier<String> stateSupp = () -> this.state.toString();
-    @Log(name = "Is Error")
-    private Supplier<Boolean> isErrorSupp = () -> this.state == LEDState.Error;
+    @Log
+    private Supplier<Boolean> isError = () -> this.state == LEDState.Error;
 
     /**
      * Describes the states that the LEDs can be in.
@@ -252,21 +252,21 @@ public class LEDs extends SubsystemBase {
      * @param state the new LEDState.
      * @return the command
      */
-    public CommandBase holdLEDStateCommand(Supplier<LEDState> state) {
+    public Command holdLEDStateCommand(Supplier<LEDState> state) {
         return runOnce(() -> this.setLEDState(state.get())).andThen(Commands.run(() -> {
         })).ignoringDisable(true).withName("Hold LED State");
     }
 
-    public CommandBase updateStateMachineCommand() {
+    public Command updateStateMachineCommand() {
         return run(() -> {
             if (Modes.getIntakeMode().isPresent()) {
                 if (Modes.getIntakeMode().get() == GamePiece.CONE) {
-                    if (Modes.getIntaking())
+                    if (Modes.getRobotState() == RobotState.INTAKING)
                         setLEDState(LEDState.ConePickupFlashing);
                     else
                         setLEDState(LEDState.ConePickup);
                 } else if (Modes.getIntakeMode().get() == GamePiece.CUBE) {
-                    if (Modes.getIntaking())
+                    if (Modes.getRobotState() == RobotState.INTAKING)
                         setLEDState(LEDState.CubePickupFlashing);
                     else
                         setLEDState(LEDState.CubePickup);

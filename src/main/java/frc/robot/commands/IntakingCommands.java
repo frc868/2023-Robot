@@ -5,21 +5,21 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.util.function.BooleanConsumer;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Modes;
 import frc.robot.Utils;
+import frc.robot.Constants.Elbow.ElbowPosition;
+import frc.robot.Constants.Elevator.ElevatorPosition;
 import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.Modes.RobotState;
 import frc.robot.subsystems.Elbow;
-import frc.robot.subsystems.Elbow.ElbowPosition;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Elevator.ElevatorPosition;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Manipulator;
 
 public class IntakingCommands {
-    public static CommandBase startAndRunIntakingCommand(
+    public static Command startAndRunIntakingCommand(
             Supplier<GamePiece> gamePieceSupplier,
             Intake intake,
             Manipulator manipulator,
@@ -37,7 +37,7 @@ public class IntakingCommands {
                                         elbow.moveToPositionCommand(() -> ElbowPosition.MID).asProxy()),
                                 () -> gamePieceSupplier.get())),
                 manipulator.setPincersReleasedCommand(() -> gamePieceSupplier.get()),
-                Commands.runOnce(() -> Modes.setIntaking(true)),
+                Commands.runOnce(() -> Modes.setRobotState(RobotState.INTAKING)),
                 Commands.parallel(
                         Commands.select(
                                 Map.of(
@@ -46,28 +46,28 @@ public class IntakingCommands {
                                                 .andThen(intake.runPassoverMotorsCommand())),
                                 () -> gamePieceSupplier.get()),
                         manipulator.setPincersReleasedCommand(() -> gamePieceSupplier.get())).repeatedly())
-                .finallyDo((d) -> Modes.setIntaking(false))
+                .finallyDo((d) -> Modes.setRobotState(RobotState.SEEKING))
                 .withName("Start and Run Intaking");
     }
 
-    public static CommandBase finishIntakingCommand(
+    public static Command finishIntakingCommand(
             Supplier<GamePiece> gamePieceSupplier,
             Intake intake,
             Manipulator manipulator,
             Elevator elevator,
             Elbow elbow) {
         return Commands.sequence(
-                Commands.runOnce(() -> Modes.setIntaking(false)),
+                Commands.runOnce(() -> Modes.setRobotState(RobotState.INTAKING)),
                 manipulator.setPincersPincingCommand(() -> gamePieceSupplier.get()),
                 intake.setPassoversRetractedCommand(elevator),
                 elevator.movePositionDeltaCommand(() -> 0.02).withTimeout(0.1).asProxy(),
                 Commands.waitSeconds(0.2)
                         .andThen(elbow.moveToPositionCommand(() -> ElbowPosition.HIGH).asProxy()),
-                Modes.setRobotStateCommand(() -> RobotState.SCORING),
+                Modes.setRobotStateCommand(() -> RobotState.SEEKING),
                 Modes.clearIntakeModeCommand()).withName("Finish Intaking");
     }
 
-    public static CommandBase intakePieceCommand(
+    public static Command intakePieceCommand(
             BooleanSupplier secondaryButton,
             Intake intake,
             Manipulator manipulator,
@@ -86,7 +86,7 @@ public class IntakingCommands {
                 .withName("Intake Game Piece");
     }
 
-    public static CommandBase startAndRunEjectingCommand(
+    public static Command startAndRunEjectingCommand(
             Supplier<GamePiece> gamePieceSupplier,
             Intake intake,
             Manipulator manipulator,
@@ -120,7 +120,7 @@ public class IntakingCommands {
 
     }
 
-    public static CommandBase finishEjectingCommand(
+    public static Command finishEjectingCommand(
             Supplier<GamePiece> gamePieceSupplier,
             Intake intake,
             Manipulator manipulator,
@@ -135,7 +135,7 @@ public class IntakingCommands {
                 Modes.clearIntakeModeCommand()).withName("Finish Ejecting");
     }
 
-    public static CommandBase ejectPieceCommand(
+    public static Command ejectPieceCommand(
             BooleanSupplier secondaryButton,
             Intake intake,
             Manipulator manipulator,
@@ -153,7 +153,7 @@ public class IntakingCommands {
 
     }
 
-    public static CommandBase humanPlayerPickupCommand(
+    public static Command humanPlayerPickupCommand(
             BooleanSupplier secondaryButton,
             BooleanConsumer secondaryButtonLED,
             Supplier<GamePiece> gamePieceSupplier,
@@ -177,6 +177,27 @@ public class IntakingCommands {
                 .withName("Human Player Pickup");
     }
 
+    public static Command humanPlayerPickupCommand(
+            BooleanSupplier secondaryButton,
+            Supplier<GamePiece> gamePieceSupplier,
+            Intake intake,
+            Manipulator manipulator,
+            Elevator elevator,
+            Elbow elbow) {
+        return Commands.sequence(
+                Modes.setIntakeModeCommand(gamePieceSupplier),
+                Commands.parallel(
+                        elevator.moveToPositionCommand(() -> ElevatorPosition.SINGLE_SUBSTATION_PICKUP).asProxy(),
+                        elbow.moveToPositionCommand(() -> ElbowPosition.SINGLE_SUBSTATION_PICKUP).asProxy()),
+                Commands.waitSeconds(0.5),
+                manipulator.setWristUpCommand(),
+                manipulator.setPincersReleasedCommand(gamePieceSupplier),
+                Commands.waitUntil(secondaryButton::getAsBoolean),
+                manipulator.setPincersPincingCommand(gamePieceSupplier),
+                Modes.clearIntakeModeCommand())
+                .withName("Human Player Pickup");
+    }
+
     /**
      * Creates a command to stow the elevator after scoring a game piece.
      * 
@@ -194,7 +215,7 @@ public class IntakingCommands {
      * @param elbow
      * @return
      */
-    public static CommandBase humanPlayerStowElevatorCommand(
+    public static Command humanPlayerStowElevatorCommand(
             Intake intake,
             Manipulator manipulator,
             Elevator elevator,

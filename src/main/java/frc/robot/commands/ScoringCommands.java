@@ -4,27 +4,27 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import com.pathplanner.lib.PathConstraints;
+// import com.pathplanner.lib.PathConstraints;
 
 import edu.wpi.first.util.function.BooleanConsumer;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.GridInterface;
 import frc.robot.Modes;
 import frc.robot.Utils;
+import frc.robot.Constants.Elbow.ElbowPosition;
+import frc.robot.Constants.Elevator.ElevatorPosition;
 import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.GamePieceLocation.Level;
 import frc.robot.Modes.RobotState;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elbow;
-import frc.robot.subsystems.Elbow.ElbowPosition;
-import frc.robot.subsystems.Elevator.ElevatorPosition;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Manipulator;
 
 public class ScoringCommands {
-    public static CommandBase raiseElevatorCommand(
+    public static Command raiseElevatorCommand(
             Supplier<GamePiece> gamePieceSupplier,
             Supplier<Level> levelSupplier,
             Intake intake,
@@ -46,7 +46,7 @@ public class ScoringCommands {
                 .withName("Raise Elevator");
     }
 
-    public static CommandBase placePieceCommand(
+    public static Command placePieceCommand(
             BooleanSupplier secondaryButton,
             BooleanConsumer secondaryButtonLED,
             Supplier<GamePiece> gamePieceSupplier,
@@ -69,9 +69,9 @@ public class ScoringCommands {
                                         Commands.parallel(
                                                 manipulator.setPincersReleasedCommand(gamePieceSupplier),
                                                 elbow.moveToPositionCommand(() -> ElbowPosition.LOW).asProxy(),
-                                                elevator.movePositionDeltaCommand(() -> -0.15).asProxy(),
-                                                drivetrain.driveDistanceDeltaCommand(-0.012,
-                                                        new PathConstraints(4, 9))),
+                                                elevator.movePositionDeltaCommand(() -> -0.15).asProxy()),
+                                        // drivetrain.driveDistanceDeltaCommand(-0.012,
+                                        // new PathConstraints(4, 9))),)))
                                         manipulator.setWristDownCommand(),
                                         manipulator.setPincersOpenCommand(),
                                         elbow.moveToPositionCommand(() -> ElbowPosition.MID_CONE_HIGH).asProxy()),
@@ -85,7 +85,7 @@ public class ScoringCommands {
                 .withName("Place Piece");
     }
 
-    public static CommandBase placePieceAutoCommand(
+    public static Command placePieceAutoCommand(
             Supplier<GamePiece> gamePieceSupplier,
             Supplier<Level> levelSupplier,
             Drivetrain drivetrain,
@@ -100,20 +100,20 @@ public class ScoringCommands {
                                 Commands.parallel(
                                         manipulator.setPincersReleasedCommand(gamePieceSupplier),
                                         elbow.moveToPositionCommand(() -> ElbowPosition.LOW).asProxy(),
-                                        elevator.movePositionDeltaCommand(() -> -0.15).asProxy(),
-                                        drivetrain.driveDistanceDeltaCommand(-0.012, new PathConstraints(4, 5))),
+                                        elevator.movePositionDeltaCommand(() -> -0.15).asProxy()),
+                                // drivetrain.driveDistanceDeltaCommand(-0.012, new PathConstraints(4, 5))),
                                 manipulator.setWristDownCommand(),
                                 manipulator.setPincersOpenCommand(),
                                 elbow.moveToPositionCommand(() -> ElbowPosition.MID_CONE_HIGH).asProxy()),
                         GamePiece.CUBE,
                         Commands.sequence(
-                                drivetrain.driveDistanceDeltaCommand(0.4, new PathConstraints(4, 3)),
+                                // drivetrain.driveDistanceDeltaCommand(0.4, new PathConstraints(4, 3)),
                                 manipulator.setPincersReleasedCommand(gamePieceSupplier))),
                 gamePieceSupplier::get)
                 .withName("Place Piece Auto");
     }
 
-    public static CommandBase fullScoreSequenceCommand(
+    public static Command fullScoreSequenceCommand(
             BooleanSupplier secondaryButton,
             BooleanConsumer secondaryButtonLED,
             Drivetrain drivetrain,
@@ -139,7 +139,28 @@ public class ScoringCommands {
                 .withName("Full Score Sequence");
     }
 
-    public static CommandBase fullScoreSequenceAutoCommand(
+    public static Command fullScoreSequenceCommand(
+            BooleanSupplier secondaryButton,
+            Supplier<GamePiece> gamePiece,
+            Supplier<Level> level,
+            Drivetrain drivetrain,
+            Intake intake,
+            Manipulator manipulator,
+            Elevator elevator,
+            Elbow elbow) {
+        return Commands.sequence(
+                raiseElevatorCommand(
+                        gamePiece::get, level::get,
+                        intake, manipulator, elevator, elbow).withTimeout(1.2),
+                placePieceCommand(
+                        secondaryButton,
+                        (b) -> {
+                        },
+                        gamePiece::get, level::get,
+                        drivetrain, intake, manipulator, elevator, elbow));
+    }
+
+    public static Command fullScoreSequenceAutoCommand(
             Supplier<GamePiece> gamePieceSupplier,
             Supplier<Level> levelSupplier,
             Drivetrain drivetrain,
@@ -176,7 +197,7 @@ public class ScoringCommands {
      * @param elbow
      * @return
      */
-    public static CommandBase stowElevatorCommand(
+    public static Command stowElevatorCommand(
             Intake intake,
             Manipulator manipulator,
             Elevator elevator,

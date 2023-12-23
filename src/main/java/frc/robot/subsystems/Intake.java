@@ -1,23 +1,23 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 import edu.wpi.first.math.Pair;
-import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
-import edu.wpi.first.wpilibj.simulation.DIOSim;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import static frc.robot.Constants.Intake.*;
 
 /**
  * Intake subsystem, contains the motors that run the passovers, and the
@@ -30,65 +30,55 @@ public class Intake extends SubsystemBase {
     /**
      * The motor that drives the left side of the passover.
      */
-    @Log(name = "Left Passover Motor")
-    private CANSparkMax leftPassoverMotor = new CANSparkMax(Constants.CAN.PASSOVER_LEFT_MOTOR_ID,
-            MotorType.kBrushless);
+    @Log
+    private CANSparkMax leftPassoverMotor;
+
     /**
      * The motor that drives the right side of the passover.
      */
-    @Log(name = "Right Passover Motor")
-    private CANSparkMax rightPassoverMotor = new CANSparkMax(Constants.CAN.PASSOVER_RIGHT_MOTOR_ID,
-            MotorType.kBrushless);
+    @Log
+    private CANSparkMax rightPassoverMotor;
+
     /**
      * The solenoid that controls the passover extending or retracting.
      */
-    @Log(name = "Passover Solenoid")
+    @Log
     private DoubleSolenoid passoverSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-            Constants.Pneumatics.PASSOVER_PORTS[0], Constants.Pneumatics.PASSOVER_PORTS[1]);
+            PASSOVER_PORTS[0], PASSOVER_PORTS[1]);
+
     /**
      * The solenoid that has shared control over the cubapult and ramrods.
      */
-    @Log(name = "Cubapolt-Ramrod Solenoid")
+    @Log
     private DoubleSolenoid cubapultRamrodSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-            Constants.Pneumatics.CUBAPULT_PORTS[0], Constants.Pneumatics.CUBAPULT_PORTS[1]);
-    /**
-     * The object that controlls both passover motors.
-     */
-    MotorControllerGroup passoverMotors = new MotorControllerGroup(leftPassoverMotor, rightPassoverMotor);
+            CUBAPULT_PORTS[0], CUBAPULT_PORTS[1]);
 
     /** The ligament of the complete mechanism body that this subsystem controls. */
     private MechanismLigament2d ligament;
 
-    /** The beam break that detects if a game piece is in the robot. */
-    @Log(name = "Game Piece Detector")
-    private DigitalInput gamePieceDetector = new DigitalInput(Constants.DIO.GAME_PIECE_SENSOR);
-
-    /**
-     * The wrapper of the gamePieceDetector for simulation. This allows you to set
-     * the values of the sensor in sim without changing the values IRL. This value
-     * is not used when the robot is running IRL.
-     */
-    private DIOSim gamePieceDetectorSim;
+    private Timer passoverPoseTimer = new Timer();
 
     /**
      * Initializes the intake system.
      */
     public Intake(MechanismLigament2d ligament) {
-        SparkMaxConfigurator.configure(leftPassoverMotor)
-                .withCurrentLimit(25)
-                .withInverted(true)
-                .burnFlash();
+        leftPassoverMotor = SparkMaxConfigurator.create(
+                PASSOVER_LEFT_MOTOR_ID, MotorType.kBrushless, false,
+                (s) -> s.setIdleMode(IdleMode.kBrake),
+                (s) -> s.setSmartCurrentLimit(PASSOVER_CURRENT_LIMIT));
 
-        SparkMaxConfigurator.configure(rightPassoverMotor)
-                .withCurrentLimit(25)
-                .burnFlash();
+        rightPassoverMotor = SparkMaxConfigurator.create(
+                PASSOVER_RIGHT_MOTOR_ID, MotorType.kBrushless, true,
+                (s) -> s.setIdleMode(IdleMode.kBrake),
+                (s) -> s.setSmartCurrentLimit(PASSOVER_CURRENT_LIMIT),
+                (s) -> s.follow(leftPassoverMotor, true));
 
         this.ligament = ligament;
 
-        if (RobotBase.isSimulation()) {
-            gamePieceDetectorSim = new DIOSim(gamePieceDetector);
-            gamePieceDetectorSim.setValue(true);
-        }
+        new Trigger(() -> passoverSolenoid.get() == Value.kForward)
+                .onTrue(Commands.runOnce(passoverPoseTimer::restart));
+        new Trigger(() -> passoverSolenoid.get() == Value.kReverse)
+                .onTrue(Commands.runOnce(passoverPoseTimer::restart));
     }
 
     /**
@@ -98,6 +88,24 @@ public class Intake extends SubsystemBase {
     public void periodic() {
         super.periodic();
         ligament.setAngle(cubapultRamrodSolenoid.get() == Value.kForward ? -90 : 0);
+    }
+
+    @Log(name = "Left Passover Component Pose")
+    public Pose3d getLeftPassoverComponentPose() {
+        return LEFT_PASSOVER_RETRACTED_POSE.interpolate(
+                LEFT_PASSOVER_EXTENDED_POSE,
+                passoverSolenoid.get() == Value.kReverse
+                        ? passoverPoseTimer.get() / PASSOVER_MOVEMENT_TIME
+                        : 1 - passoverPoseTimer.get() / PASSOVER_MOVEMENT_TIME);
+    }
+
+    @Log(name = "Right Passover Component Pose")
+    public Pose3d getRightPassoverComponentPose() {
+        return RIGHT_PASSOVER_RETRACTED_POSE.interpolate(
+                RIGHT_PASSOVER_EXTENDED_POSE,
+                passoverSolenoid.get() == Value.kReverse
+                        ? passoverPoseTimer.get() / PASSOVER_MOVEMENT_TIME
+                        : 1 - passoverPoseTimer.get() / PASSOVER_MOVEMENT_TIME);
     }
 
     /**
@@ -132,7 +140,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setPassoversExtendedCommand(Elevator elevator) {
+    public Command setPassoversExtendedCommand(Elevator elevator) {
         // return Commands.either(
         // runOnce(() -> passoverSolenoid.set(Value.kForward)),
         // leds.errorCommand(),
@@ -149,7 +157,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setPassoversRetractedCommand(Elevator elevator) {
+    public Command setPassoversRetractedCommand(Elevator elevator) {
         return runOnce(() -> passoverSolenoid.set(Value.kForward)).withName("Set Passover Retracted");
     }
 
@@ -158,7 +166,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setCubapultPrimed() {
+    public Command setCubapultPrimed() {
         return runOnce(() -> cubapultRamrodSolenoid.set(Value.kForward)).withName("Set Cubapult Primed"); // untested
     }
 
@@ -167,7 +175,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setCubapultReleased() {
+    public Command setCubapultReleased() {
         return runOnce(() -> cubapultRamrodSolenoid.set(Value.kReverse)).withName("Set Cubapult Released"); // untested
     }
 
@@ -176,7 +184,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setRamrodsExtendedCommand() {
+    public Command setRamrodsExtendedCommand() {
         return Commands.runOnce(() -> cubapultRamrodSolenoid.set(Value.kReverse)).withName("Set Ramrods Extended"); // untested
     }
 
@@ -185,7 +193,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase setRamrodsRetractedCommand() {
+    public Command setRamrodsRetractedCommand() {
         return Commands.runOnce(() -> cubapultRamrodSolenoid.set(Value.kForward)).withName("Set Ramrods Released"); // untested
     }
 
@@ -194,7 +202,7 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase toggleRamrodsCommand() {
+    public Command toggleRamrodsCommand() {
         return Commands.startEnd(
                 () -> cubapultRamrodSolenoid.set(Value.kForward),
                 () -> cubapultRamrodSolenoid.set(Value.kReverse)).withName("Toggle Ramrods"); // untested
@@ -207,10 +215,10 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase runPassoverMotorsCommand() {
+    public Command runPassoverMotorsCommand() {
         return startEnd(
-                () -> passoverMotors.setVoltage(6),
-                () -> passoverMotors.setVoltage(0))
+                () -> leftPassoverMotor.setVoltage(6),
+                () -> leftPassoverMotor.setVoltage(0))
                 .withName("Run Passover Motors");
     }
 
@@ -221,8 +229,8 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase startPassoverMotorsCommand() {
-        return runOnce(() -> passoverMotors.setVoltage(6))
+    public Command startPassoverMotorsCommand() {
+        return runOnce(() -> leftPassoverMotor.setVoltage(6))
                 .withName("Start Passover Motors");
     }
 
@@ -233,8 +241,8 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase stopPassoverMotorsCommand() {
-        return runOnce(() -> passoverMotors.setVoltage(0))
+    public Command stopPassoverMotorsCommand() {
+        return runOnce(() -> leftPassoverMotor.setVoltage(0))
                 .withName("Stop Passover Motors");
     }
 
@@ -245,31 +253,10 @@ public class Intake extends SubsystemBase {
      * 
      * @return the command
      */
-    public CommandBase reversePassoverMotorsCommand() {
+    public Command reversePassoverMotorsCommand() {
         return startEnd(
-                () -> passoverMotors.setVoltage(-6),
-                () -> passoverMotors.setVoltage(0))
+                () -> leftPassoverMotor.setVoltage(-6),
+                () -> leftPassoverMotor.setVoltage(0))
                 .withName("Run Passover Motors");
-    }
-
-    /**
-     * Check if a game piece is detected to be ready to be pinced.
-     * 
-     * @return true if a game piece is detected inside the robot
-     */
-    public boolean isGamePieceDetected() {
-        return !gamePieceDetector.get();
-    }
-
-    /**
-     * Creates a command that toggles on the game piece detector to simulate that a
-     * game piece has entered the robot. This will only work in sim.
-     * 
-     * @return the command
-     */
-    public CommandBase simulateGamePieceDetectedCommand() {
-        return Commands.runOnce(() -> gamePieceDetectorSim.setValue(true))
-                .andThen(Commands.waitSeconds(1))
-                .andThen(() -> gamePieceDetectorSim.setValue(false)).withName("Simulate Game Piece Detected");
     }
 }

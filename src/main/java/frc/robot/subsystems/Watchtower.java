@@ -6,98 +6,114 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.photonvision.EstimatedRobotPose;
-import com.techhounds.houndutil.houndauto.AutoManager;
-import com.techhounds.houndutil.houndlib.AdvantageScopeSerializer;
+import org.photonvision.simulation.VisionSystemSim;
+
 import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera;
+import com.techhounds.houndutil.houndlib.subsystems.BaseVision;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
+
+import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
+import static frc.robot.Constants.Vision.*;
+
 @LoggedObject
-public class Watchtower extends SubsystemBase {
+public class Watchtower extends SubsystemBase implements BaseVision {
     private SwerveDrivePoseEstimator poseEstimator = null;
+    private Supplier<Pose2d> simPoseSupplier = null;
+    private final VisionSystemSim visionSim = new VisionSystemSim("main");
 
-    /** The PhotonVision cameras, used to detect the AprilTags. */
+    @Log(groups = "cameras")
+    private final AprilTagPhotonCamera ov9281_01 = new AprilTagPhotonCamera("OV9281-01", ROBOT_TO_CAMS[0]);
 
-    @Log(name = "OV9281-01", groups = "Cameras")
-    AprilTagPhotonCamera photonCamera1 = new AprilTagPhotonCamera("OV9281-01",
-            Constants.Vision.ROBOT_TO_CAMS[0]);
+    @Log(groups = "cameras")
+    private final AprilTagPhotonCamera ov9281_02 = new AprilTagPhotonCamera("OV9281-02", ROBOT_TO_CAMS[1]);
 
-    @Log(name = "OV9281-02", groups = "Cameras")
-    AprilTagPhotonCamera photonCamera2 = new AprilTagPhotonCamera("OV9281-02",
-            Constants.Vision.ROBOT_TO_CAMS[1]);
+    @Log(groups = "cameras")
+    private final AprilTagPhotonCamera ov9281_03 = new AprilTagPhotonCamera("OV9281-03", ROBOT_TO_CAMS[2]);
 
-    @Log(name = "OV9281-03", groups = "Cameras")
-    AprilTagPhotonCamera photonCamera3 = new AprilTagPhotonCamera("OV9281-03",
-            Constants.Vision.ROBOT_TO_CAMS[2]);
-
-    @Log(name = "OV9281-04", groups = "Cameras")
-    AprilTagPhotonCamera photonCamera4 = new AprilTagPhotonCamera("OV9281-04",
-            Constants.Vision.ROBOT_TO_CAMS[3]);
+    @Log(groups = "cameras")
+    private final AprilTagPhotonCamera ov9281_04 = new AprilTagPhotonCamera("OV9281-04", ROBOT_TO_CAMS[3]);
 
     private AprilTagPhotonCamera[] photonCameras = new AprilTagPhotonCamera[] {
-            photonCamera1, photonCamera2, photonCamera3, photonCamera4 };
-
-    @Log(name = "Overall Estimated Robot Pose")
-    private Supplier<double[]> estimatedPoseSupp = () -> AdvantageScopeSerializer
-            .serializePose2ds(List.of(this.poseEstimator.getEstimatedPosition()));
+            ov9281_01, ov9281_02, ov9281_03, ov9281_04 };
 
     public Watchtower() {
-        AutoManager.getInstance().setPoseEstimatorCallback(this::updatePoseEstimator);
-    }
-
-    @Log(name = "Detected AprilTags")
-    public double[] getAllDetectedAprilTags() {
-        List<Pose3d> poses = new ArrayList<Pose3d>();
-        for (AprilTagPhotonCamera cam : photonCameras) {
-            poses.addAll(cam.getCurrentlyDetectedAprilTags());
+        AprilTagFieldLayout tagLayout = AprilTagFields.kDefaultField.loadAprilTagLayoutField();
+        visionSim.addAprilTags(tagLayout);
+        for (AprilTagPhotonCamera photonCamera : photonCameras) {
+            visionSim.addCamera(photonCamera.getSim(), photonCamera.getRobotToCam());
         }
-        return AdvantageScopeSerializer.serializePose3ds(poses);
     }
 
-    @Log(name = "Detected Robot Poses")
-    public double[] getAllDetectedRobotPoses() {
-        List<Pose3d> poses = new ArrayList<Pose3d>();
-        for (AprilTagPhotonCamera cam : photonCameras) {
-            if (cam.hasPose())
-                poses.add(cam.getCurrentlyDetectedRobotPose());
-        }
-        return AdvantageScopeSerializer.serializePose3ds(poses);
+    @Override
+    public void simulationPeriodic() {
+        visionSim.update(simPoseSupplier.get());
     }
 
-    @Log(name = "Camera Poses")
-    public double[] getAllCameraPoses() {
-        List<Pose3d> poses = new ArrayList<Pose3d>();
-        for (Transform3d transform : Constants.Vision.ROBOT_TO_CAMS) {
-            poses.add(new Pose3d(poseEstimator.getEstimatedPosition()).plus(transform));
-        }
-        return AdvantageScopeSerializer.serializePose3ds(poses);
-    }
-
+    @Override
     public void updatePoseEstimator() {
-        if (poseEstimator != null && DriverStation.isTeleop()) {
-            Pose2d prevEstimatedRobotPose = poseEstimator.getEstimatedPosition();
-            for (AprilTagPhotonCamera photonCamera : photonCameras) {
-                Optional<EstimatedRobotPose> result = photonCamera
-                        .getEstimatedGlobalPose(prevEstimatedRobotPose);
+        if (poseEstimator == null) {
+            return;
+        }
 
-                if (result.isPresent()) {
-                    EstimatedRobotPose camPose = result.get();
+        Pose2d prevEstimatedRobotPose = poseEstimator.getEstimatedPosition();
+        for (AprilTagPhotonCamera photonCamera : photonCameras) {
+            Optional<EstimatedRobotPose> result = photonCamera
+                    .getEstimatedGlobalPose(prevEstimatedRobotPose);
 
-                    poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(),
-                            camPose.timestampSeconds);
-                }
+            if (result.isPresent()) {
+                EstimatedRobotPose estPose = result.get();
+                Matrix<N3, N1> stddevs = photonCamera.getEstimationStdDevs(estPose.estimatedPose.toPose2d(),
+                        SINGLE_TAG_STD_DEVS, MULTI_TAG_STD_DEVS);
+                poseEstimator.addVisionMeasurement(estPose.estimatedPose.toPose2d(),
+                        estPose.timestampSeconds, stddevs);
             }
         }
     }
 
+    @Override
+    @Log
+    public Pose3d[] getCameraPoses() {
+        List<Pose3d> poses = new ArrayList<Pose3d>();
+        for (Transform3d transform : Constants.Vision.ROBOT_TO_CAMS) {
+            poses.add(new Pose3d(poseEstimator.getEstimatedPosition()).plus(transform)
+                    .plus(new Transform3d(0, 0, 0, new Rotation3d(0, 0, Math.PI))));
+        }
+        Pose3d[] poseArray = new Pose3d[poses.size()];
+        return poses.toArray(poseArray);
+    }
+
+    @Override
+    @Log
+    public Pose3d[] getAprilTagPoses() {
+        List<Pose3d> poses = new ArrayList<Pose3d>();
+        for (AprilTag tag : AprilTagFields.kDefaultField.loadAprilTagLayoutField().getTags()) {
+            poses.add(tag.pose);
+        }
+        Pose3d[] poseArray = new Pose3d[poses.size()];
+        return poses.toArray(poseArray);
+    }
+
+    @Override
     public void setPoseEstimator(SwerveDrivePoseEstimator poseEstimator) {
         this.poseEstimator = poseEstimator;
+    }
+
+    @Override
+    public void setSimPoseSupplier(Supplier<Pose2d> simPoseSupplier) {
+        this.simPoseSupplier = simPoseSupplier;
     }
 }

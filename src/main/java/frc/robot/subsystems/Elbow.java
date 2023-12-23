@@ -1,6 +1,5 @@
 package frc.robot.subsystems;
 
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkMax;
@@ -9,25 +8,23 @@ import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
+import com.techhounds.houndutil.houndlib.subsystems.BaseSingleJointedArm;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.simulation.BatterySim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
-import frc.robot.Constants;
-import frc.robot.Overrides;
+import frc.robot.Constants.Elbow.ElbowPosition;
+import static frc.robot.Constants.Elbow.*;
 
 /**
  * The elbow subsystem, controlling the elbow's position.
@@ -36,75 +33,64 @@ import frc.robot.Overrides;
  * @author dr
  */
 @LoggedObject
-public class Elbow extends SubsystemBase {
-    public static enum ElbowPosition {
-        LOW(-0.31),
-        MID_STOW(-0.1),
-        MID(-0.05),
-        MID_CONE_HIGH(0.3),
-        CONE_PICKUP(0.07),
-        SINGLE_SUBSTATION_PICKUP(0.087),
-        HIGH(0.75);
-
-        public final double value;
-
-        private ElbowPosition(double value) {
-            this.value = value;
-        }
-    }
-
-    @Log(name = "Motor")
-    private CANSparkMax motor = new CANSparkMax(Constants.CAN.ELBOW_MOTOR_ID, MotorType.kBrushless);
-    @Log(name = "Encoder")
-    private SparkMaxAbsoluteEncoder encoder = motor.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
+public class Elbow extends SubsystemBase implements BaseSingleJointedArm<ElbowPosition> {
+    @Log
+    private CANSparkMax motor;
+    @Log
+    private SparkMaxAbsoluteEncoder encoder;
 
     private MechanismLigament2d ligament;
 
     private SingleJointedArmSim armSim = new SingleJointedArmSim(
-            DCMotor.getNeo550(1),
-            100,
-            SingleJointedArmSim.estimateMOI(Units.inchesToMeters(12), 3.63),
-            Units.inchesToMeters(12),
-            ElbowPosition.LOW.value - 0.25,
-            ElbowPosition.HIGH.value + 0.25,
-            true);
+            MOTOR_GEARBOX_REPR,
+            GEARING,
+            MOMENT_OF_INERTIA_KG_METERS_SQUARED,
+            LENGTH_METERS,
+            MIN_ANGLE_RADIANS,
+            MAX_ANGLE_RADIANS,
+            true,
+            0);
 
-    @Log(name = "Profiled PID Controller")
-    private ProfiledPIDController pidController = new ProfiledPIDController(
-            Constants.Gains.Elbow.kP,
-            Constants.Gains.Elbow.kI,
-            Constants.Gains.Elbow.kD,
-            new TrapezoidProfile.Constraints(
-                    Constants.Geometries.Elbow.MAX_VELOCITY_METERS_PER_SECOND,
-                    Constants.Geometries.Elbow.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED));
+    @Log
+    private ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, MOVEMENT_CONSTRAINTS);
 
-    @Log(name = "Feedforward Controller")
-    private ArmFeedforward feedforwardController = new ArmFeedforward(
-            Constants.Gains.Elbow.kS,
-            Constants.Gains.Elbow.kG,
-            Constants.Gains.Elbow.kV,
-            Constants.Gains.Elbow.kA);
+    @Log
+    private ArmFeedforward feedforwardController = new ArmFeedforward(kS, kG, kV, kA);
 
-    public Elbow(MechanismLigament2d ligament) {
+    @Log(groups = "control")
+    private double feedbackVoltage = 0;
+    @Log(groups = "control")
+    private double feedforwardVoltage = 0;
+
+    private Supplier<Pose3d> elevatorPoseSupplier;
+
+    public Elbow(Supplier<Pose3d> elevatorPoseSupplier, MechanismLigament2d ligament) {
         this.ligament = ligament;
+        this.elevatorPoseSupplier = elevatorPoseSupplier;
 
-        SparkMaxConfigurator.configure(motor, false)
-                .withIdleMode(IdleMode.kBrake)
-                .withCurrentLimit(20)
-                .withInverted(true)
-                .withPositionConversionFactor(2 * Math.PI / 100.0, true);
+        motor = SparkMaxConfigurator.create(
+                MOTOR_ID, MotorType.kBrushless, true,
+                (s) -> s.setIdleMode(IdleMode.kBrake),
+                (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
+                (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS),
+                (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0),
+                (s) -> s.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 20),
+                (s) -> s.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle).setInverted(true),
+                (s) -> s.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle)
+                        .setPositionConversionFactor(ABSOLUTE_ENCODER_ROTATIONS_TO_RADIANS),
+                (s) -> s.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle)
+                        .setVelocityConversionFactor(ABSOLUTE_ENCODER_ROTATIONS_TO_RADIANS / 60.0),
+                (s) -> s.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle)
+                        .setZeroOffset(ABSOLUTE_ENCODER_ZERO_OFFSET));
 
-        motor.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 20);
-        encoder.setInverted(true);
-        encoder.setPositionConversionFactor(2 * Math.PI);
-        encoder.setZeroOffset(1.274);
-        motor.burnFlash();
+        encoder = motor.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
 
         new Thread(() -> {
             try {
                 Thread.sleep(3000);
                 motor.getEncoder().setPosition(encoder.getPosition());
             } catch (Exception e) {
+                e.printStackTrace(System.err);
             }
         }).start();
 
@@ -121,27 +107,23 @@ public class Elbow extends SubsystemBase {
         armSim.setInput(motor.getAppliedOutput());
         armSim.update(0.020);
         motor.getEncoder().setPosition(armSim.getAngleRads());
-        // update the voltage of the RIO sim
-        RoboRioSim.setVInVoltage(
-                BatterySim.calculateDefaultBatteryLoadedVoltage(armSim.getCurrentDrawAmps()));
     }
 
-    @Log(name = "Position")
-    private double getPosition() {
+    @Override
+    @Log
+    public double getPosition() {
         return motor.getEncoder().getPosition();
     }
 
-    /**
-     * Sets the speed of the motor. Will refuse to go past the bottom or top soft
-     * limits.
-     * 
-     * @param speed the speed, from -1.0 to 1.0.
-     */
-    private void setSpeed(double speed) {
-        if (RobotBase.isReal())
-            motor.set(speed);
-        else
-            motor.setVoltage(speed * 12.0);
+    @Log
+    public Pose3d getComponentPose() {
+        Pose3d elevatorPose = elevatorPoseSupplier.get();
+        return new Pose3d(elevatorPose.getTranslation().plus(ELEVATOR_TO_ELBOW), new Rotation3d(0, -getPosition(), 0));
+    }
+
+    @Override
+    public void resetPosition() {
+        motor.getEncoder().setPosition(0);
     }
 
     /**
@@ -149,92 +131,67 @@ public class Elbow extends SubsystemBase {
      * 
      * @param voltage the voltage, from -12.0v to 12.0v
      */
-    private void setVoltage(double voltage) {
+    @Override
+    public void setVoltage(double voltage) {
         motor.setVoltage(voltage);
     }
 
-    /**
-     * Creates a command that moves to the currently specified goal pose, then holds
-     * its position.
-     * 
-     * @return the command
-     */
-    private CommandBase moveToCurrentGoalCommand() {
+    @Override
+    public Command moveToCurrentGoalCommand() {
         return run(() -> {
-            double feedback = pidController.calculate(getPosition());
-            double feedforward = feedforwardController.calculate(pidController.getSetpoint().position,
+            feedbackVoltage = pidController.calculate(getPosition());
+            feedforwardVoltage = feedforwardController.calculate(pidController.getSetpoint().position,
                     pidController.getSetpoint().velocity);
-            setVoltage(feedback + feedforward);
+            setVoltage(feedbackVoltage + feedforwardVoltage);
         }).withName("Move to Current Goal");
     }
 
-    /**
-     * Creates a command that sets a new goal position, and waits until the elbow
-     * has
-     * reached its goal.
-     * 
-     * @param goalPositionSupplier the supplier for the new goal position
-     * @return the command
-     */
-    public CommandBase moveToPositionCommand(Supplier<ElbowPosition> goalPositionSupplier) {
+    @Override
+    public Command moveToPositionCommand(Supplier<ElbowPosition> goalPositionSupplier) {
         return Commands.sequence(
                 runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> pidController.setGoal(goalPositionSupplier.get().value)),
                 moveToCurrentGoalCommand().until(pidController::atGoal)).withTimeout(2)
-                .finallyDo((d) -> motor.stopMotor())
                 .withName("Move to Position");
     }
 
-    /**
-     * Creates a command that sets a new arbitrary goal position, and waits until
-     * the elbow has
-     * reached its goal.
-     * 
-     * @param goalPositionSupplier the supplier for the new goal position
-     * @return the command
-     */
-    public CommandBase moveToArbitraryPositionCommand(Supplier<Double> goalPositionSupplier) {
+    @Override
+    public Command moveToArbitraryPositionCommand(Supplier<Double> goalPositionSupplier) {
         return Commands.sequence(
                 runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> pidController.setGoal(goalPositionSupplier.get())),
                 moveToCurrentGoalCommand().until(pidController::atGoal)).withTimeout(2)
-                .finallyDo((d) -> motor.stopMotor())
                 .withName("Move to Arbitrary Position");
     }
 
-    public CommandBase holdCurrentPositionCommand() {
-        return runOnce(() -> pidController.setGoal(getPosition())).andThen(run(() -> {
-        }));
+    @Override
+    public Command movePositionDeltaCommand(Supplier<Double> delta) {
+        return Commands.sequence(
+                runOnce(() -> pidController.reset(getPosition())),
+                runOnce(() -> pidController.setGoal(getPosition() + delta.get())),
+                moveToCurrentGoalCommand().until(pidController::atGoal)).withTimeout(2)
+                .withName("Move to Arbitrary Position");
     }
 
-    /**
-     * Sets the speed of the elbow from the operator overrides controller.
-     * 
-     * @param speed the speed commanded from the joystick
-     * @return the command
-     */
-    // TODO
-    public CommandBase setOverridenElbowSpeedCommand(DoubleSupplier speed) {
-        return run(() -> {
-            if (Overrides.MANUAL_MECH_CONTROL_MODE.getStatus()) {
-                setSpeed(speed.getAsDouble());
-            }
-        });
+    @Override
+    public Command holdCurrentPositionCommand() {
+        return runOnce(() -> pidController.setGoal(getPosition()))
+                .andThen(holdCurrentPositionCommand());
     }
 
-    /**
-     * Creates a command that overrides all others and both disables and coasts the
-     * motor until cancelled.
-     * 
-     * @return the command
-     */
-    /**
-     * Creates a command that both disables and sets the motor to coast until
-     * cancelled.
-     * 
-     * @return the command
-     */
-    public CommandBase disabledMotorOverrideCommand() {
+    @Override
+    public Command resetPositionCommand() {
+        return runOnce(this::resetPosition);
+    }
+
+    @Override
+    public Command setOverridenSpeedCommand(Supplier<Double> speed) {
+        return run(() -> setVoltage(12.0 * speed.get()))
+                .withName("Set Overridden Elbow Speed");
+    }
+
+    @Override
+    public Command coastMotorsCommand() {
         return runOnce(() -> motor.stopMotor())
                 .andThen(() -> motor.setIdleMode(IdleMode.kCoast))
                 .finallyDo((d) -> {

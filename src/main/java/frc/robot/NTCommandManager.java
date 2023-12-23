@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive.DriveMode;
 import com.techhounds.houndutil.houndlog.LogGroup;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.loggers.SendableLogger;
@@ -7,6 +8,8 @@ import com.techhounds.houndutil.houndlog.loggers.SendableLogger;
 import frc.robot.Modes.RobotState;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants.Elbow.ElbowPosition;
+import frc.robot.Constants.Elevator.ElevatorPosition;
 import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.GamePieceLocation.Grid;
 import frc.robot.GamePieceLocation.GridPosition;
@@ -15,9 +18,7 @@ import frc.robot.commands.IntakingCommands;
 import frc.robot.commands.ScoringCommands;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elbow;
-import frc.robot.subsystems.Elbow.ElbowPosition;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Elevator.ElevatorPosition;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LEDs;
 import frc.robot.subsystems.LEDs.LEDState;
@@ -38,47 +39,48 @@ public class NTCommandManager {
             Manipulator manipulator, Elevator elevator, Elbow elbow, LEDs leds) {
         if (Constants.IS_VIRTUAL_BUTTON_PANEL_ENABLED) {
             LoggingManager.getInstance().addGroup("Commands/Operator Panel", new LogGroup(
-                    new SendableLogger("Select Left Grid",
+                    new SendableLogger("selectLeftGrid",
                             gridInterface.setGridCommand(Grid.LEFT).withName("Left Grid")),
-                    new SendableLogger("Select Middle Grid",
+                    new SendableLogger("selectMiddleGrid",
                             gridInterface.setGridCommand(Grid.MIDDLE).withName("Middle Grid")),
-                    new SendableLogger("Select Right Grid",
+                    new SendableLogger("selectRightGrid",
                             gridInterface.setGridCommand(Grid.RIGHT).withName("Right Grid")),
-                    new SendableLogger("Select Left High Location",
+                    new SendableLogger("selectLeftHighLocation",
                             gridInterface.setLocationCommand(GamePiece.CONE, GridPosition.LEFT, Level.HIGH)
                                     .withName("Left High Location")),
-                    new SendableLogger("Select Middle High Location",
+                    new SendableLogger("selectMiddleHighLocation",
                             gridInterface.setLocationCommand(GamePiece.CUBE, GridPosition.MIDDLE, Level.HIGH)
                                     .withName("Middle High Location")),
-                    new SendableLogger("Select Right High Location",
+                    new SendableLogger("selectRightHighLocation",
                             gridInterface.setLocationCommand(GamePiece.CONE, GridPosition.RIGHT, Level.HIGH)
                                     .withName("Right High Location")),
-                    new SendableLogger("Select Left Middle Location",
+                    new SendableLogger("selectLeftMiddleLocation",
                             gridInterface.setLocationCommand(GamePiece.CONE, GridPosition.LEFT, Level.MIDDLE)
                                     .withName("Left Middle Location")),
-                    new SendableLogger("Select Middle Middle Location",
+                    new SendableLogger("selectMiddleMiddleLocation",
                             gridInterface.setLocationCommand(GamePiece.CUBE, GridPosition.MIDDLE, Level.MIDDLE)
                                     .withName("Middle Middle Location")),
-                    new SendableLogger("Select Right Middle Location",
+                    new SendableLogger("selectRightMiddleLocation",
                             gridInterface.setLocationCommand(GamePiece.CONE, GridPosition.RIGHT, Level.MIDDLE)
                                     .withName("Right Middle Location")),
-                    new SendableLogger("Select Left Low Location",
-                            gridInterface.setLocationCommand(GamePiece.HYBRID, GridPosition.LEFT, Level.LOW)
+                    new SendableLogger("selectLeftLowLocation",
+                            gridInterface.setLocationCommand(GamePiece.HYBRID, GridPosition.LEFT, Level.HYBRID)
                                     .withName("Left Low Location")),
-                    new SendableLogger("Select Middle Low Location",
-                            gridInterface.setLocationCommand(GamePiece.HYBRID, GridPosition.MIDDLE, Level.LOW)
+                    new SendableLogger("selectMiddleLowLocation",
+                            gridInterface.setLocationCommand(GamePiece.HYBRID, GridPosition.MIDDLE, Level.HYBRID)
                                     .withName("Middle Low Location")),
-                    new SendableLogger("Select Right Low Location",
-                            gridInterface.setLocationCommand(GamePiece.HYBRID, GridPosition.RIGHT, Level.LOW)
+                    new SendableLogger("selectRightLowLocation",
+                            gridInterface.setLocationCommand(GamePiece.HYBRID, GridPosition.RIGHT, Level.HYBRID)
                                     .withName("Right Low Location")),
-                    new SendableLogger("Reset",
+                    new SendableLogger("reset",
                             Commands.runOnce(() -> gridInterface.reset()).withName("Reset")),
-                    new SendableLogger("Score",
+                    new SendableLogger("score",
                             ScoringCommands
                                     .fullScoreSequenceCommand(() -> true, d -> {
                                     }, drivetrain, gridInterface, intake, manipulator, elevator, elbow)
                                     .andThen(ScoringCommands.stowElevatorCommand(intake, manipulator, elevator, elbow))
                                     .withName("Score"))));
+
         }
 
         if (Constants.IS_NT_COMMANDS_ENABLED) {
@@ -110,33 +112,33 @@ public class NTCommandManager {
 
             levelChooser.setDefaultOption("High", Level.HIGH);
             levelChooser.addOption("Middle", Level.MIDDLE);
-            levelChooser.addOption("Low", Level.LOW);
+            levelChooser.addOption("Low", Level.HYBRID);
 
             robotStateChooser.setDefaultOption("Seeking", RobotState.SEEKING);
             robotStateChooser.addOption("Scoring", RobotState.SCORING);
 
             LoggingManager.getInstance().addGroup(new LogGroup(
-                    new SendableLogger("Commands/Sequences/Choosers", "Game Piece Chooser", gamePieceChooser),
-                    new SendableLogger("Commands/Sequences/Choosers", "Level Chooser", levelChooser),
-                    new SendableLogger("Commands/Sequences/Scoring", "Raise Elevator",
+                    new SendableLogger("commands/sequences/choosers", "gamePieceChooser", gamePieceChooser),
+                    new SendableLogger("commands/sequences/choosers", "levelChooser", levelChooser),
+                    new SendableLogger("commands/sequences/scoring", "raiseElevator",
                             ScoringCommands.raiseElevatorCommand(gamePieceChooser::getSelected,
                                     levelChooser::getSelected, intake, manipulator, elevator, elbow)),
-                    new SendableLogger("Commands/Sequences/Scoring", "Place Piece",
+                    new SendableLogger("commands/sequences/scoring", "placePiece",
                             ScoringCommands.placePieceCommand(() -> secondaryButton,
                                     (s) -> {
                                     }, gamePieceChooser::getSelected, levelChooser::getSelected, drivetrain, intake,
                                     manipulator, elevator, elbow)),
-                    new SendableLogger("Commands/Sequences/Scoring", "Place Piece Auto",
+                    new SendableLogger("commands/sequences/scoring", "placePieceAuto",
                             ScoringCommands.placePieceAutoCommand(gamePieceChooser::getSelected,
                                     levelChooser::getSelected, drivetrain, intake, manipulator, elevator, elbow)),
-                    new SendableLogger("Commands/Sequences/Scoring", "Full Score Sequence",
+                    new SendableLogger("commands/sequences/scoring", "fullScoreSequence",
                             ScoringCommands.fullScoreSequenceCommand(() -> secondaryButton,
                                     (s) -> {
                                     }, drivetrain, gridInterface, intake, manipulator, elevator, elbow)),
-                    new SendableLogger("Commands/Sequences/Scoring", "Full Score Sequence Auto",
+                    new SendableLogger("commands/sequences/scoring", "fullScoreSequenceAuto",
                             ScoringCommands.fullScoreSequenceAutoCommand(gamePieceChooser::getSelected,
                                     levelChooser::getSelected, drivetrain, intake, manipulator, elevator, elbow)),
-                    new SendableLogger("Commands/Sequences/Scoring", "Trigger Secondary Button",
+                    new SendableLogger("commands/sequences/scoring", "triggerSecondaryButton",
                             Commands.sequence(
                                     Commands.runOnce(() -> {
                                         secondaryButton = true;
@@ -145,92 +147,93 @@ public class NTCommandManager {
                                     Commands.runOnce(() -> {
                                         secondaryButton = false;
                                     })).withName("Trigger Secondary Button")),
-                    new SendableLogger("Commands/Sequences/Scoring", "Stow Elevator",
+                    new SendableLogger("commands/sequences/scoring", "stowElevator",
                             ScoringCommands.stowElevatorCommand(intake, manipulator, elevator, elbow)),
-                    new SendableLogger("Commands/Sequences/Intaking", "Start and Run Intaking",
+                    new SendableLogger("commands/sequences/intaking", "startAndRunIntaking",
                             IntakingCommands.startAndRunIntakingCommand(gamePieceChooser::getSelected, intake,
                                     manipulator, elevator, elbow)),
-                    new SendableLogger("Commands/Sequences/Intaking", "Finish Intaking",
+                    new SendableLogger("commands/sequences/intaking", "finishIntaking",
                             IntakingCommands.finishIntakingCommand(gamePieceChooser::getSelected, intake,
                                     manipulator, elevator, elbow)),
-                    new SendableLogger("Commands/Sequences/Intaking", "Intake Game Piece",
+                    new SendableLogger("commands/sequences/intaking", "intakeGamePiece",
                             IntakingCommands.intakePieceCommand(() -> secondaryButton, intake,
                                     manipulator, elevator, elbow)),
-                    new SendableLogger("Commands/Sequences/Intaking", "Start and Run Ejecting",
+                    new SendableLogger("commands/sequences/intaking", "startAndRunEjecting",
                             IntakingCommands.startAndRunEjectingCommand(gamePieceChooser::getSelected, intake,
                                     manipulator, elevator, elbow)),
-                    new SendableLogger("Commands/Sequences/Intaking", "Finish Ejecting",
+                    new SendableLogger("commands/sequences/intaking", "finishEjecting",
                             IntakingCommands.finishEjectingCommand(gamePieceChooser::getSelected, intake,
                                     manipulator, elevator, elbow)),
-                    new SendableLogger("Commands/Sequences/Intaking", "Eject Game Piece",
+                    new SendableLogger("commands/sequences/intaking", "ejectGamePiece",
                             IntakingCommands.ejectPieceCommand(() -> secondaryButton, intake,
                                     manipulator, elevator, elbow)),
-                    new SendableLogger("Commands/Sequences/Intaking", "Human Player Pickup",
+                    new SendableLogger("commands/sequences/intaking", "humanPlayerPickup",
                             IntakingCommands.humanPlayerPickupCommand(() -> secondaryButton,
                                     (s) -> {
                                     }, gamePieceChooser::getSelected, intake, manipulator, elevator, elbow)),
-                    new SendableLogger("Commands/Sequences/Intaking", "Human Player Stow Elevator",
+                    new SendableLogger("commands/sequences/intaking", "humanPlayerStowElevator",
                             IntakingCommands.humanPlayerStowElevatorCommand(intake, manipulator, elevator, elbow)),
-                    new SendableLogger("Commands/States", "Robot State Chooser", robotStateChooser),
-                    new SendableLogger("Commands/States", "Set Robot State", Modes.setRobotStateCommand(null)),
-                    new SendableLogger("Commands/States", "Set Intake Mode",
+                    new SendableLogger("commands/states", "robotStateChooser", robotStateChooser),
+                    new SendableLogger("commands/states", "setRobotState", Modes.setRobotStateCommand(null)),
+                    new SendableLogger("commands/states", "setIntakeMode",
                             Modes.setIntakeModeCommand(gamePieceChooser::getSelected)),
-                    new SendableLogger("Commands/States", "Clear Intake Mode",
+                    new SendableLogger("commands/states", "clearIntakeMode",
                             Modes.clearIntakeModeCommand()),
-                    new SendableLogger("Commands/States", "Initialize Mechanisms",
+                    new SendableLogger("commands/states", "initializeMechanisms",
                             Modes.initializeMechanisms(intake, manipulator, elevator, elbow))));
 
             LoggingManager.getInstance().addGroup(new LogGroup(
-                    new SendableLogger("Commands/Manipulator", "Wrist Down",
+                    new SendableLogger("commands/manipulator", "wristDown",
                             manipulator.setWristDownCommand()),
-                    new SendableLogger("Commands/Manipulator", "Wrist Up",
+                    new SendableLogger("commands/manipulator", "wristUp",
                             manipulator.setWristUpCommand()),
-                    new SendableLogger("Commands/Manipulator", "Pincers Open",
+                    new SendableLogger("commands/manipulator", "pincersOpen",
                             manipulator.setPincersOpenCommand()),
-                    new SendableLogger("Commands/Manipulator", "Pincers Closed",
+                    new SendableLogger("commands/manipulator", "pincersClosed",
                             manipulator.setPincersClosedCommand()),
-                    new SendableLogger("Commands/Manipulator", "Simulate Pole Switch Triggered",
+                    new SendableLogger("commands/manipulator", "simulatePoleSwitchTriggered",
                             manipulator.simulatePoleSwitchTriggered()),
 
-                    new SendableLogger("Commands/Intake", "Passover Extended",
+                    new SendableLogger("commands/intake", "passoverExtended",
                             intake.setPassoversExtendedCommand(elevator)),
-                    new SendableLogger("Commands/Intake", "Passover Retracted",
+                    new SendableLogger("commands/intake", "passoverRetracted",
                             intake.setPassoversRetractedCommand(elevator)),
-                    new SendableLogger("Commands/Intake", "Cubapult Primed",
+                    new SendableLogger("commands/intake", "cubapultPrimed",
                             intake.setCubapultReleased()),
-                    new SendableLogger("Commands/Intake", "Cubapult Released",
+                    new SendableLogger("commands/intake", "cubapultReleased",
                             intake.setCubapultPrimed()),
-                    new SendableLogger("Commands/Intake", "Run Passover Motors",
+                    new SendableLogger("commands/intake", "runPassoverMotors",
                             intake.runPassoverMotorsCommand()),
-                    new SendableLogger("Commands/Intake", "Simulate Game Piece Detected",
-                            intake.simulateGamePieceDetectedCommand()),
 
-                    new SendableLogger("Commands/Elbow", "Setpoint Chooser", elbowPositionChooser),
-                    new SendableLogger("Commands/Elbow", "Move to Setpoint",
+                    new SendableLogger("commands/elbow", "setpointChooser", elbowPositionChooser),
+                    new SendableLogger("commands/elbow", "moveToSetpoint",
                             elbow.moveToPositionCommand(elbowPositionChooser::getSelected)
                                     .withName("Move to Elbow Setpoint")),
 
-                    new SendableLogger("Commands/Elevator", "Setpoint Chooser", elevatorPositionChooser),
-                    new SendableLogger("Commands/Elevator", "Move to Setpoint",
+                    new SendableLogger("commands/elevator", "setpointChooser", elevatorPositionChooser),
+                    new SendableLogger("commands/elevator", "moveToSetpoint",
                             elevator.moveToPositionCommand(elevatorPositionChooser::getSelected)
                                     .withName("Move to Elevator Setpoint")),
 
-                    new SendableLogger("Commands/Drivetrain", "Rotate to 0°",
-                            drivetrain.controlledRotateCommand(0, true).withName("Rotate to 0°")),
-                    new SendableLogger("Commands/Drivetrain", "Rotate to 90°",
-                            drivetrain.controlledRotateCommand(Math.PI / 2, true).withName("Rotate to 90°")),
-                    new SendableLogger("Commands/Drivetrain", "Rotate to 180°",
-                            drivetrain.controlledRotateCommand(Math.PI, true).withName("Rotate to 180°")),
-                    new SendableLogger("Commands/Drivetrain", "Rotate to 270°",
-                            drivetrain.controlledRotateCommand(3 * Math.PI / 2, true).withName("Rotate to 270°")),
-                    new SendableLogger("Commands/Drivetrain", "Brake O", drivetrain.brakeOCommand()),
-                    new SendableLogger("Commands/Drivetrain", "Brake X", drivetrain.brakeXCommand()),
+                    new SendableLogger("commands/drivetrain", "rotateTo0Degrees",
+                            drivetrain.controlledRotateCommand(0, DriveMode.FIELD_ORIENTED).withName("Rotate to 0°")),
+                    new SendableLogger("commands/drivetrain", "rotateTo90Degrees",
+                            drivetrain.controlledRotateCommand(Math.PI / 2, DriveMode.FIELD_ORIENTED)
+                                    .withName("Rotate to 90°")),
+                    new SendableLogger("commands/drivetrain", "rotateTo180Degrees",
+                            drivetrain.controlledRotateCommand(Math.PI, DriveMode.FIELD_ORIENTED)
+                                    .withName("Rotate to 180°")),
+                    new SendableLogger("commands/drivetrain", "rotateTo270Degrees",
+                            drivetrain.controlledRotateCommand(3 * Math.PI / 2, DriveMode.FIELD_ORIENTED)
+                                    .withName("Rotate to 270°")),
+                    new SendableLogger("commands/drivetrain", "wheelLock", drivetrain.wheelLockCommand()),
 
-                    new SendableLogger("Commands/LEDs", "LED State Chooser",
+                    new SendableLogger("commands/leds", "ledStateChooser",
                             ledStateChooser),
-                    new SendableLogger("Commands/LEDs", "Hold Selected State",
+                    new SendableLogger("commands/leds", "holdSelectedState",
                             leds.holdLEDStateCommand(ledStateChooser::getSelected).withName("Hold Selected LED State")
                                     .ignoringDisable(true))));
+
         }
     }
 

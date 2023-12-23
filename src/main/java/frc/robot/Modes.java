@@ -3,26 +3,44 @@ package frc.robot;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import com.techhounds.houndutil.houndlog.interfaces.Log;
+
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants.Elbow.ElbowPosition;
 import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.subsystems.Elbow;
-import frc.robot.subsystems.Elbow.ElbowPosition;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Manipulator;
 
 public class Modes {
+
+    @Log(groups = "states")
+    private static Supplier<Boolean> initialized = Modes::isInitialized;
+
+    @Log(groups = "states")
+    private static Supplier<String> discreteError = () -> Modes.getCurrentDiscreteError().isPresent()
+            ? Modes.getCurrentDiscreteError().orElseThrow().toString()
+            : "None";
+
+    @Log(groups = "states")
+    private static Supplier<String> continuousError = () -> Modes.getCurrentContinuousError().isPresent()
+            ? Modes.getCurrentContinuousError().orElseThrow().toString()
+            : "None";
+
     //////////////////////////////
     ///////// RobotState /////////
     //////////////////////////////
 
     public enum RobotState {
         SEEKING,
+        INTAKING,
         SCORING;
     }
 
     // RobotState
+    @Log(name = "robotState")
     private static RobotState robotState = RobotState.SEEKING;
 
     public static RobotState getRobotState() {
@@ -33,7 +51,7 @@ public class Modes {
         Modes.robotState = robotState;
     }
 
-    public static CommandBase setRobotStateCommand(Supplier<RobotState> robotState) {
+    public static Command setRobotStateCommand(Supplier<RobotState> robotState) {
         return Commands.runOnce(() -> Modes.robotState = robotState.get()).withName("Set Robot State");
     }
 
@@ -44,6 +62,7 @@ public class Modes {
     /**
      * The current mode of the robot for intaking a game piece. Set by the driver.
      */
+    @Log
     private static Optional<GamePiece> intakeMode = Optional.empty();
 
     /**
@@ -72,7 +91,7 @@ public class Modes {
      * @param intakeMode the new mode to set the intake mechanism to
      * @return the command
      */
-    public static CommandBase setIntakeModeCommand(Supplier<GamePiece> intakeMode) {
+    public static Command setIntakeModeCommand(Supplier<GamePiece> intakeMode) {
         return Commands.runOnce(() -> {
             setIntakeMode(intakeMode.get());
         }).withName("Set Intake Mode");
@@ -91,18 +110,8 @@ public class Modes {
      * 
      * @return the command
      */
-    public static CommandBase clearIntakeModeCommand() {
+    public static Command clearIntakeModeCommand() {
         return Commands.runOnce(Modes::clearIntakeMode).withName("Clear Intake Mode");
-    }
-
-    private static boolean isIntaking = false;
-
-    public static void setIntaking(boolean isIntaking) {
-        Modes.isIntaking = isIntaking;
-    }
-
-    public static boolean getIntaking() {
-        return isIntaking;
     }
 
     //////////////////////////////
@@ -123,7 +132,7 @@ public class Modes {
         return isInitialized;
     }
 
-    public static CommandBase initializeMechanisms(
+    public static Command initializeMechanisms(
             Intake intake,
             Manipulator manipulator,
             Elevator elevator,
@@ -132,7 +141,7 @@ public class Modes {
                 elbow.moveToPositionCommand(() -> ElbowPosition.MID),
                 intake.setPassoversRetractedCommand(elevator),
                 manipulator.setWristDownCommand(),
-                elevator.zeroEncoderCommand()).withName("Initialize Mechanisms");
+                elevator.autoHallResetPositionCommand()).withName("Initialize Mechanisms");
     }
 
     //////////////////////////////
@@ -150,7 +159,7 @@ public class Modes {
      * 
      * @return the command
      */
-    public static CommandBase singularErrorCommand(Supplier<String> error) {
+    public static Command singularErrorCommand(Supplier<String> error) {
         return Commands.sequence(
                 Commands.runOnce(() -> {
                     System.out.println(error);
@@ -167,7 +176,7 @@ public class Modes {
      * 
      * @return the command
      */
-    public static CommandBase continuousErrorCommand(Supplier<String> error) {
+    public static Command continuousErrorCommand(Supplier<String> error) {
         return Commands.runEnd(
                 () -> {
                     currentContinuousError = Optional.of(error.get());

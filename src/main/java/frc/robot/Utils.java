@@ -1,11 +1,11 @@
 package frc.robot;
 
 import edu.wpi.first.util.function.BooleanConsumer;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 public class Utils {
-    public static CommandBase flashButtonCommand(BooleanConsumer buttonLed) {
+    public static Command flashButtonCommand(BooleanConsumer buttonLed) {
         return Commands.sequence(
                 Commands.runOnce(() -> buttonLed.accept(true)),
                 Commands.waitSeconds(0.25),

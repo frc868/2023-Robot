@@ -8,7 +8,7 @@ import java.util.Optional;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Controls.OperatorControls;
 import frc.robot.GamePieceLocation.Grid;
 import frc.robot.GamePieceLocation.GridPosition;
@@ -70,7 +70,7 @@ public class GridInterface {
 
         Grid grid = setGrid.orElseThrow();
 
-        if (DriverStation.getAlliance() == Alliance.Blue) {
+        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue) {
             GridPosition invertedGridPosition;
             if (gridPosition == GamePieceLocation.GridPosition.LEFT) {
                 invertedGridPosition = GamePieceLocation.GridPosition.RIGHT;
@@ -100,7 +100,7 @@ public class GridInterface {
             switch (gridPosition) {
                 case LEFT:
                     switch (level) {
-                        case LOW:
+                        case HYBRID:
                             hids.orElseThrow()[OperatorControls.GRIDPOS_C1.hid]
                                     .setOutput(OperatorControls.GRIDPOS_C1.button, true);
                             break;
@@ -116,7 +116,7 @@ public class GridInterface {
                     break;
                 case MIDDLE:
                     switch (level) {
-                        case LOW:
+                        case HYBRID:
                             hids.orElseThrow()[OperatorControls.GRIDPOS_C2.hid]
                                     .setOutput(OperatorControls.GRIDPOS_C2.button, true);
                             break;
@@ -132,7 +132,7 @@ public class GridInterface {
                     break;
                 case RIGHT:
                     switch (level) {
-                        case LOW:
+                        case HYBRID:
                             hids.orElseThrow()[OperatorControls.GRIDPOS_C3.hid]
                                     .setOutput(OperatorControls.GRIDPOS_C3.button, true);
                             break;
@@ -151,13 +151,13 @@ public class GridInterface {
         return true;
     }
 
-    public CommandBase setGridCommand(GamePieceLocation.Grid grid) {
+    public Command setGridCommand(GamePieceLocation.Grid grid) {
         return runOnce(() -> {
             setGrid(grid);
         }).ignoringDisable(true);
     }
 
-    public CommandBase setLocationCommand(
+    public Command setLocationCommand(
             GamePieceLocation.GamePiece gamePiece,
             GamePieceLocation.GridPosition gridPosition,
             GamePieceLocation.Level level) {
@@ -188,10 +188,6 @@ public class GridInterface {
         previousLocations.add(setLocation.get());
         setGrid = Optional.empty();
         setLocation = Optional.empty();
-    }
-
-    public void sendToShuffleboard() {
-        // TODO
     }
 
     public Optional<GamePieceLocation.Grid> getSetGrid() {

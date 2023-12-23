@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import java.util.Map;
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkMax;
@@ -9,31 +8,29 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
 import com.techhounds.houndutil.houndlib.Utils;
+import com.techhounds.houndutil.houndlib.subsystems.BaseElevator;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants;
 import frc.robot.Overrides;
 import frc.robot.Modes;
+import frc.robot.Constants.Elevator.ElevatorPosition;
 import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.GamePieceLocation.Level;
+import static frc.robot.Constants.Elevator.*;
 
 /**
  * The elevator subsystem, with two motors and motion profling.
@@ -42,66 +39,28 @@ import frc.robot.GamePieceLocation.Level;
  * @author jt
  */
 @LoggedObject
-public class Elevator extends SubsystemBase {
-    public static enum ElevatorPosition {
-        BOTTOM(0),
-        CONE_LOW(0.25),
-        CONE_MID(1.14),
-        CONE_HIGH(1.7),
-        CUBE_LOW(0.25),
-        CUBE_MID(1.18482),
-        SINGLE_SUBSTATION_PICKUP(0.5164),
-        CUBE_HIGH(1.70220),
-        HUMAN_PLAYER(0),
-        TOP(1.40);
-        // 1.72 meters max
-
-        public final double value;
-
-        private ElevatorPosition(double value) {
-            this.value = value;
-        }
-    }
-
+public class Elevator extends SubsystemBase implements BaseElevator<ElevatorPosition> {
     /** The left motor of the elevator. */
-    @Log(name = "Left Motor")
-    private CANSparkMax leftMotor = new CANSparkMax(Constants.CAN.ELEVATOR_LEFT_MOTOR_ID, MotorType.kBrushless);
+    @Log
+    private CANSparkMax leftMotor;
 
     /** The right motor of the elevator. */
-    @Log(name = "Right Motor")
-    private CANSparkMax rightMotor = new CANSparkMax(Constants.CAN.ELEVATOR_RIGHT_MOTOR_ID, MotorType.kBrushless);
-
-    /** The group that controls both elevator motors. */
-    private MotorControllerGroup motors = new MotorControllerGroup(leftMotor, rightMotor);
+    @Log
+    private CANSparkMax rightMotor;
 
     /** Hall effect sensor that represents the minimum extension of the elevator. */
-    @Log(name = "Bottom Hall Effect")
-    private DigitalInput bottomHallEffect = new DigitalInput(Constants.DIO.ELEVATOR_BOTTOM_LIMIT);
+    @Log
+    private DigitalInput bottomHallEffect = new DigitalInput(BOTTOM_HALL_SENSOR_PORT);
 
-    private TrapezoidProfile.Constraints normalConstraints = new TrapezoidProfile.Constraints(
-            Constants.Geometries.Elevator.MAX_VELOCITY_METERS_PER_SECOND,
-            Constants.Geometries.Elevator.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
-
-    private TrapezoidProfile.Constraints stowingConstraints = new TrapezoidProfile.Constraints(
-            Constants.Geometries.Elevator.MAX_STOWING_VELOCITY_METERS_PER_SECOND,
-            Constants.Geometries.Elevator.MAX_STOWING_ACCELERATION_METERS_PER_SECOND_SQUARED);
-
-    @Log(name = "Profiled PID Controller")
-    private ProfiledPIDController pidController = new ProfiledPIDController(
-            Constants.Gains.Elevator.kP,
-            Constants.Gains.Elevator.kI,
-            Constants.Gains.Elevator.kD,
-            normalConstraints);
+    @Log
+    private ProfiledPIDController pidController = new ProfiledPIDController(kP, kI, kD, NORMAL_MOVEMENT_CONSTRAINTS);
 
     /**
      * The feedforward controller (calculates voltage based on the setpoint's
      * velocity and acceleration).
      */
-    private ElevatorFeedforward feedforwardController = new ElevatorFeedforward(
-            Constants.Gains.Elevator.kS,
-            Constants.Gains.Elevator.kG,
-            Constants.Gains.Elevator.kV,
-            Constants.Gains.Elevator.kA);
+    @Log
+    private ElevatorFeedforward feedforwardController = new ElevatorFeedforward(kS, kG, kV, kA);
 
     /** The ligament of the complete mechanism body that this subsystem controls. */
     private MechanismLigament2d ligament;
@@ -111,13 +70,14 @@ public class Elevator extends SubsystemBase {
      * from the motor and simulates an elevator under the influence of gravity.
      */
     private ElevatorSim elevatorSim = new ElevatorSim(
-            DCMotor.getNEO(2),
-            4,
-            15,
-            Units.inchesToMeters(1.2),
-            Units.inchesToMeters(0),
-            1.72,
-            true);
+            MOTOR_GEARBOX_REPR,
+            GEARING,
+            CARRIAGE_MASS_KG,
+            DRUM_RADIUS_METERS,
+            MIN_HEIGHT_METERS,
+            MAX_HEIGHT_METERS,
+            true,
+            0);
 
     /**
      * The wrapper of the bottomHallEffect for simulation. This allows you to set
@@ -126,29 +86,32 @@ public class Elevator extends SubsystemBase {
      */
     private DIOSim bottomHallEffectSim;
 
-    @Log(name = "Feedback", groups = "Control")
-    private double feedback = 0;
-    @Log(name = "Feedforward", groups = "Control")
-    private double feedforward = 0;
+    @Log(groups = "control")
+    private double feedbackVoltage = 0;
+    @Log(groups = "control")
+    private double feedforwardVoltage = 0;
 
     /**
      * Initializes the elevator.
      */
     public Elevator(MechanismLigament2d ligament) {
-        SparkMaxConfigurator.configure(leftMotor)
-                .withIdleMode(IdleMode.kBrake)
-                .withCurrentLimit(40)
-                .withPositionConversionFactor(Constants.Geometries.Elevator.ENCODER_DISTANCE_TO_METERS, true)
-                .burnFlash();
 
-        SparkMaxConfigurator.configure(rightMotor)
-                .withIdleMode(IdleMode.kBrake)
-                .withCurrentLimit(40)
-                .withInverted(true)
-                .withPositionConversionFactor(Constants.Geometries.Elevator.ENCODER_DISTANCE_TO_METERS, true)
-                .burnFlash();
+        leftMotor = SparkMaxConfigurator.create(
+                LEFT_MOTOR_ID, MotorType.kBrushless, false,
+                (s) -> s.setIdleMode(IdleMode.kBrake),
+                (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
+                (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_METERS),
+                (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_METERS / 60.0));
 
-        pidController.setTolerance(Constants.Gains.Elevator.TOLERANCE);
+        rightMotor = SparkMaxConfigurator.create(
+                RIGHT_MOTOR_ID, MotorType.kBrushless, true,
+                (s) -> s.setIdleMode(IdleMode.kBrake),
+                (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
+                (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_METERS),
+                (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_METERS / 60.0),
+                (s) -> s.follow(leftMotor, true));
+
+        pidController.setTolerance(TOLERANCE);
 
         this.ligament = ligament;
 
@@ -159,7 +122,7 @@ public class Elevator extends SubsystemBase {
 
         new Trigger(bottomHallEffect::get).whileTrue(
                 Commands.parallel(
-                        Commands.runOnce(this::resetEncoders).ignoringDisable(true),
+                        Commands.runOnce(this::resetPosition).ignoringDisable(true),
                         Commands.runOnce(Modes::enableInitialized)).ignoringDisable(true));
 
         setDefaultCommand(moveToCurrentGoalCommand());
@@ -186,135 +149,134 @@ public class Elevator extends SubsystemBase {
         bottomHallEffectSim.setValue(elevatorSim.getPositionMeters() <= 0);
     }
 
-    /**
-     * Returns the current position of the elevator.
-     * 
-     * @return the output of the left motor's encoder
-     */
-    @Log(name = "Position")
+    @Override
+    @Log
     public double getPosition() {
         return leftMotor.getEncoder().getPosition();
     }
 
-    /**
-     * Check if the elevator is safe to move.
-     * 
-     * @return true if the elevator is safe to move
-     */
-    private Pair<Boolean, String> getIfSafeToMove() {
-        boolean safe = true;
-        String str = "none";
-        if (!Overrides.SAFETIES_DISABLE.getStatus()) {
-            if (!Modes.isInitialized()) {
-                safe = false;
-                str = "Robot not initialized: cannot move elevator";
-            }
-        }
-
-        return new Pair<Boolean, String>(safe, str);
+    @Log
+    public Pose3d getMiddleSegmentPose() {
+        double lateralPosition = getPosition() >= STARTING_MIDDLE_SEGMENT_POSITION
+                ? getPosition() - STARTING_MIDDLE_SEGMENT_POSITION
+                : 0;
+        return new Pose3d(BASE_MIDDLE_SEGMENT_POSE.getTranslation().plus(new Translation3d(
+                Math.sin(ANGLE) * lateralPosition, 0, Math.cos(ANGLE) * lateralPosition)),
+                BASE_MIDDLE_SEGMENT_POSE.getRotation());
     }
 
-    /**
-     * Sets the value of both motor encoders to zero.
-     */
-    public void resetEncoders() {
+    @Log
+    public Pose3d getInnerSegmentPose() {
+        double lateralPosition = getPosition() >= STARTING_INNER_SEGMENT_POSITION
+                ? getPosition() - STARTING_INNER_SEGMENT_POSITION
+                : 0;
+        return new Pose3d(BASE_INNER_SEGMENT_POSE.getTranslation().plus(new Translation3d(
+                Math.sin(ANGLE) * lateralPosition, 0, Math.cos(ANGLE) * lateralPosition)),
+                BASE_INNER_SEGMENT_POSE.getRotation());
+
+    }
+
+    @Log
+    public Pose3d getCarriagePose() {
+        return new Pose3d(BASE_CARRIAGE_POSE.getTranslation().plus(new Translation3d(
+                Math.sin(ANGLE) * getPosition(), 0, Math.cos(ANGLE) * getPosition())),
+                BASE_CARRIAGE_POSE.getRotation());
+    }
+
+    @Override
+    public void resetPosition() {
         leftMotor.getEncoder().setPosition(0);
         rightMotor.getEncoder().setPosition(0);
     }
 
-    /**
-     * Sets the speed of the motors. Will refuse to go past the bottom or top points
-     * of the elevator.
-     * 
-     * @param speed the speed, from -1.0 to 1.0
-     */
-    public void setSpeed(double speed) {
-        if (!Utils.limitMechanism(bottomHallEffect.get(), false, speed) || Overrides.MECH_LIMITS_DISABLE.getStatus()) {
-            if (RobotBase.isReal()) {
-                motors.set(speed);
-            } else {
-                motors.setVoltage(speed * 12.0);
-            }
-        } else {
-            motors.setVoltage(0);
-        }
-
-    }
-
-    /**
-     * Sets the voltage of the motors. Will refuse to go past the bottom or top
-     * points of the elevator.
-     * 
-     * @param speed the speed, from -1.0 to 1.0
-     */
-    private void setVoltage(double voltage) {
+    @Override
+    public void setVoltage(double voltage) {
         if (!Utils.limitMechanism(bottomHallEffect.get(), false,
                 voltage) || Overrides.MECH_LIMITS_DISABLE.getStatus())
-            motors.setVoltage(voltage);
+            leftMotor.setVoltage(voltage);
         else {
-            motors.setVoltage(0);
+            leftMotor.setVoltage(0);
         }
     }
 
-    private CommandBase moveToCurrentGoalCommand() {
+    @Override
+    public Command moveToCurrentGoalCommand() {
         return run(() -> {
-            feedback = pidController.calculate(getPosition());
-            feedforward = feedforwardController.calculate(pidController.getSetpoint().position,
+            feedbackVoltage = pidController.calculate(getPosition());
+            feedforwardVoltage = feedforwardController.calculate(pidController.getSetpoint().position,
                     pidController.getSetpoint().velocity);
-            setVoltage(feedback + feedforward);
+            setVoltage(feedbackVoltage + feedforwardVoltage);
         }).withName("Move to Current Goal");
     }
 
-    public CommandBase moveToPositionCommand(Supplier<ElevatorPosition> goalPositionSupplier) {
-        return Commands.either(
-                Commands.sequence(
-                        runOnce(() -> {
-                            if (goalPositionSupplier.get() == ElevatorPosition.BOTTOM)
-                                pidController.setConstraints(stowingConstraints);
-                            else
-                                pidController.setConstraints(normalConstraints);
-                        }),
-                        runOnce(() -> pidController.reset(getPosition())),
-                        runOnce(() -> pidController.setGoal(goalPositionSupplier.get().value)), // also sets 0 velocity
-                        moveToCurrentGoalCommand()
-                                .until(pidController::atGoal))
-                        .withTimeout(2)
-                        .finallyDo((d) -> {
-                            pidController.setConstraints(normalConstraints);
-                            motors.stopMotor();
-                        }),
-                Modes.singularErrorCommand(() -> getIfSafeToMove().getSecond()),
-                () -> getIfSafeToMove().getFirst());
+    @Override
+    public Command moveToPositionCommand(Supplier<ElevatorPosition> goalPositionSupplier) {
+        return Commands.sequence(
+                runOnce(() -> {
+                    if (goalPositionSupplier.get() == ElevatorPosition.BOTTOM)
+                        pidController.setConstraints(STOWING_MOVEMENT_CONSTRAINTS);
+                    else
+                        pidController.setConstraints(NORMAL_MOVEMENT_CONSTRAINTS);
+                }),
+                runOnce(() -> pidController.reset(getPosition())),
+                runOnce(() -> pidController.setGoal(goalPositionSupplier.get().value)), // also sets 0 velocity
+                moveToCurrentGoalCommand().until(pidController::atGoal))
+                .withTimeout(2)
+                .finallyDo((d) -> pidController.setConstraints(NORMAL_MOVEMENT_CONSTRAINTS));
     }
 
-    public CommandBase moveToArbitraryPositionCommand(Supplier<Double> goalPositionSupplier) {
-        return Commands.either(
-                Commands.sequence(
-                        runOnce(() -> pidController.reset(getPosition())),
-                        runOnce(() -> pidController.setGoal(goalPositionSupplier.get())),
-                        moveToCurrentGoalCommand().until(pidController::atGoal)).withTimeout(2)
-                        .finallyDo((d) -> motors.stopMotor()),
-                Modes.singularErrorCommand(() -> getIfSafeToMove().getSecond()),
-                () -> getIfSafeToMove().getFirst());
+    @Override
+    public Command moveToArbitraryPositionCommand(Supplier<Double> goalPositionSupplier) {
+        return Commands.sequence(
+                runOnce(() -> pidController.reset(getPosition())),
+                runOnce(() -> pidController.setGoal(goalPositionSupplier.get())),
+                moveToCurrentGoalCommand().until(pidController::atGoal))
+                .withTimeout(2);
     }
 
-    public CommandBase movePositionDeltaCommand(Supplier<Double> delta) {
+    @Override
+    public Command movePositionDeltaCommand(Supplier<Double> delta) {
         return moveToArbitraryPositionCommand(() -> pidController.getGoal().position + delta.get());
     }
 
-    public CommandBase holdCurrentPositionCommand() {
-        return runOnce(() -> pidController.setGoal(getPosition())).andThen(run(() -> {
-        }));
+    @Override
+    public Command holdCurrentPositionCommand() {
+        return runOnce(() -> pidController.setGoal(getPosition())).andThen(moveToCurrentGoalCommand());
     }
 
-    public CommandBase moveToScoringPositionCommand(Supplier<GamePiece> gamePieceMode,
+    @Override
+    public Command resetPositionCommand() {
+        return runOnce(this::resetPosition);
+    }
+
+    @Override
+    public Command setOverridenSpeedCommand(Supplier<Double> speed) {
+        return run(() -> setVoltage(12.0 * speed.get()))
+                .withName("Set Overridden Elevator Speed");
+    }
+
+    @Override
+    public Command coastMotorsCommand() {
+        return runOnce(() -> leftMotor.stopMotor())
+                .andThen(() -> {
+                    leftMotor.setIdleMode(IdleMode.kCoast);
+                    rightMotor.setIdleMode(IdleMode.kCoast);
+                })
+                .finallyDo((d) -> {
+                    leftMotor.setIdleMode(IdleMode.kBrake);
+                    rightMotor.setIdleMode(IdleMode.kBrake);
+                    pidController.reset(getPosition());
+                }).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+    }
+
+    public Command moveToScoringPositionCommand(Supplier<GamePiece> gamePieceMode,
             Supplier<Level> scoringMode, Intake intake, Elbow elbow) {
         return Commands.select(
                 Map.of(
                         GamePiece.CONE,
                         Commands.select(
                                 Map.of(
-                                        Level.LOW,
+                                        Level.HYBRID,
                                         moveToPositionCommand(() -> ElevatorPosition.CONE_LOW),
                                         Level.MIDDLE,
                                         moveToPositionCommand(() -> ElevatorPosition.CONE_MID),
@@ -324,7 +286,7 @@ public class Elevator extends SubsystemBase {
                         GamePiece.CUBE,
                         Commands.select(
                                 Map.of(
-                                        Level.LOW,
+                                        Level.HYBRID,
                                         moveToPositionCommand(() -> ElevatorPosition.CUBE_LOW),
                                         Level.MIDDLE,
                                         moveToPositionCommand(() -> ElevatorPosition.CUBE_MID),
@@ -334,55 +296,11 @@ public class Elevator extends SubsystemBase {
                 gamePieceMode::get);
     }
 
-    /**
-     * Creates a psuedo-StartEndCommand that runs the motors down at 15% speed until
-     * the bottom hall effect sensor is reached, then zeros the encoders.
-     */
-    public CommandBase zeroEncoderCommand() {
-        return startEnd(() -> setSpeed(-0.15), () -> {
-            this.resetEncoders();
+    public Command autoHallResetPositionCommand() {
+        return startEnd(() -> setVoltage(-1.5), () -> {
+            this.resetPosition();
             Modes.enableInitialized();
-            motors.stopMotor();
+            leftMotor.stopMotor();
         }).until(bottomHallEffect::get).withName("Zero Encoder");
-    }
-
-    public CommandBase manualZeroEncoderCommand() {
-        return Commands.runOnce(() -> {
-            Modes.enableInitialized();
-            this.resetEncoders();
-        });
-    }
-
-    /**
-     * Sets the speed of the elevator from the operator overrides controller.
-     * 
-     * @param speed  the speed commanded from the joystick
-     * @param intake
-     * @param leds
-     * @return the command
-     */
-    public CommandBase setOverridenElevatorSpeedCommand(DoubleSupplier speed, Intake intake, Elbow elbow) {
-        return run(() -> {
-            if (Overrides.MANUAL_MECH_CONTROL_MODE.getStatus()) {
-                setSpeed(speed.getAsDouble());
-            }
-        }).withName("Set Overridden Elevator Speed");
-    }
-
-    public CommandBase motorOverride() {
-        return new FunctionalCommand(
-                () -> {
-                    leftMotor.setIdleMode(IdleMode.kCoast);
-                    rightMotor.setIdleMode(IdleMode.kCoast);
-                },
-                () -> {
-                    motors.stopMotor();
-                },
-                (d) -> {
-                    leftMotor.setIdleMode(IdleMode.kBrake);
-                    rightMotor.setIdleMode(IdleMode.kBrake);
-                },
-                () -> false,
-                this).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
     }
 }

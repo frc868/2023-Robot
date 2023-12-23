@@ -3,5 +3,8 @@
     "localDir": "/Users/davidracovan/Documents/Programming/GitHub/frc868/2023-Robot/logs/INPRI/testing",
     "remoteDir": "/media/sda1",
     "serverTeam": "10.8.68.2"
+  },
+  "output": {
+    "outputFolder": "/Users/davidracovan/Downloads"
   }
 }

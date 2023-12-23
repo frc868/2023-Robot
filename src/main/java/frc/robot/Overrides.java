@@ -2,7 +2,7 @@ package frc.robot;
 
 import java.util.function.BooleanSupplier;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 public enum Overrides {
@@ -42,11 +42,11 @@ public enum Overrides {
         return () -> this.isEnabled;
     }
 
-    public CommandBase enableC() {
+    public Command enableC() {
         return Commands.runOnce(() -> this.isEnabled = true);
     }
 
-    public CommandBase disableC() {
+    public Command disableC() {
         return Commands.runOnce(() -> this.isEnabled = false);
     }
 }
