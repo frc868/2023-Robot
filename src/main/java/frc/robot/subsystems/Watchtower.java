@@ -47,11 +47,6 @@ public class Watchtower extends SubsystemBase implements BaseVision {
     private final AprilTagPhotonCamera ov9281_03 = new AprilTagPhotonCamera("OV9281-03", ROBOT_TO_CAMS[2],
             CAMERA_CONSTANTS, 0.64, 0.22);
 
-    // @Log(groups = "cameras")
-    // private final AprilTagPhotonCamera ov9281_04 = new
-    // AprilTagPhotonCamera("OV9281-04", ROBOT_TO_CAMS[3],
-    // CAMERA_CONSTANTS, 0.64, 0.22);
-
     private AprilTagPhotonCamera[] photonCameras = new AprilTagPhotonCamera[] {
             ov9281_01, ov9281_02, ov9281_03 };
 
@@ -65,12 +60,12 @@ public class Watchtower extends SubsystemBase implements BaseVision {
 
     @Override
     public void periodic() {
-        // updatePoseEstimator();
+        updatePoseEstimator();
     }
 
     @Override
     public void simulationPeriodic() {
-        // visionSim.update(simPoseSupplier.get());
+        visionSim.update(simPoseSupplier.get());
     }
 
     @Override
