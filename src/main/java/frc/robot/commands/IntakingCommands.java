@@ -60,11 +60,9 @@ public class IntakingCommands {
                 Commands.runOnce(() -> Modes.setRobotState(RobotState.INTAKING)),
                 manipulator.setPincersPincingCommand(() -> gamePieceSupplier.get()),
                 intake.setPassoversRetractedCommand(elevator),
-                elevator.movePositionDeltaCommand(() -> 0.02).withTimeout(0.1).asProxy(),
                 Commands.waitSeconds(0.2)
                         .andThen(elbow.moveToPositionCommand(() -> ElbowPosition.HIGH).asProxy()),
-                Modes.setRobotStateCommand(() -> RobotState.SEEKING),
-                Modes.clearIntakeModeCommand()).withName("Finish Intaking");
+                Modes.setRobotStateCommand(() -> RobotState.SEEKING)).withName("Finish Intaking");
     }
 
     public static Command intakePieceCommand(
@@ -92,32 +90,29 @@ public class IntakingCommands {
             Manipulator manipulator,
             Elevator elevator,
             Elbow elbow) {
-        return Commands.either(
-                Commands.sequence(
-                        Modes.setIntakeModeCommand(() -> gamePieceSupplier.get()),
-                        Commands.parallel(
-                                elevator.moveToPositionCommand(() -> ElevatorPosition.BOTTOM)
-                                        .withTimeout(0.75).asProxy(),
-                                Commands.select(
-                                        Map.of(
-                                                GamePiece.CONE,
-                                                elbow.moveToPositionCommand(() -> ElbowPosition.CONE_PICKUP).asProxy(),
-                                                GamePiece.CUBE,
-                                                elbow.moveToPositionCommand(() -> ElbowPosition.MID).asProxy()),
-                                        () -> gamePieceSupplier.get())),
-                        manipulator.setPincersReleasedCommand(() -> gamePieceSupplier.get()),
-                        Commands.parallel(
-                                Commands.select(
-                                        Map.of(
-                                                GamePiece.CONE, Commands.none(),
-                                                GamePiece.CUBE, intake.setPassoversExtendedCommand(elevator)
-                                                        .andThen(intake.reversePassoverMotorsCommand())),
-                                        () -> gamePieceSupplier.get()),
-                                manipulator.setPincersReleasedCommand(() -> gamePieceSupplier.get())
-                                        .repeatedly())),
-                Modes.singularErrorCommand(() -> "Intake mode not present"),
-                () -> Modes.getIntakeMode().isPresent()).withName("Start and Run Ejecting");
-
+        return Commands.sequence(
+                manipulator.setWristDownCommand(),
+                Commands.parallel(
+                        elevator.moveToPositionCommand(() -> ElevatorPosition.BOTTOM).withTimeout(0.75).asProxy(),
+                        Commands.select(
+                                Map.of(
+                                        GamePiece.CONE,
+                                        elbow.moveToPositionCommand(() -> ElbowPosition.CONE_PICKUP).asProxy(),
+                                        GamePiece.CUBE,
+                                        elbow.moveToPositionCommand(() -> ElbowPosition.MID).asProxy()),
+                                () -> gamePieceSupplier.get())),
+                manipulator.setPincersReleasedCommand(() -> gamePieceSupplier.get()),
+                Commands.runOnce(() -> Modes.setRobotState(RobotState.INTAKING)),
+                Commands.parallel(
+                        Commands.select(
+                                Map.of(
+                                        GamePiece.CONE, Commands.none(),
+                                        GamePiece.CUBE, intake.setPassoversExtendedCommand(elevator)
+                                                .andThen(intake.reversePassoverMotorsCommand())),
+                                () -> gamePieceSupplier.get()),
+                        manipulator.setPincersReleasedCommand(() -> gamePieceSupplier.get())).repeatedly())
+                .finallyDo((d) -> Modes.setRobotState(RobotState.SEEKING))
+                .withName("Start and Run Intaking");
     }
 
     public static Command finishEjectingCommand(
@@ -129,10 +124,7 @@ public class IntakingCommands {
         return Commands.sequence(
                 manipulator.setPincersClosedCommand(),
                 intake.setPassoversRetractedCommand(elevator),
-                Commands.waitSeconds(0.2)
-                        .andThen(elbow.moveToPositionCommand(() -> ElbowPosition.HIGH).asProxy()),
-                Modes.setRobotStateCommand(() -> RobotState.SCORING),
-                Modes.clearIntakeModeCommand()).withName("Finish Ejecting");
+                Modes.setRobotStateCommand(() -> RobotState.SCORING)).withName("Finish Ejecting");
     }
 
     public static Command ejectPieceCommand(

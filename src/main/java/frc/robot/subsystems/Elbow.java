@@ -3,10 +3,10 @@ package frc.robot.subsystems;
 import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
-import com.revrobotics.SparkMaxAbsoluteEncoder;
-import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
+import com.revrobotics.SparkAbsoluteEncoder;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSingleJointedArm;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
@@ -37,7 +37,7 @@ public class Elbow extends SubsystemBase implements BaseSingleJointedArm<ElbowPo
     @Log
     private CANSparkMax motor;
     @Log
-    private SparkMaxAbsoluteEncoder encoder;
+    private SparkAbsoluteEncoder encoder;
 
     private MechanismLigament2d ligament;
 
@@ -75,15 +75,15 @@ public class Elbow extends SubsystemBase implements BaseSingleJointedArm<ElbowPo
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_RADIANS),
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_RADIANS / 60.0),
                 (s) -> s.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 20),
-                (s) -> s.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle).setInverted(true),
-                (s) -> s.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle)
+                (s) -> s.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle).setInverted(true),
+                (s) -> s.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle)
                         .setPositionConversionFactor(ABSOLUTE_ENCODER_ROTATIONS_TO_RADIANS),
-                (s) -> s.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle)
+                (s) -> s.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle)
                         .setVelocityConversionFactor(ABSOLUTE_ENCODER_ROTATIONS_TO_RADIANS / 60.0),
-                (s) -> s.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle)
+                (s) -> s.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle)
                         .setZeroOffset(ABSOLUTE_ENCODER_ZERO_OFFSET));
 
-        encoder = motor.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
+        encoder = motor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle);
 
         new Thread(() -> {
             try {
@@ -176,7 +176,7 @@ public class Elbow extends SubsystemBase implements BaseSingleJointedArm<ElbowPo
     @Override
     public Command holdCurrentPositionCommand() {
         return runOnce(() -> pidController.setGoal(getPosition()))
-                .andThen(holdCurrentPositionCommand());
+                .andThen(moveToCurrentGoalCommand());
     }
 
     @Override

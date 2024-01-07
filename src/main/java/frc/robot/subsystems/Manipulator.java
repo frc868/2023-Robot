@@ -63,7 +63,7 @@ public class Manipulator extends SubsystemBase {
 
         if (RobotBase.isSimulation()) {
             poleSwitchSim = new DIOSim(poleSwitch);
-            poleSwitchSim.setValue(false);
+            poleSwitchSim.setValue(true);
         }
 
         new Trigger(() -> wrist.get() == Value.kForward)
@@ -82,7 +82,7 @@ public class Manipulator extends SubsystemBase {
      */
     @Override
     public void periodic() {
-        if (wrist.get() == Value.kReverse) {
+        if (wrist.get() == Value.kForward) {
             wristLigament.setAngle(0);
         } else {
             wristLigament.setAngle(60);
@@ -97,7 +97,7 @@ public class Manipulator extends SubsystemBase {
                 .plus(new Transform3d(new Translation3d(), new Rotation3d(0, -Math.PI / 2.0, 0)));
 
         return wristPoseDown.interpolate(wristPoseUp,
-                wrist.get() == Value.kForward
+                wrist.get() == Value.kReverse
                         ? wristPoseTimer.get() / WRIST_MOVEMENT_TIME
                         : 1 - wristPoseTimer.get() / WRIST_MOVEMENT_TIME);
     }
@@ -109,7 +109,7 @@ public class Manipulator extends SubsystemBase {
                 .plus(new Transform3d(0, PINCER_MOVEMENT_SECTION, 0, new Rotation3d()));
 
         return leftPincerPoseClosed.interpolate(leftPincerPoseOpen,
-                pincers.get() == Value.kForward
+                pincers.get() == Value.kReverse
                         ? pincersPoseTimer.get() / PINCER_MOVEMENT_TIME
                         : 1 - pincersPoseTimer.get() / PINCER_MOVEMENT_TIME);
     }
@@ -121,7 +121,7 @@ public class Manipulator extends SubsystemBase {
                 .plus(new Transform3d(0, -PINCER_MOVEMENT_SECTION, 0, new Rotation3d()));
 
         return rightPincerPoseClosed.interpolate(rightPincerPoseOpen,
-                pincers.get() == Value.kForward
+                pincers.get() == Value.kReverse
                         ? pincersPoseTimer.get() / PINCER_MOVEMENT_TIME
                         : 1 - pincersPoseTimer.get() / PINCER_MOVEMENT_TIME);
     }
@@ -137,7 +137,7 @@ public class Manipulator extends SubsystemBase {
      * @return the command
      */
     public Command setWristDownCommand() {
-        return Commands.runOnce(() -> wrist.set(Value.kReverse)).withName("Wrist Down"); // untested
+        return Commands.runOnce(() -> wrist.set(Value.kForward)).withName("Wrist Down"); // untested
     }
 
     /**
@@ -147,7 +147,7 @@ public class Manipulator extends SubsystemBase {
      * @return the command
      */
     public Command setWristUpCommand() {
-        return Commands.runOnce(() -> wrist.set(Value.kForward)).withName("Wrist Up");
+        return Commands.runOnce(() -> wrist.set(Value.kReverse)).withName("Wrist Up");
     }
 
     /**
@@ -175,6 +175,7 @@ public class Manipulator extends SubsystemBase {
      * 
      * @return true if IR beam broken by pole
      */
+    @Log
     public boolean isPoleDetected() {
         return !poleSwitch.get();
     }

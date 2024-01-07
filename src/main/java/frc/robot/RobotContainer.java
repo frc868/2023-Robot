@@ -1,9 +1,12 @@
 package frc.robot;
 
+import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.SendableLog;
+
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PneumaticHub;
@@ -13,6 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.Autos;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elbow;
 import frc.robot.subsystems.Elevator;
@@ -94,6 +98,7 @@ public class RobotContainer {
 
         LoggingManager.getInstance().registerRobotContainer(this);
         LoggingManager.getInstance().registerClass(Modes.class, "modes", new ArrayList<String>());
+        LoggingManager.getInstance().registerClass(LoggingManager.class, "wpilib", new ArrayList<>());
 
         LiveWindow.disableAllTelemetry(); // livewindow is basically deprecated. using houndlog instead.
 
@@ -108,12 +113,11 @@ public class RobotContainer {
     }
 
     private void configureButtonBindings() {
-        Controls.configureDriverControls(0, drivetrain, gridInterface, intake, manipulator,
-                elevator, elbow);
+        Controls.configureSingleDriverControl(0, drivetrain, intake, manipulator, elevator, elbow);
         // Controls.configureOperatorControls(1, 2, drivetrain, gridInterface, intake,
         // manipulator,
         // elevator, elbow);
-        Controls.configureTestingControls(2, gridInterface, intake, manipulator, elevator,
+        Controls.configureTestingControls(2, drivetrain, intake, manipulator, elevator,
                 elbow);
         Controls.configureBackupOperatorControls(3, gridInterface, intake, manipulator, elevator,
                 elbow);
@@ -132,10 +136,7 @@ public class RobotContainer {
         // new AutoRoutine("2 Piece Cube N",
         // () -> Autos.threePieceN(drivetrain, intake, manipulator, elevator, elbow)));
 
-        // AutoManager.getInstance().addRoutine(
-        // new AutoRoutine("1 Piece Mobility N",
-        // () -> Autos.onePieceMobilityN(drivetrain, intake, manipulator, elevator,
-        // elbow)));
+        AutoManager.getInstance().addRoutine(Autos.northThreePiece(drivetrain, intake, manipulator, elevator, elbow));
         // AutoManager.getInstance().addRoutine(
         // new AutoRoutine("1 Piece Charge Mobility M",
         // () -> Autos.onePieceChargeMobilityM(drivetrain, intake, manipulator,
@@ -151,5 +152,20 @@ public class RobotContainer {
 
         // FieldConstants.displayAutoDriveOnField();
         // FieldConstants.displayItemsOnField();
+    }
+
+    @Log
+    private Pose3d[] getComponentPoses() {
+        return new Pose3d[] {
+                intake.getLeftPassoverComponentPose(),
+                intake.getRightPassoverComponentPose(),
+                elevator.getMiddleSegmentPose(),
+                elevator.getInnerSegmentPose(),
+                elevator.getCarriagePose(),
+                elbow.getComponentPose(),
+                manipulator.getWristPose(),
+                manipulator.getLeftPincerPose(),
+                manipulator.getRightPincerPose()
+        };
     }
 }

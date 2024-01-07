@@ -12,6 +12,8 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndlib.MotorHoldMode;
+import com.techhounds.houndutil.houndlib.beta.sysid.MotorLog;
+import com.techhounds.houndutil.houndlib.beta.sysid.SysIdRoutine;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive;
 import com.techhounds.houndutil.houndlib.swerve.NEOCoaxialSwerveModule;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
@@ -24,12 +26,18 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.MutableMeasure;
+import edu.wpi.first.units.Velocity;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -43,6 +51,10 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 
 import static frc.robot.Constants.Drivetrain.*;
 import static frc.robot.Constants.Teleop.*;
+import static edu.wpi.first.units.MutableMeasure.mutable;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 /**
  * The drivetrain subsystem, containing four swerve modules and odometry-related
@@ -134,11 +146,8 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Log
     private DriveMode driveMode = DriveMode.FIELD_ORIENTED;
 
-    /**
-     * The yaw of the gyro in simulations. This value is not used when the robot is
-     * running IRL.
-     */
-    private double simYaw;
+    @Log
+    private Twist2d twist = new Twist2d();
 
     /**
      * Whether to override the inputs of the driver for maintaining or turning to a
@@ -148,6 +157,48 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     private boolean isControlledRotationEnabled = false;
 
     private SwerveDriveOdometry simOdometry;
+    private SwerveModulePosition[] lastModulePositions = getModulePositions();
+
+    private final MutableMeasure<Voltage> m_appliedVoltage = mutable(Volts.of(0));
+    // Mutable holder for unit-safe linear distance values, persisted to avoid
+    // reallocation.
+    private final MutableMeasure<Distance> m_distance = mutable(Meters.of(0));
+    // Mutable holder for unit-safe linear velocity values, persisted to avoid
+    // reallocation.
+    private final MutableMeasure<Velocity<Distance>> m_velocity = mutable(MetersPerSecond.of(0));
+
+    private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
+            // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
+            new SysIdRoutine.Config(),
+            new SysIdRoutine.Mechanism(
+                    // Tell SysId how to plumb the driving voltage to the motors.
+                    (Measure<Voltage> volts) -> {
+                        drive(new ChassisSpeeds(volts.magnitude(), 0, 0));
+                    },
+                    // Tell SysId how to record a frame of data for each motor on the mechanism
+                    // being
+                    // characterized.
+                    (MotorLog log) -> {
+                        // Record a frame for the left motors. Since these share an encoder, we consider
+                        // the entire group to be one motor.
+                        log.recordFrameLinear(
+                                m_appliedVoltage.mut_replace(frontLeft.getDriveVoltage(), Volts),
+                                m_distance.mut_replace(frontLeft.getDriveMotorPosition(), Meters),
+                                m_velocity.mut_replace(frontLeft.getDriveMotorVelocity(), MetersPerSecond),
+                                "drive-left");
+                        // Record a frame for the right motors. Since these share an encoder, we
+                        // consider
+                        // the entire group to be one motor.
+                        log.recordFrameLinear(
+                                m_appliedVoltage.mut_replace(frontRight.getDriveVoltage(), Volts),
+                                m_distance.mut_replace(frontRight.getDriveMotorPosition(), Meters),
+                                m_velocity.mut_replace(frontRight.getDriveMotorVelocity(), MetersPerSecond),
+                                "drive-right");
+                    },
+                    // Tell SysId to make generated commands require this subsystem, suffix test
+                    // state in
+                    // WPILog with this subsystem's name ("drive")
+                    this));
 
     /** Initializes the drivetrain. */
     public Drivetrain() {
@@ -164,7 +215,6 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
         AutoManager.getInstance().setResetOdometryConsumer(this::resetPoseEstimator);
 
         if (RobotBase.isSimulation()) {
-            simYaw = 0;
             simOdometry = new SwerveDriveOdometry(KINEMATICS, getRotation(), getModulePositions(), new Pose2d());
         }
     }
@@ -183,11 +233,21 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
      */
     @Override
     public void simulationPeriodic() {
-        simYaw += getChassisSpeeds().omegaRadiansPerSecond * 0.020;
+        SwerveModulePosition[] currentPositions = getModulePositions();
+        SwerveModulePosition[] deltas = new SwerveModulePosition[4];
 
-        pigeon.getSimState().setRawYaw(Units.radiansToDegrees(simYaw));
+        for (int i = 0; i < 4; i++) {
+            deltas[i] = new SwerveModulePosition(
+                    currentPositions[i].distanceMeters - lastModulePositions[i].distanceMeters,
+                    currentPositions[i].angle);
+        }
 
-        simOdometry.update(getRotation(), getModulePositions());
+        twist = KINEMATICS.toTwist2d(deltas);
+
+        pigeon.getSimState().setRawYaw(pigeon.getYaw().getValue() +
+                Units.radiansToDegrees(twist.dtheta));
+
+        lastModulePositions = currentPositions;
     }
 
     @Override
@@ -247,13 +307,14 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     @Override
     public void updatePoseEstimator() {
         poseEstimator.update(getRotation(), getModulePositions());
+        simOdometry.update(getRotation(), getModulePositions());
         drawRobotOnField(AutoManager.getInstance().getField());
     }
 
     @Override
     public void resetPoseEstimator(Pose2d pose) {
         poseEstimator.resetPosition(getRotation(), getModulePositions(), pose);
-        pigeon.setYaw(pose.getRotation().getDegrees());
+        simOdometry.resetPosition(getRotation(), getModulePositions(), pose);
     }
 
     @Override
@@ -323,13 +384,20 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                 adjustedChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds.vxMetersPerSecond,
                         speeds.vyMetersPerSecond,
                         speeds.omegaRadiansPerSecond, getRotation());
-
                 break;
         }
 
         SwerveModuleState[] states = KINEMATICS.toSwerveModuleStates(adjustedChassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states,
                 SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND);
+
+        states = new SwerveModuleState[] {
+                SwerveModuleState.optimize(states[0], frontLeft.getWheelAngle()),
+                SwerveModuleState.optimize(states[1], frontRight.getWheelAngle()),
+                SwerveModuleState.optimize(states[2], backLeft.getWheelAngle()),
+                SwerveModuleState.optimize(states[3], backRight.getWheelAngle()),
+        };
+
         commandedModuleStates = states;
         setStates(states);
     }
@@ -342,25 +410,30 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             speeds.vyMetersPerSecond *= -1;
         }
 
-        commandedChassisSpeeds = new ChassisSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond,
-                speeds.omegaRadiansPerSecond);
-
-        ChassisSpeeds chassisSpeeds = null;
+        commandedChassisSpeeds = speeds;
+        ChassisSpeeds adjustedChassisSpeeds = null;
         switch (driveMode) {
             case ROBOT_RELATIVE:
-                chassisSpeeds = commandedChassisSpeeds;
+                adjustedChassisSpeeds = speeds;
                 break;
             case FIELD_ORIENTED:
-                chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds.vxMetersPerSecond,
+                adjustedChassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds.vxMetersPerSecond,
                         speeds.vyMetersPerSecond,
                         speeds.omegaRadiansPerSecond, getRotation());
-
                 break;
         }
 
-        SwerveModuleState[] states = KINEMATICS.toSwerveModuleStates(chassisSpeeds);
+        SwerveModuleState[] states = KINEMATICS.toSwerveModuleStates(adjustedChassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(states,
                 SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND);
+
+        states = new SwerveModuleState[] {
+                SwerveModuleState.optimize(states[0], frontLeft.getWheelAngle()),
+                SwerveModuleState.optimize(states[1], frontRight.getWheelAngle()),
+                SwerveModuleState.optimize(states[2], backLeft.getWheelAngle()),
+                SwerveModuleState.optimize(states[3], backRight.getWheelAngle()),
+        };
+
         commandedModuleStates = states;
         setStatesClosedLoop(states);
     }
@@ -377,13 +450,13 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             double ySpeed = ySpeedSupplier.getAsDouble();
             double thetaSpeed = thetaSpeedSupplier.getAsDouble();
 
-            xSpeed = MathUtil.applyDeadband(xSpeed, 0.05);
-            ySpeed = MathUtil.applyDeadband(ySpeed, 0.05);
-            thetaSpeed = MathUtil.applyDeadband(thetaSpeed, 0.05);
+            xSpeed = MathUtil.applyDeadband(xSpeed, 0.01);
+            ySpeed = MathUtil.applyDeadband(ySpeed, 0.01);
+            thetaSpeed = MathUtil.applyDeadband(thetaSpeed, 0.01);
 
-            xSpeed = Math.pow(xSpeed, 3);
-            ySpeed = Math.pow(ySpeed, 3);
-            thetaSpeed = Math.pow(thetaSpeed, 3);
+            xSpeed = Math.copySign(Math.pow(xSpeed, JOYSTICK_CURVE_EXP), xSpeed);
+            ySpeed = Math.copySign(Math.pow(ySpeed, JOYSTICK_CURVE_EXP), ySpeed);
+            thetaSpeed = Math.copySign(Math.pow(thetaSpeed, JOYSTICK_CURVE_EXP), thetaSpeed);
 
             xSpeed = xSpeedLimiter.calculate(xSpeed);
             ySpeed = ySpeedLimiter.calculate(ySpeed);
@@ -399,13 +472,13 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
             ySpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
             thetaSpeed *= SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND;
 
-            drive(new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed));
+            driveClosedLoop(new ChassisSpeeds(xSpeed, ySpeed, thetaSpeed), driveMode);
         }).withName("Teleop Drive Command");
     }
 
     @Override
     public Command controlledRotateCommand(double angle, DriveMode driveMode) {
-        return Commands.startEnd(() -> {
+        return Commands.runOnce(() -> {
             if (!isControlledRotationEnabled) {
                 thetaPositionController.reset(getRotation().getRadians());
             }
@@ -415,14 +488,20 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                 thetaPositionController.setGoal(angle + Math.PI);
             else
                 thetaPositionController.setGoal(angle);
-        }, () -> {
-            isControlledRotationEnabled = false;
-        }).withName("Turn While Moving");
+        }).withName("Controlled Rotate");
+    }
+
+    @Override
+    public Command disableControlledRotateCommand() {
+        return Commands.runOnce(
+                () -> {
+                    isControlledRotationEnabled = false;
+                }).withName("Disable Controlled Rotate");
     }
 
     @Override
     public Command wheelLockCommand() {
-        return Commands.runOnce(() -> {
+        return run(() -> {
             setStates(new SwerveModuleState[] {
                     new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
                     new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
@@ -462,26 +541,24 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     }
 
     @Override
-    public Command pathFollowingCommand(PathPlannerPath path) {
+    public Command followPathCommand(PathPlannerPath path) {
         return new FollowPathHolonomic(
                 path,
                 this::getPose,
                 this::getChassisSpeeds,
                 (speeds) -> driveClosedLoop(speeds, DriveMode.ROBOT_RELATIVE),
                 new HolonomicPathFollowerConfig(
-                        new PIDConstants(5.0, 0.0, 0.0),
-                        new PIDConstants(5.0, 0.0, 0.0),
-                        4.5,
-                        0.4,
+                        new PIDConstants(PATH_FOLLOWING_TRANSLATION_kP, 0, 0),
+                        new PIDConstants(PATH_FOLLOWING_ROTATION_kP, 0, 0),
+                        SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND,
+                        0.41,
                         new ReplanningConfig()),
                 this);
     }
 
     @Override
-    public Command driveDeltaPathFollowingCommand(Transform2d delta,
-            PathConstraints constraints) {
-
-        return new DeferredCommand(() -> pathFollowingCommand(
+    public Command driveDeltaCommand(Transform2d delta, PathConstraints constraints) {
+        return new DeferredCommand(() -> followPathCommand(
                 new PathPlannerPath(
                         PathPlannerPath.bezierFromPoses(
                                 getPose(), getPose().plus(delta)),
@@ -571,4 +648,11 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
                 .finallyDo((d) -> this.stop());
     }
 
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return m_sysIdRoutine.quasistatic(direction);
+    }
+
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return m_sysIdRoutine.dynamic(direction);
+    }
 }

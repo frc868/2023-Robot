@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.techhounds.houndutil.houndlib.AprilTagPhotonCamera.PhotonCameraConstants;
 import com.techhounds.houndutil.houndlib.swerve.NEOCoaxialSwerveModule;
 import com.techhounds.houndutil.houndlog.logitems.TunableDouble;
 
@@ -69,27 +70,38 @@ public final class Constants {
         public static final double TRACK_WIDTH_METERS = Units.inchesToMeters(22.75);
         /** Distance between front and back wheels. */
         public static final double WHEEL_BASE_METERS = Units.inchesToMeters(22.75);
-        public static final double GEARING = 1.0 / 6.75;
-        public static final double STEER_GEARING = 1.0 / (150.0 / 7.0);
-        public static final double WHEEL_RADIUS_METERS = 0.048;
-        public static final double WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * WHEEL_RADIUS_METERS;
+
         public static final NEOCoaxialSwerveModule.SwerveConstants SWERVE_CONSTANTS = new NEOCoaxialSwerveModule.SwerveConstants();
         static {
-            SWERVE_CONSTANTS.DRIVE_kP = 0.12575;
+            SWERVE_CONSTANTS.DRIVE_kP = 2.9646;
             SWERVE_CONSTANTS.DRIVE_kI = 0.0;
             SWERVE_CONSTANTS.DRIVE_kD = 0.0;
-            SWERVE_CONSTANTS.DRIVE_kS = 0.2089;
-            SWERVE_CONSTANTS.DRIVE_kV = 2.7069;
-            SWERVE_CONSTANTS.DRIVE_kA = 0.41713;
-            SWERVE_CONSTANTS.STEER_kP = 0.4;
+            SWERVE_CONSTANTS.DRIVE_kS = 0.0;
+            SWERVE_CONSTANTS.DRIVE_kV = 2.8024;
+            SWERVE_CONSTANTS.DRIVE_kA = 0.057223;
+            SWERVE_CONSTANTS.STEER_kP = 6.0;
             SWERVE_CONSTANTS.STEER_kI = 0.0;
-            SWERVE_CONSTANTS.STEER_kD = 0.01;
-            SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND = 4.42;
+            SWERVE_CONSTANTS.STEER_kD = 0.1;
+
+            SWERVE_CONSTANTS.DRIVE_GEARING = 6.75;
+            SWERVE_CONSTANTS.STEER_GEARING = 150.0 / 7.0;
+            SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE = 2.0 * Math.PI * 0.0478;
+            SWERVE_CONSTANTS.DRIVE_ENCODER_ROTATIONS_TO_METERS = SWERVE_CONSTANTS.WHEEL_CIRCUMFERENCE
+                    / SWERVE_CONSTANTS.DRIVE_GEARING;
+            SWERVE_CONSTANTS.STEER_ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI / SWERVE_CONSTANTS.STEER_GEARING;
+
+            SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND = 4.282;
             SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED = 3;
-            SWERVE_CONSTANTS.MAX_STEER_VELOCITY_RADIANS_PER_SECOND = 5 * Math.PI;
-            SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 5 * Math.PI;
-            SWERVE_CONSTANTS.ENCODER_ROTATIONS_TO_METERS = WHEEL_CIRCUMFERENCE * GEARING;
-            SWERVE_CONSTANTS.STEER_ENCODER_ROTATIONS_TO_RADIANS = 2 * Math.PI * STEER_GEARING;
+            SWERVE_CONSTANTS.MAX_STEER_VELOCITY_RADIANS_PER_SECOND = 8.829 * Math.PI;
+            // max velocity in 1/3 sec
+            SWERVE_CONSTANTS.MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 8.829 * 3 * Math.PI;
+
+            SWERVE_CONSTANTS.DRIVE_CURRENT_LIMIT = 50;
+            SWERVE_CONSTANTS.STEER_CURRENT_LIMIT = 20;
+            SWERVE_CONSTANTS.DRIVE_GEARBOX_REPR = DCMotor.getNEO(1);
+            SWERVE_CONSTANTS.STEER_GEARBOX_REPR = DCMotor.getNEO(1);
+            SWERVE_CONSTANTS.DRIVE_MOI = 0.04;
+            SWERVE_CONSTANTS.STEER_MOI = 0.025;
         }
 
         public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = Math.PI / 4;
@@ -114,15 +126,14 @@ public final class Constants {
                 SWERVE_CONSTANTS.MAX_DRIVING_VELOCITY_METERS_PER_SECOND,
                 SWERVE_CONSTANTS.MAX_DRIVING_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
-        public static final double THETA_kP = 1.1;
+        public static final double THETA_kP = 1;
         public static final double THETA_kI = 0;
-        public static final double THETA_kD = 0;
+        public static final double THETA_kD = 0.1;
         public static final TrapezoidProfile.Constraints THETA_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 20 * Math.PI, 20 * Math.PI);
 
-        public static final double PATH_FOLLOWING_kP = 1;
-        public static final double PATH_FOLLOWING_kI = 0;
-        public static final double PATH_FOLLOWING_kD = 0;
+        public static final double PATH_FOLLOWING_TRANSLATION_kP = 7;
+        public static final double PATH_FOLLOWING_ROTATION_kP = 7;
 
         public static final double BALANCE_kP = 0.035;
         public static final double BALANCE_kI = 0;
@@ -139,7 +150,7 @@ public final class Constants {
             CONE_HIGH(1.7),
             CUBE_LOW(0.25),
             CUBE_MID(1.18482),
-            CUBE_HIGH(1.70220),
+            CUBE_HIGH(1.65),
             SINGLE_SUBSTATION_PICKUP(0.5164),
             TOP(1.40);
             // 1.72 meters max
@@ -179,10 +190,10 @@ public final class Constants {
         public static final double kA = 0.29009;
         public static final double TOLERANCE = 0.015;
 
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 2;
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 1;
-        public static final double MAX_STOWING_VELOCITY_METERS_PER_SECOND = 1;
-        public static final double MAX_STOWING_ACCELERATION_METERS_PER_SECOND_SQUARED = 1;
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 4;
+        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 3;
+        public static final double MAX_STOWING_VELOCITY_METERS_PER_SECOND = 2;
+        public static final double MAX_STOWING_ACCELERATION_METERS_PER_SECOND_SQUARED = 2;
 
         public static final TrapezoidProfile.Constraints NORMAL_MOVEMENT_CONSTRAINTS = new TrapezoidProfile.Constraints(
                 MAX_VELOCITY_METERS_PER_SECOND,
@@ -316,32 +327,68 @@ public final class Constants {
          * Larger numbers mean less of a rate limit.
          */
         public static final double JOYSTICK_INPUT_RATE_LIMIT = 15.0;
+        public static final double JOYSTICK_CURVE_EXP = 2;
         public static final TunableDouble INPUT_LIMIT = new TunableDouble("Drivetrain", "Input Limit", 1);
     }
 
     public static final class Vision {
         public static final Matrix<N3, N1> SINGLE_TAG_STD_DEVS = VecBuilder.fill(4, 4, 8);
         public static final Matrix<N3, N1> MULTI_TAG_STD_DEVS = VecBuilder.fill(0.5, 0.5, 1);
+
+        public static final PhotonCameraConstants CAMERA_CONSTANTS = new PhotonCameraConstants();
+        static {
+            // CAMERA_CONSTANTS.WIDTH = 1280;
+            // CAMERA_CONSTANTS.HEIGHT = 800;
+            // CAMERA_CONSTANTS.FOV = 95.39;
+            // CAMERA_CONSTANTS.FPS = 20;
+            // CAMERA_CONSTANTS.AVG_LATENCY = 50;
+            // CAMERA_CONSTANTS.STDDEV_LATENCY = 15;
+            CAMERA_CONSTANTS.WIDTH = 1600;
+            CAMERA_CONSTANTS.HEIGHT = 1200;
+            CAMERA_CONSTANTS.FOV = 95.39;
+            CAMERA_CONSTANTS.FPS = 30;
+            CAMERA_CONSTANTS.AVG_LATENCY = 30;
+            CAMERA_CONSTANTS.STDDEV_LATENCY = 15;
+        }
+
         // front-left, front-right, back-left, back-right
         public static final Transform3d[] ROBOT_TO_CAMS = new Transform3d[] {
                 new Transform3d(
-                        new Translation3d(Units.inchesToMeters(-10.1376), Units.inchesToMeters(-5.3876),
-                                Units.inchesToMeters(28.826)),
-                        new Rotation3d(0, 0, Math.PI / 4.0)),
+                        new Translation3d(Units.inchesToMeters(9.5), Units.inchesToMeters(9.5),
+                                Units.inchesToMeters(10)),
+                        new Rotation3d(0, -Units.degreesToRadians(10), -Math.PI / 8)),
                 new Transform3d(
-                        new Translation3d(Units.inchesToMeters(-10.1376), Units.inchesToMeters(-7.8624),
-                                Units.inchesToMeters(28.826)),
-                        new Rotation3d(0, 0, -Math.PI / 4.0)),
-
+                        new Translation3d(Units.inchesToMeters(-12.5), Units.inchesToMeters(0),
+                                Units.inchesToMeters(10)),
+                        new Rotation3d(0, -Units.degreesToRadians(10), Math.PI)),
                 new Transform3d(
-                        new Translation3d(Units.inchesToMeters(-12.6124), Units.inchesToMeters(-5.3876),
-                                Units.inchesToMeters(28.826)),
-                        new Rotation3d(0, 0, 3.0 * Math.PI / 4.0)),
-                new Transform3d(
-                        new Translation3d(Units.inchesToMeters(-12.6124), Units.inchesToMeters(-7.8624),
-                                Units.inchesToMeters(28.826)),
-                        new Rotation3d(0, 0, -3.0 * Math.PI / 4.0)),
+                        new Translation3d(Units.inchesToMeters(9.5), Units.inchesToMeters(-9.5),
+                                Units.inchesToMeters(10)),
+                        new Rotation3d(0, -Units.degreesToRadians(10), Math.PI / 8))
         };
+        // public static final Transform3d[] ROBOT_TO_CAMS = new Transform3d[] {
+        // new Transform3d(
+        // new Translation3d(Units.inchesToMeters(-10.1376),
+        // Units.inchesToMeters(-5.3876),
+        // Units.inchesToMeters(28.826)),
+        // new Rotation3d(0, 0, Math.PI / 4.0)),
+        // new Transform3d(
+        // new Translation3d(Units.inchesToMeters(-10.1376),
+        // Units.inchesToMeters(-7.8624),
+        // Units.inchesToMeters(28.826)),
+        // new Rotation3d(0, 0, -Math.PI / 4.0)),
+
+        // new Transform3d(
+        // new Translation3d(Units.inchesToMeters(-12.6124),
+        // Units.inchesToMeters(-5.3876),
+        // Units.inchesToMeters(28.826)),
+        // new Rotation3d(0, 0, 3.0 * Math.PI / 4.0)),
+        // new Transform3d(
+        // new Translation3d(Units.inchesToMeters(-12.6124),
+        // Units.inchesToMeters(-7.8624),
+        // Units.inchesToMeters(28.826)),
+        // new Rotation3d(0, 0, -3.0 * Math.PI / 4.0)),
+        // };
     }
 
     public static final class Mechanisms {

@@ -35,7 +35,7 @@ public class ScoringCommands {
                 elevator.moveToScoringPositionCommand(
                         gamePieceSupplier, levelSupplier, intake, elbow).asProxy(),
                 Commands.sequence(
-                        Commands.waitSeconds(0.5),
+                        Commands.waitSeconds(0.7),
                         Commands.parallel(
                                 elbow.moveToPositionCommand(() -> ElbowPosition.HIGH).asProxy(),
                                 Commands.select(
@@ -69,7 +69,8 @@ public class ScoringCommands {
                                         Commands.parallel(
                                                 manipulator.setPincersReleasedCommand(gamePieceSupplier),
                                                 elbow.moveToPositionCommand(() -> ElbowPosition.LOW).asProxy(),
-                                                elevator.movePositionDeltaCommand(() -> -0.15).asProxy()),
+                                                elevator.movePositionDeltaCommand(() -> -0.15).asProxy())
+                                                .withTimeout(0.5),
                                         // drivetrain.driveDistanceDeltaCommand(-0.012,
                                         // new PathConstraints(4, 9))),)))
                                         manipulator.setWristDownCommand(),
@@ -172,7 +173,7 @@ public class ScoringCommands {
                 raiseElevatorCommand(
                         () -> gamePieceSupplier.get(),
                         () -> levelSupplier.get(),
-                        intake, manipulator, elevator, elbow).withTimeout(1.2),
+                        intake, manipulator, elevator, elbow),
                 placePieceAutoCommand(
                         () -> gamePieceSupplier.get(),
                         () -> levelSupplier.get(),

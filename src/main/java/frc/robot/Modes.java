@@ -40,7 +40,7 @@ public class Modes {
     }
 
     // RobotState
-    @Log(name = "robotState")
+    @Log
     private static RobotState robotState = RobotState.SEEKING;
 
     public static RobotState getRobotState() {

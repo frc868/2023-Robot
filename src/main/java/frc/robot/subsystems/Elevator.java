@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
 import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlib.subsystems.BaseElevator;
@@ -212,16 +212,16 @@ public class Elevator extends SubsystemBase implements BaseElevator<ElevatorPosi
     @Override
     public Command moveToPositionCommand(Supplier<ElevatorPosition> goalPositionSupplier) {
         return Commands.sequence(
+                runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> {
                     if (goalPositionSupplier.get() == ElevatorPosition.BOTTOM)
                         pidController.setConstraints(STOWING_MOVEMENT_CONSTRAINTS);
                     else
                         pidController.setConstraints(NORMAL_MOVEMENT_CONSTRAINTS);
                 }),
-                runOnce(() -> pidController.reset(getPosition())),
                 runOnce(() -> pidController.setGoal(goalPositionSupplier.get().value)), // also sets 0 velocity
                 moveToCurrentGoalCommand().until(pidController::atGoal))
-                .withTimeout(2)
+                .withTimeout(5)
                 .finallyDo((d) -> pidController.setConstraints(NORMAL_MOVEMENT_CONSTRAINTS));
     }
 

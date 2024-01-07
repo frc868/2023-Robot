@@ -1,0 +1,19 @@
+{
+    "game": "Charged Up",
+    "field-image": "pp2023-field.png",
+    "field-corners": {
+        "top-left": [
+            0,
+            0
+        ],
+        "bottom-right": [
+            3256,
+            1578
+        ]
+    },
+    "field-size": [
+        54.27083,
+        26.2916
+    ],
+    "field-unit": "foot"
+}

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import com.techhounds.houndutil.houndlib.beta.sysid.SysIdRoutine.Direction;
 import com.techhounds.houndutil.houndlib.oi.CommandVirpilJoystick;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive.DriveMode;
 
@@ -18,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.Elbow.ElbowPosition;
-import frc.robot.Constants.Elevator.ElevatorPosition;
 import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.GamePieceLocation.GridPosition;
 import frc.robot.GamePieceLocation.Level;
@@ -107,24 +107,23 @@ public class Controls {
                 drivetrain.teleopDriveCommand(
                         () -> -joystick.getY() * INPUT_LIMIT.get() * speedMultiplier,
                         () -> -joystick.getX() * INPUT_LIMIT.get() * speedMultiplier,
-                        () -> -MathUtil.applyDeadband(
-                                joystick.getTwist() * INPUT_LIMIT.get()
-                                        * speedMultiplier,
-                                0.05)));
+                        () -> -joystick.getTwist() * INPUT_LIMIT.get() * speedMultiplier));
+
+        new Trigger(() -> (Math.abs(joystick.getTwist()) > 0.05)).onTrue(drivetrain.disableControlledRotateCommand());
 
         joystick.stickButton().onTrue(drivetrain.resetGyroCommand());
-        joystick.redButton().whileTrue(
+        joystick.redButton().onTrue(
                 ScoringCommands.stowElevatorCommand(intake, manipulator, elevator, elbow)
                         .finallyDo(safeStop));
 
         joystick.centerBottomHatUp()
-                .onTrue(drivetrain.controlledRotateCommand(Math.toRadians(0), DriveMode.FIELD_ORIENTED));
+                .whileTrue(drivetrain.controlledRotateCommand(Math.toRadians(0), DriveMode.FIELD_ORIENTED));
         joystick.centerBottomHatLeft()
-                .onTrue(drivetrain.controlledRotateCommand(Math.toRadians(90), DriveMode.FIELD_ORIENTED));
+                .whileTrue(drivetrain.controlledRotateCommand(Math.toRadians(90), DriveMode.FIELD_ORIENTED));
         joystick.centerBottomHatDown()
-                .onTrue(drivetrain.controlledRotateCommand(Math.toRadians(180), DriveMode.FIELD_ORIENTED));
+                .whileTrue(drivetrain.controlledRotateCommand(Math.toRadians(180), DriveMode.FIELD_ORIENTED));
         joystick.centerBottomHatRight()
-                .onTrue(drivetrain.controlledRotateCommand(Math.toRadians(270), DriveMode.FIELD_ORIENTED));
+                .whileTrue(drivetrain.controlledRotateCommand(Math.toRadians(270), DriveMode.FIELD_ORIENTED));
         joystick.centerBottomHatButton().onTrue(drivetrain.wheelLockCommand());
 
         joystick.bottomHatLeft()
@@ -155,7 +154,6 @@ public class Controls {
                         joystick.getHID()::getPinkieButton, () -> Modes.getIntakeMode().get(),
                         () -> Level.HYBRID,
                         drivetrain, intake, manipulator, elevator, elbow).finallyDo(safeStop));
-
         joystick.topRightHatUp().onTrue(
                 IntakingCommands.humanPlayerPickupCommand(
                         joystick.getHID()::getPinkieButton, () -> GamePiece.CONE,
@@ -168,7 +166,7 @@ public class Controls {
                 .onTrue(intake.toggleRamrodsCommand());
 
         joystick.triggerSoftPress()
-                .onTrue(setSpeedMultiplierCommand(0.5))
+                .onTrue(setSpeedMultiplierCommand(0.7))
                 .onFalse(setSpeedMultiplierCommand(1.0));
         joystick.triggerHardPress()
                 .onTrue(drivetrain.setDriveModeCommand(DriveMode.ROBOT_RELATIVE))
@@ -395,7 +393,8 @@ public class Controls {
 
     }
 
-    public static void configureTestingControls(int port, GridInterface gridInterface, Intake intake,
+    public static void configureTestingControls(int port, Drivetrain drivetrain,
+            Intake intake,
             Manipulator manipulator,
             Elevator elevator, Elbow elbow) {
         CommandXboxController xbox = new CommandXboxController(port);
@@ -405,10 +404,10 @@ public class Controls {
                         elevator.setOverridenSpeedCommand(() -> -0.25 * xbox.getLeftY()),
                         elbow.setOverridenSpeedCommand(() -> -0.25 * xbox.getRightY())));
 
-        xbox.y().onTrue(elevator.moveToPositionCommand(() -> ElevatorPosition.CONE_HIGH));
-        xbox.x().onTrue(elevator.moveToPositionCommand(() -> ElevatorPosition.CONE_MID));
-        xbox.b().onTrue(elevator.moveToPositionCommand(() -> ElevatorPosition.SINGLE_SUBSTATION_PICKUP));
-        xbox.a().onTrue(elevator.moveToPositionCommand(() -> ElevatorPosition.BOTTOM));
+        xbox.x().whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        xbox.y().whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        xbox.a().whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        xbox.b().whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
 
         xbox.povUp().onTrue(elbow.moveToPositionCommand(() -> ElbowPosition.HIGH));
         xbox.povLeft().onTrue(elbow.moveToPositionCommand(() -> ElbowPosition.MID));

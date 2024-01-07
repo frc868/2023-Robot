@@ -1,8 +1,8 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
@@ -90,7 +90,7 @@ public class Intake extends SubsystemBase {
         ligament.setAngle(cubapultRamrodSolenoid.get() == Value.kForward ? -90 : 0);
     }
 
-    @Log(name = "Left Passover Component Pose")
+    @Log
     public Pose3d getLeftPassoverComponentPose() {
         return LEFT_PASSOVER_RETRACTED_POSE.interpolate(
                 LEFT_PASSOVER_EXTENDED_POSE,
@@ -99,7 +99,7 @@ public class Intake extends SubsystemBase {
                         : 1 - passoverPoseTimer.get() / PASSOVER_MOVEMENT_TIME);
     }
 
-    @Log(name = "Right Passover Component Pose")
+    @Log
     public Pose3d getRightPassoverComponentPose() {
         return RIGHT_PASSOVER_RETRACTED_POSE.interpolate(
                 RIGHT_PASSOVER_EXTENDED_POSE,
