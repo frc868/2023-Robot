@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
+import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.Utils;
 import com.techhounds.houndutil.houndlib.subsystems.BaseElevator;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
@@ -96,14 +96,14 @@ public class Elevator extends SubsystemBase implements BaseElevator<ElevatorPosi
      */
     public Elevator(MechanismLigament2d ligament) {
 
-        leftMotor = SparkMaxConfigurator.create(
+        leftMotor = SparkConfigurator.createSparkMax(
                 LEFT_MOTOR_ID, MotorType.kBrushless, false,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),
                 (s) -> s.getEncoder().setPositionConversionFactor(ENCODER_ROTATIONS_TO_METERS),
                 (s) -> s.getEncoder().setVelocityConversionFactor(ENCODER_ROTATIONS_TO_METERS / 60.0));
 
-        rightMotor = SparkMaxConfigurator.create(
+        rightMotor = SparkConfigurator.createSparkMax(
                 RIGHT_MOTOR_ID, MotorType.kBrushless, true,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),

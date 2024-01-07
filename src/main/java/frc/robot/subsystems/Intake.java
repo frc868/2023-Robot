@@ -3,7 +3,7 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
+import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
 import edu.wpi.first.math.Pair;
@@ -62,12 +62,12 @@ public class Intake extends SubsystemBase {
      * Initializes the intake system.
      */
     public Intake(MechanismLigament2d ligament) {
-        leftPassoverMotor = SparkMaxConfigurator.create(
+        leftPassoverMotor = SparkConfigurator.createSparkMax(
                 PASSOVER_LEFT_MOTOR_ID, MotorType.kBrushless, false,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(PASSOVER_CURRENT_LIMIT));
 
-        rightPassoverMotor = SparkMaxConfigurator.create(
+        rightPassoverMotor = SparkConfigurator.createSparkMax(
                 PASSOVER_RIGHT_MOTOR_ID, MotorType.kBrushless, true,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(PASSOVER_CURRENT_LIMIT),

@@ -7,7 +7,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkLowLevel.PeriodicFrame;
 import com.revrobotics.SparkAbsoluteEncoder;
 import com.revrobotics.CANSparkBase.IdleMode;
-import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
+import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSingleJointedArm;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.LoggedObject;
@@ -68,7 +68,7 @@ public class Elbow extends SubsystemBase implements BaseSingleJointedArm<ElbowPo
         this.ligament = ligament;
         this.elevatorPoseSupplier = elevatorPoseSupplier;
 
-        motor = SparkMaxConfigurator.create(
+        motor = SparkConfigurator.createSparkMax(
                 MOTOR_ID, MotorType.kBrushless, true,
                 (s) -> s.setIdleMode(IdleMode.kBrake),
                 (s) -> s.setSmartCurrentLimit(CURRENT_LIMIT),

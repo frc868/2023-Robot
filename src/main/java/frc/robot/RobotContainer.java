@@ -1,7 +1,7 @@
 package frc.robot;
 
 import com.techhounds.houndutil.houndauto.AutoManager;
-import com.techhounds.houndutil.houndlib.SparkMaxConfigurator;
+import com.techhounds.houndutil.houndlib.SparkConfigurator;
 import com.techhounds.houndutil.houndlog.LoggingManager;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
 import com.techhounds.houndutil.houndlog.interfaces.SendableLog;
@@ -89,7 +89,7 @@ public class RobotContainer {
      * Constructs the robot container.
      */
     public RobotContainer() {
-        SparkMaxConfigurator.safeBurnFlash();
+        SparkConfigurator.safeBurnFlash();
         watchtower.setPoseEstimator(drivetrain.getPoseEstimator());
         watchtower.setSimPoseSupplier(drivetrain::getSimPose);
         DataLogManager.logNetworkTables(true);
