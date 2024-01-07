@@ -12,8 +12,6 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 import com.techhounds.houndutil.houndauto.AutoManager;
 import com.techhounds.houndutil.houndlib.MotorHoldMode;
-import com.techhounds.houndutil.houndlib.beta.sysid.MotorLog;
-import com.techhounds.houndutil.houndlib.beta.sysid.SysIdRoutine;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive;
 import com.techhounds.houndutil.houndlib.swerve.NEOCoaxialSwerveModule;
 import com.techhounds.houndutil.houndlog.interfaces.Log;
@@ -47,6 +45,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 
 import static frc.robot.Constants.Drivetrain.*;
@@ -159,45 +158,34 @@ public class Drivetrain extends SubsystemBase implements BaseSwerveDrive {
     private SwerveDriveOdometry simOdometry;
     private SwerveModulePosition[] lastModulePositions = getModulePositions();
 
-    private final MutableMeasure<Voltage> m_appliedVoltage = mutable(Volts.of(0));
-    // Mutable holder for unit-safe linear distance values, persisted to avoid
-    // reallocation.
-    private final MutableMeasure<Distance> m_distance = mutable(Meters.of(0));
-    // Mutable holder for unit-safe linear velocity values, persisted to avoid
-    // reallocation.
-    private final MutableMeasure<Velocity<Distance>> m_velocity = mutable(MetersPerSecond.of(0));
+    private final MutableMeasure<Voltage> sysidAppliedVoltageMeasure = mutable(Volts.of(0));
+    private final MutableMeasure<Distance> sysidPositionMeasure = mutable(Meters.of(0));
+    private final MutableMeasure<Velocity<Distance>> sysidVelocityMeasure = mutable(MetersPerSecond.of(0));
 
     private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
-            // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
             new SysIdRoutine.Config(),
             new SysIdRoutine.Mechanism(
-                    // Tell SysId how to plumb the driving voltage to the motors.
                     (Measure<Voltage> volts) -> {
                         drive(new ChassisSpeeds(volts.magnitude(), 0, 0));
                     },
-                    // Tell SysId how to record a frame of data for each motor on the mechanism
-                    // being
-                    // characterized.
-                    (MotorLog log) -> {
-                        // Record a frame for the left motors. Since these share an encoder, we consider
-                        // the entire group to be one motor.
-                        log.recordFrameLinear(
-                                m_appliedVoltage.mut_replace(frontLeft.getDriveVoltage(), Volts),
-                                m_distance.mut_replace(frontLeft.getDriveMotorPosition(), Meters),
-                                m_velocity.mut_replace(frontLeft.getDriveMotorVelocity(), MetersPerSecond),
-                                "drive-left");
-                        // Record a frame for the right motors. Since these share an encoder, we
-                        // consider
-                        // the entire group to be one motor.
-                        log.recordFrameLinear(
-                                m_appliedVoltage.mut_replace(frontRight.getDriveVoltage(), Volts),
-                                m_distance.mut_replace(frontRight.getDriveMotorPosition(), Meters),
-                                m_velocity.mut_replace(frontRight.getDriveMotorVelocity(), MetersPerSecond),
-                                "drive-right");
+                    log -> {
+                        log.motor("frontLeft")
+                            .voltage(sysidAppliedVoltageMeasure.mut_replace(frontLeft.getDriveVoltage(), Volts))
+                            .linearPosition(sysidPositionMeasure.mut_replace(frontLeft.getDriveMotorPosition(), Meters))
+                            .linearVelocity(sysidVelocityMeasure.mut_replace(frontLeft.getDriveMotorVelocity(), MetersPerSecond));
+                        log.motor("frontRight")
+                            .voltage(sysidAppliedVoltageMeasure.mut_replace(frontRight.getDriveVoltage(), Volts))
+                            .linearPosition(sysidPositionMeasure.mut_replace(frontRight.getDriveMotorPosition(), Meters))
+                            .linearVelocity(sysidVelocityMeasure.mut_replace(frontRight.getDriveMotorVelocity(), MetersPerSecond));
+                        log.motor("backLeft")
+                            .voltage(sysidAppliedVoltageMeasure.mut_replace(backLeft.getDriveVoltage(), Volts))
+                            .linearPosition(sysidPositionMeasure.mut_replace(backLeft.getDriveMotorPosition(), Meters))
+                            .linearVelocity(sysidVelocityMeasure.mut_replace(backLeft.getDriveMotorVelocity(), MetersPerSecond));
+                        log.motor("backRight")
+                            .voltage(sysidAppliedVoltageMeasure.mut_replace(backRight.getDriveVoltage(), Volts))
+                            .linearPosition(sysidPositionMeasure.mut_replace(backRight.getDriveMotorPosition(), Meters))
+                            .linearVelocity(sysidVelocityMeasure.mut_replace(backRight.getDriveMotorVelocity(), MetersPerSecond));
                     },
-                    // Tell SysId to make generated commands require this subsystem, suffix test
-                    // state in
-                    // WPILog with this subsystem's name ("drive")
                     this));
 
     /** Initializes the drivetrain. */

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import com.techhounds.houndutil.houndlib.beta.sysid.SysIdRoutine.Direction;
 import com.techhounds.houndutil.houndlib.oi.CommandVirpilJoystick;
 import com.techhounds.houndutil.houndlib.subsystems.BaseSwerveDrive.DriveMode;
 
@@ -18,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.Elbow.ElbowPosition;
 import frc.robot.GamePieceLocation.GamePiece;
 import frc.robot.GamePieceLocation.GridPosition;
