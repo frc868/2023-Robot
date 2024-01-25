@@ -140,10 +140,10 @@ public class Drivetrain extends SubsystemBase {
         FIELD_ORIENTED
     }
 
-    /** The mode of driving, either robot relative or field relative. */
+    /** The mode of driving, either robot relative or field relative */
     private DriveMode driveMode = DriveMode.FIELD_ORIENTED;
 
-    @Log(name = "Commanded X Velocity", groups = "Control")
+    @Log(name = "commandedXVelocity", groups = "Control")
     private double commandedX = 0.0;
 
     @Log(name = "Commanded Y Velocity", groups = "Control")
