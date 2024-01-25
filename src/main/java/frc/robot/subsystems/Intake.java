@@ -21,14 +21,14 @@ import frc.robot.Constants;
 
 /**
  * Intake subsystem, contains the motors that run the passovers, and the
- * pneumatics for the passover and intake.
+ * pneumatics for the passover and intake
  * 
  * @author bam
  */
 @LoggedObject
 public class Intake extends SubsystemBase {
     /**
-     * The motor that drives the left side of the passover.
+     * The motor that drives the left side of
      */
     @Log(name = "Left Passover Motor")
     private CANSparkMax leftPassoverMotor = new CANSparkMax(Constants.CAN.PASSOVER_LEFT_MOTOR_ID,
