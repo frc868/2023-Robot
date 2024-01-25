@@ -55,7 +55,7 @@ public class Elbow extends SubsystemBase {
 
     @Log(name = "Motor")
     private CANSparkMax motor = new CANSparkMax(Constants.CAN.ELBOW_MOTOR_ID, MotorType.kBrushless);
-    @Log(name = "Encoder")
+    @Log(name = "encoder")
     private SparkMaxAbsoluteEncoder encoder = motor.getAbsoluteEncoder(SparkMaxAbsoluteEncoder.Type.kDutyCycle);
 
     private MechanismLigament2d ligament;
